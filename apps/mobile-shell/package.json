@@ -1,0 +1,31 @@
+{
+  "name": "@comma/mobile-shell",
+  "private": true,
+  "version": "0.0.0",
+  "main": "expo/AppEntry.js",
+  "scripts": {
+    "dev": "expo start",
+    "dev:client": "expo start --dev-client",
+    "android": "expo start --android",
+    "android:dev-client": "expo run:android",
+    "ios": "expo start --ios",
+    "ios:dev-client": "expo run:ios",
+    "web": "expo start --web",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@comma/bridge": "workspace:*",
+    "@webview-bridge/react-native": "^1.7.9",
+    "expo": "~53.0.27",
+    "expo-dev-client": "~5.2.4",
+    "expo-status-bar": "^2.2.0",
+    "react": "19.0.0",
+    "react-native": "0.79.6",
+    "react-native-webview": "13.13.5",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/react": "~19.0.10",
+    "typescript": "~5.8.3"
+  }
+}

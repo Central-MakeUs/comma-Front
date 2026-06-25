@@ -1,0 +1,34 @@
+{
+  "name": "comma-front",
+  "private": true,
+  "packageManager": "pnpm@10.0.0",
+  "scripts": {
+    "dev": "turbo dev",
+    "dev:web": "turbo dev --filter=@comma/web",
+    "dev:web:lan": "pnpm --filter @comma/web dev:lan",
+    "dev:mobile": "turbo dev --filter=@comma/mobile-shell",
+    "dev:mobile-client": "pnpm --filter @comma/mobile-shell dev:client",
+    "ios:dev-client": "pnpm --filter @comma/mobile-shell ios:dev-client",
+    "android:dev-client": "pnpm --filter @comma/mobile-shell android:dev-client",
+    "build": "turbo build",
+    "typecheck": "turbo typecheck",
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "check": "biome check --write .",
+    "commitlint": "commitlint",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.1",
+    "@commitlint/cli": "^21.1.0",
+    "@commitlint/config-conventional": "^21.1.0",
+    "husky": "^9.1.7",
+    "turbo": "^2.5.0",
+    "typescript": "~5.8.3"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  }
+}

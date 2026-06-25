@@ -1,0 +1,41 @@
+name: Feature Request
+description: Propose a new feature or improvement.
+title: "[Feature] "
+labels: ["feature"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What user or product problem are we solving?
+      placeholder: Describe the motivation and context.
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: What should be built?
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: What is included or excluded?
+      placeholder: |
+        Included:
+        Excluded:
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: How do we know this is done?
+      placeholder: |
+        - [ ] ...
+        - [ ] ...
+  - type: textarea
+    id: extra
+    attributes:
+      label: Additional Context
+      description: Designs, references, or related issues.

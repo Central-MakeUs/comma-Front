@@ -19,22 +19,26 @@ export const panel = style({
 export const eyebrow = style({
   margin: `0 0 ${vars.space[3]}`,
   color: vars.color.muted,
-  fontSize: 13,
-  fontWeight: 700,
+  fontSize: vars.typography.label1.fontSize,
+  fontWeight: vars.typography.label1.fontWeight,
+  lineHeight: vars.typography.label1.lineHeight,
   textTransform: 'uppercase'
 });
 
 export const title = style({
   margin: 0,
   fontSize: 'clamp(42px, 10vw, 76px)',
-  lineHeight: 0.95
+  lineHeight: 0.95,
+  fontFamily: vars.font.display,
+  fontWeight: 400
 });
 
 export const description = style({
   margin: `${vars.space[6]} 0 ${vars.space[7]}`,
   color: vars.color.body,
-  fontSize: 18,
-  lineHeight: 1.6
+  fontSize: vars.typography.display.fontSize,
+  fontWeight: vars.typography.display.fontWeight,
+  lineHeight: vars.typography.display.lineHeight
 });
 
 export const actionButton = recipe({
@@ -44,7 +48,9 @@ export const actionButton = recipe({
     borderRadius: vars.radius.control,
     padding: '0 18px',
     font: 'inherit',
-    fontWeight: 700,
+    fontSize: vars.typography.heading1.fontSize,
+    fontWeight: vars.typography.heading1.fontWeight,
+    lineHeight: vars.typography.heading1.lineHeight,
     selectors: {
       '& + &': {
         marginLeft: 10
@@ -54,13 +60,13 @@ export const actionButton = recipe({
   variants: {
     tone: {
       primary: {
-        background: vars.color.foreground,
+        background: vars.color.accent,
         color: vars.color.inverse
       },
       secondary: {
         background: 'transparent',
         color: vars.color.foreground,
-        boxShadow: `inset 0 0 0 1px ${vars.color.foreground}`
+        boxShadow: `inset 0 0 0 1px ${vars.color.line}`
       }
     }
   },

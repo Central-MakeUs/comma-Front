@@ -11,6 +11,7 @@
 - [ ] `pnpm lint`
 - [ ] `pnpm typecheck`
 - [ ] `pnpm build --filter=@comma/web`
+- [ ] `pnpm build:storybook`
 
 ## Notes
 

@@ -38,5 +38,8 @@ jobs:
       - name: Build web
         run: pnpm build --filter=@comma/web
 
+      - name: Build Storybook
+        run: pnpm build:storybook
+
       - name: Check Expo dependencies
         run: pnpm --filter @comma/mobile-shell exec expo install --check

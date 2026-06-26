@@ -30,6 +30,7 @@ nvm use
 pnpm install
 pnpm dev:web
 pnpm dev:web:lan
+pnpm dev:storybook
 pnpm dev:mobile
 pnpm dev:mobile-client
 pnpm typecheck
@@ -61,6 +62,7 @@ pnpm dev:web:lan
 pnpm dev          # web + mobile-shell 전체 dev task
 pnpm dev:web      # React web만 실행, local/simulator
 pnpm dev:web:lan  # React web을 LAN 접근 가능하게 실행, 실기기용
+pnpm dev:storybook # 디자인 시스템 Storybook 실행
 pnpm dev:mobile   # Expo shell만 실행
 pnpm dev:mobile-client # installed dev-client 앱에 연결
 pnpm ios:dev-client    # iOS dev-client 빌드/실행
@@ -70,7 +72,18 @@ pnpm lint         # Biome 검사
 pnpm format       # Biome 포맷
 pnpm check        # Biome 자동 수정 가능한 항목 반영
 pnpm build        # 전체 빌드
+pnpm build:storybook # Storybook 정적 빌드
 ```
+
+## Storybook
+
+Storybook은 GitHub Pages로 배포합니다.
+
+```txt
+https://central-makeus.github.io/comma-Front/
+```
+
+GitHub Pages source는 repository Settings에서 `GitHub Actions`로 설정되어 있어야 합니다.
 
 ## Commit Convention
 

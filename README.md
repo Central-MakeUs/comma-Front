@@ -75,6 +75,16 @@ pnpm build        # 전체 빌드
 pnpm build:storybook # Storybook 정적 빌드
 ```
 
+## Storybook
+
+Storybook은 GitHub Pages로 배포합니다.
+
+```txt
+https://central-makeus.github.io/comma-Front/
+```
+
+GitHub Pages source는 repository Settings에서 `GitHub Actions`로 설정되어 있어야 합니다.
+
 ## Commit Convention
 
 커밋 메시지는 Conventional Commits 형식을 사용합니다. Husky `commit-msg` hook이 커밋 시 자동으로 검사합니다.

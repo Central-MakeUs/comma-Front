@@ -17,6 +17,6 @@ if (!rootElement) {
 
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
-   <Onboarding /> 
+    <Onboarding />
   </React.StrictMode>
 );

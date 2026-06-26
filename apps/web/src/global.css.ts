@@ -11,11 +11,10 @@ globalStyle('body', {
 globalFontFace('Pretendard', {
   src: 'url("/fonts/PretendardVariable.woff2") format("woff2")',
   fontDisplay: 'swap',
-  fontWeight: '100 900',
+  fontWeight: '100 900'
 });
 
 globalStyle('body', {
   margin: 0,
-  fontFamily:
-    'Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
+  fontFamily: 'Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif'
 });

@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom/client';
 import { appBridge } from './bridge';
 import './global.css';
 import { RouterProvider } from 'react-router-dom';
-import {router} from './router/index';
+import { router } from './router/index';
 
 appBridge.addEventListener(POST_MESSAGE_EVENT.APP_READY, (message) => {
   console.log('app ready', message);
@@ -18,6 +18,6 @@ if (!rootElement) {
 
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
-    <RouterProvider router={router}/>
+    <RouterProvider router={router} />
   </React.StrictMode>
 );

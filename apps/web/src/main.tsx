@@ -3,7 +3,8 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { appBridge } from './bridge';
 import './global.css';
-import Onboarding from './pages/Onboarding';
+import { RouterProvider } from 'react-router-dom';
+import {router} from './router/index';
 
 appBridge.addEventListener(POST_MESSAGE_EVENT.APP_READY, (message) => {
   console.log('app ready', message);
@@ -17,6 +18,6 @@ if (!rootElement) {
 
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
-    <Onboarding />
+    <RouterProvider router={router}/>
   </React.StrictMode>
 );

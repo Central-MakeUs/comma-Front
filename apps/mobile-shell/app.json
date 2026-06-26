@@ -7,6 +7,14 @@
     "scheme": "comma",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "plugins": [
+      "expo-splash-screen",
+      {
+        "image": "./assets/splash.png",
+        "resizeMode": "cover"
+
+      }
+    ],
     "ios": {
       "supportsTablet": true
     },

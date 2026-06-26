@@ -3,7 +3,7 @@ import * as styles from './Onboarding.css';
 function Onboarding() {
   return (
     <div className={styles.container}>
-      <img src="/images/logo_glass.svg" alt='배경 이미지' width={160} height={35} />
+      <img src="/images/logo_glass.svg" alt="Logo" width={160} height={35} />
     </div>
   );
 }

@@ -1,5 +1,14 @@
-import { style, styleVariants } from '@vanilla-extract/css';
+import { keyframes, style, styleVariants } from '@vanilla-extract/css';
 import { vars } from './theme.css';
+
+const activeFadeIn = keyframes({
+  from: {
+    opacity: 0.45
+  },
+  to: {
+    opacity: 1
+  }
+});
 
 export const navigationBar = style({
   width: 344,
@@ -42,7 +51,8 @@ export const navigationItem = style({
 
 export const navigationItemTone = styleVariants({
   active: {
-    color: vars.color.iconPrimary
+    color: vars.color.iconPrimary,
+    animation: `${activeFadeIn} 0.3s ease-out`
   },
   inactive: {
     color: vars.color.iconSecondary
@@ -72,7 +82,8 @@ export const navigationLabelTone = styleVariants({
     fontWeight: vars.typography.captionB.fontWeight,
     lineHeight: vars.typography.captionB.lineHeight,
     letterSpacing: vars.typography.captionB.letterSpacing,
-    textShadow: vars.shadow.card
+    textShadow: vars.shadow.card,
+    animation: `${activeFadeIn} 0.3s ease-out`
   },
   inactive: {
     color: vars.color.textTertiary,

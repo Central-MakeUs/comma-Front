@@ -67,7 +67,7 @@ const variantsSurfaceStyle: React.CSSProperties = {
 
 const variantGridStyle: React.CSSProperties = {
   display: 'grid',
-  gridTemplateColumns: 'repeat(4, 345px)',
+  gridTemplateColumns: 'repeat(auto-fit, 345px)',
   gap: 16
 };
 
@@ -100,6 +100,10 @@ export const Variants: Story = {
         <div style={{ display: 'grid', gap: 8 }}>
           <h3 style={stateLabelStyle}>exist</h3>
           <ImageUpload imageSrc={sampleImage} state="exist" />
+        </div>
+        <div style={{ display: 'grid', gap: 8 }}>
+          <h3 style={stateLabelStyle}>exist empty</h3>
+          <ImageUpload state="exist" />
         </div>
         <div style={{ display: 'grid', gap: 8 }}>
           <h3 style={stateLabelStyle}>disabled</h3>

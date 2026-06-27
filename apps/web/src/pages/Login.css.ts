@@ -20,7 +20,8 @@ export const title = style({
   fontFamily: 'Pretendard, sans-serif',
   fontSize: 32,
   fontWeight: 200,
-  color: '#FDFCFC'
+  color: '#FDFCFC',
+  lineHeight: '135%',
 });
 
 export const desc = style({

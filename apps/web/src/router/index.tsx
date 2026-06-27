@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom';
 import Login from '../pages/Login';
 import Nickname from '../pages/Nickname';
+import Loading from '../pages/Loading';
 
 export const router = createBrowserRouter([
   {
@@ -10,5 +11,9 @@ export const router = createBrowserRouter([
   {
     path: '/nickname',
     Component: Nickname,
+  },
+  {
+    path: '/loading',
+    Component: Loading,
   }
 ]);

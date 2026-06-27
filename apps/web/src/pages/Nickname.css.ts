@@ -1,5 +1,5 @@
+import { colors, typography } from '@comma/design-system';
 import { style } from '@vanilla-extract/css';
-import { typography, colors } from "@comma/design-system";
 
 export const container = style({
   backgroundImage: 'url("/images/onboardingBackground_blur.svg")',
@@ -18,24 +18,24 @@ export const container = style({
 });
 
 export const title = style({
-    ...typography.titleR,
-    color: colors.textPrimary,
-})
+  ...typography.titleR,
+  color: colors.textPrimary
+});
 
 export const desc = style({
-    ...typography.bodyReadingR,
-    color: colors.textTertiary,
-    marginTop: 16,
-})
+  ...typography.bodyReadingR,
+  color: colors.textTertiary,
+  marginTop: 16
+});
 
 export const agreementNotice = style({
   ...typography.captionR,
   color: colors.textTertiary,
   textAlign: 'center',
-  marginBottom: 24,
+  marginBottom: 24
 });
 
 export const agreementAccent = style({
   color: colors.textSecondary,
-  textDecoration: 'underline',
+  textDecoration: 'underline'
 });

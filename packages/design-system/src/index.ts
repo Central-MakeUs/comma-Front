@@ -4,6 +4,8 @@ export const brand = {
 
 export type { DesignAsset } from './assets';
 export { designAssets } from './assets';
+export type { ChipProps, ChipState } from './Chip';
+export { Chip } from './Chip';
 export type { CtaButtonProps, CtaButtonState } from './CtaButton';
 export { CtaButton } from './CtaButton';
 export type { ActionButtonVariants } from './components.css';

@@ -12,33 +12,19 @@ import { useEffect, useState } from 'react';
 type TextInputStoryArgs = {
   variant: TextInputVariant;
   state: TextInputState;
-  title: string;
+  title?: string;
   placeholder: string;
   value: string;
+  helperText?: string;
+  maxLength?: number;
 };
 
-const variantOptions = ['bar', 'field', 'fieldNoTitle'] satisfies TextInputVariant[];
-const stateOptions = [
-  'default',
-  'focus',
-  'type',
-  'filled',
-  'filledPlus'
-] satisfies TextInputState[];
 const barStates = ['default', 'focus', 'type', 'filled', 'filledPlus'] satisfies TextInputState[];
 const fieldStates = ['default', 'type'] satisfies TextInputState[];
 
 const meta = {
   title: 'Design System/TextInput',
   argTypes: {
-    variant: {
-      control: 'inline-radio',
-      options: variantOptions
-    },
-    state: {
-      control: 'inline-radio',
-      options: stateOptions
-    },
     title: {
       control: 'text'
     },
@@ -47,6 +33,15 @@ const meta = {
     },
     value: {
       control: 'text'
+    },
+    helperText: {
+      control: 'text'
+    },
+    maxLength: {
+      control: {
+        type: 'number',
+        min: 1
+      }
     }
   },
   args: {
@@ -135,8 +130,17 @@ function VariantGroup({
   );
 }
 
-function PlaygroundView({ variant, state, title, placeholder, value }: TextInputStoryArgs) {
+function PlaygroundView({
+  variant,
+  state,
+  title,
+  placeholder,
+  value,
+  helperText,
+  maxLength
+}: TextInputStoryArgs) {
   const [inputValue, setInputValue] = useState(value);
+  const isFieldType = (variant === 'field' || variant === 'fieldNoTitle') && state === 'type';
 
   useEffect(() => {
     setInputValue(value);
@@ -145,6 +149,8 @@ function PlaygroundView({ variant, state, title, placeholder, value }: TextInput
   return (
     <div className={themeClass} style={storySurfaceStyle}>
       <TextInput
+        helperText={isFieldType ? helperText || '최대 20자까지 입력할 수 있어요' : helperText}
+        maxLength={isFieldType ? (maxLength ?? 20) : maxLength}
         placeholder={placeholder}
         state={state}
         title={title}
@@ -156,8 +162,79 @@ function PlaygroundView({ variant, state, title, placeholder, value }: TextInput
   );
 }
 
-export const Playground: Story = {
-  render: (args) => <PlaygroundView {...args} />
+export const InputBarPlayground: Story = {
+  argTypes: {
+    state: {
+      control: 'inline-radio',
+      options: barStates
+    },
+    variant: {
+      table: {
+        disable: true
+      }
+    }
+  },
+  args: {
+    variant: 'bar',
+    state: 'default',
+    title: '',
+    placeholder: '예) 오랜만에 바람 쐬니 좋네요',
+    value: ''
+  },
+  render: (args) => <PlaygroundView {...args} variant="bar" />
+};
+
+export const InputPlayground: Story = {
+  argTypes: {
+    state: {
+      control: 'inline-radio',
+      options: fieldStates
+    },
+    variant: {
+      table: {
+        disable: true
+      }
+    }
+  },
+  args: {
+    variant: 'field',
+    state: 'default',
+    title: '한 줄 소감',
+    placeholder: '예) 오랜만에 바람 쐬니 좋네요',
+    value: '',
+    helperText: '최대 20자까지 입력할 수 있어요',
+    maxLength: 20
+  },
+  render: (args) => <PlaygroundView {...args} variant="field" />
+};
+
+export const InputNoTitlePlayground: Story = {
+  argTypes: {
+    state: {
+      control: 'inline-radio',
+      options: fieldStates
+    },
+    title: {
+      table: {
+        disable: true
+      }
+    },
+    variant: {
+      table: {
+        disable: true
+      }
+    }
+  },
+  args: {
+    variant: 'fieldNoTitle',
+    state: 'default',
+    title: '',
+    placeholder: '예) 오랜만에 바람 쐬니 좋네요',
+    value: '',
+    helperText: '최대 20자까지 입력할 수 있어요',
+    maxLength: 20
+  },
+  render: (args) => <PlaygroundView {...args} title={undefined} variant="fieldNoTitle" />
 };
 
 export const InputBar: Story = {

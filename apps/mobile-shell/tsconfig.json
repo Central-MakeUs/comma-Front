@@ -4,5 +4,5 @@
     "strict": true,
     "types": ["node"]
   },
-  "include": ["App.tsx", "src"]
+  "include": ["index.ts", "App.tsx", "src"]
 }

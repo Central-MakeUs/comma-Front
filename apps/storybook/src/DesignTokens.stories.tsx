@@ -1,6 +1,8 @@
 import {
-  colors,
+  grid,
+  primitiveColors,
   radii,
+  semanticColors,
   shadows,
   spacing,
   themeClass,
@@ -16,6 +18,27 @@ const meta = {
 export default meta;
 
 type Story = StoryObj<typeof meta>;
+
+const typographyTokenNames = [
+  'titleR',
+  'headingB',
+  'headingR',
+  'headlineB',
+  'headlineR',
+  'bodyNormalB',
+  'bodyNormalR',
+  'bodyReadingB',
+  'bodyReadingR',
+  'labelNormalB',
+  'labelNormalR',
+  'labelReadingB',
+  'labelReadingR',
+  'captionB',
+  'captionR',
+  'engNum',
+  'systemEyebrow',
+  'systemSection'
+] as const;
 
 const tokenGroupStyle: React.CSSProperties = {
   display: 'grid',
@@ -37,25 +60,48 @@ const gridStyle: React.CSSProperties = {
 
 export const Tokens: Story = {
   render: () => (
-    <div className={themeClass} style={{ padding: 32, background: vars.color.background }}>
+    <div className={themeClass} style={{ padding: 32, background: vars.color.backgroundPrimary }}>
       <div style={tokenGroupStyle}>
         <section style={sectionStyle}>
-          <h2 style={{ margin: 0, ...typography.heading1 }}>Colors</h2>
+          <h2 style={{ margin: 0, ...typography.systemSection }}>Colors</h2>
+          <h3 style={{ margin: 0, ...typography.labelNormalB }}>Primitive</h3>
           <div style={gridStyle}>
-            {Object.entries(colors).map(([name, value]) => (
+            {Object.entries(primitiveColors).map(([name, value]) => (
               <div
                 key={name}
                 style={{
-                  border: `1px solid ${vars.color.line}`,
+                  border: `1px solid ${vars.color.linePrimary}`,
                   borderRadius: radii.md,
                   overflow: 'hidden',
-                  background: vars.color.surface
+                  background: vars.color.backgroundFill
                 }}
               >
                 <div style={{ height: 72, background: value }} />
                 <div style={{ display: 'grid', gap: 4, padding: 10 }}>
-                  <strong style={typography.label1}>{name}</strong>
-                  <span style={{ ...typography.caption, color: vars.color.textSecondary }}>
+                  <strong style={typography.labelNormalB}>{name}</strong>
+                  <span style={{ ...typography.captionR, color: vars.color.textSecondary }}>
+                    {value}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+          <h3 style={{ margin: 0, ...typography.labelNormalB }}>Semantic</h3>
+          <div style={gridStyle}>
+            {Object.entries(semanticColors).map(([name, value]) => (
+              <div
+                key={name}
+                style={{
+                  border: `1px solid ${vars.color.linePrimary}`,
+                  borderRadius: radii.md,
+                  overflow: 'hidden',
+                  background: vars.color.backgroundFill
+                }}
+              >
+                <div style={{ height: 72, background: value }} />
+                <div style={{ display: 'grid', gap: 4, padding: 10 }}>
+                  <strong style={typography.labelNormalB}>{name}</strong>
+                  <span style={{ ...typography.captionR, color: vars.color.textSecondary }}>
                     {value}
                   </span>
                 </div>
@@ -65,10 +111,10 @@ export const Tokens: Story = {
         </section>
 
         <section style={sectionStyle}>
-          <h2 style={{ margin: 0, ...typography.heading1 }}>Typography</h2>
+          <h2 style={{ margin: 0, ...typography.systemSection }}>Typography</h2>
           <div style={sectionStyle}>
-            {Object.entries(typography).map(([name, style]) => (
-              <div key={name} style={{ color: vars.color.textPrimary, ...style }}>
+            {typographyTokenNames.map((name) => (
+              <div key={name} style={{ color: vars.color.textPrimary, ...typography[name] }}>
                 {name} · 빠른 갈색 여우가 게으른 개를 뛰어넘습니다.
               </div>
             ))}
@@ -76,12 +122,32 @@ export const Tokens: Story = {
         </section>
 
         <section style={sectionStyle}>
-          <h2 style={{ margin: 0, ...typography.heading1 }}>Spacing / Radius / Shadow</h2>
+          <h2 style={{ margin: 0, ...typography.systemSection }}>
+            Grid / Spacing / Radius / Shadow
+          </h2>
           <div style={gridStyle}>
+            {Object.entries(grid).map(([name, value]) => (
+              <div
+                key={name}
+                style={{
+                  padding: 16,
+                  borderRadius: radii.md,
+                  background: vars.color.backgroundFill,
+                  border: `1px solid ${vars.color.lineTertiary}`
+                }}
+              >
+                <strong style={typography.labelNormalB}>{name}</strong>
+                <div style={{ ...typography.captionR, color: vars.color.textSecondary }}>
+                  {value}
+                </div>
+              </div>
+            ))}
             {Object.entries(spacing).map(([name, value]) => (
               <div key={name} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div style={{ width: value, height: 16, background: vars.color.accent }} />
-                <span style={typography.caption}>
+                <div
+                  style={{ width: value, height: 16, background: vars.color.textBlackSecondary }}
+                />
+                <span style={typography.captionR}>
                   {name}: {value}
                 </span>
               </div>
@@ -92,11 +158,11 @@ export const Tokens: Story = {
                 style={{
                   padding: 16,
                   borderRadius: radii.md,
-                  background: vars.color.surface,
+                  background: vars.color.backgroundFill,
                   boxShadow: value
                 }}
               >
-                <span style={typography.caption}>{name}</span>
+                <span style={typography.captionR}>{name}</span>
               </div>
             ))}
           </div>

@@ -37,7 +37,7 @@ export const Playground: Story = {
         minHeight: 240,
         display: 'grid',
         placeItems: 'center',
-        background: vars.color.background,
+        background: vars.color.backgroundPrimary,
         fontFamily: vars.font.body
       }}
     >
@@ -58,7 +58,7 @@ export const Variants: Story = {
         alignItems: 'center',
         gap: 12,
         padding: 32,
-        background: vars.color.background,
+        background: vars.color.backgroundPrimary,
         fontFamily: vars.font.body
       }}
     >

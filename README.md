@@ -13,6 +13,34 @@ packages/
   design-system/   # design tokens and brand constants
 ```
 
+## Assets
+
+Figma에서 export한 공통 에셋은 디자인 시스템 패키지에 저장합니다.
+
+```txt
+packages/design-system/assets/
+  logos/
+```
+
+앱에서는 `designAssets` manifest를 통해 사용합니다.
+
+```ts
+import { designAssets } from '@comma/design-system';
+
+const logo = designAssets.logos.symbolDefault.src;
+```
+
+## Fonts
+
+디자인 시스템에서 사용하는 공개 폰트는 로컬 파일로 저장하고 `@font-face`로 로드합니다.
+
+```txt
+packages/design-system/assets/fonts/
+  kepler-std/
+  outfit/
+  pretendard/
+```
+
 ## Bridge
 
 WebView 통신은 `@webview-bridge/web`, `@webview-bridge/react-native`, `zod` 기반으로 구성되어 있습니다.
@@ -28,11 +56,10 @@ apps/web/src/bridge.ts            # typed web client
 ```bash
 nvm use
 pnpm install
+pnpm dev:device
 pnpm dev:web
-pnpm dev:web:lan
 pnpm dev:storybook
 pnpm dev:mobile
-pnpm dev:mobile-client
 pnpm typecheck
 pnpm lint
 pnpm format
@@ -40,20 +67,10 @@ pnpm format
 
 웹 개발 서버는 기본적으로 `http://127.0.0.1:5173`에서 실행됩니다.
 
-실기기에서 Expo Go로 테스트할 때는 Mac의 LAN IP를 `.env`에 넣어야 합니다.
+실기기에서 Expo Go로 테스트할 때는 아래 명령을 사용합니다. 실행 시점의 Mac LAN IP를 자동으로 감지해 WebView URL에 주입합니다.
 
 ```bash
-cp .env.example .env
-```
-
-```env
-EXPO_PUBLIC_WEB_URL=http://YOUR_MAC_LAN_IP:5173
-```
-
-그 경우 웹 서버는 LAN용 명령으로 실행합니다.
-
-```bash
-pnpm dev:web:lan
+pnpm dev:device
 ```
 
 ## Useful Commands
@@ -61,12 +78,9 @@ pnpm dev:web:lan
 ```bash
 pnpm dev          # web + mobile-shell 전체 dev task
 pnpm dev:web      # React web만 실행, local/simulator
-pnpm dev:web:lan  # React web을 LAN 접근 가능하게 실행, 실기기용
+pnpm dev:device   # 실기기 테스트용, web + Expo Go 서버 실행
 pnpm dev:storybook # 디자인 시스템 Storybook 실행
 pnpm dev:mobile   # Expo shell만 실행
-pnpm dev:mobile-client # installed dev-client 앱에 연결
-pnpm ios:dev-client    # iOS dev-client 빌드/실행
-pnpm android:dev-client # Android dev-client 빌드/실행
 pnpm typecheck    # 전체 타입체크
 pnpm lint         # Biome 검사
 pnpm format       # Biome 포맷
@@ -124,20 +138,4 @@ revert
 ```txt
 초기 세팅 추가
 버그 수정
-```
-
-## Expo Dev Client
-
-Expo Go로 충분한 동안은 `pnpm dev:mobile`을 쓰면 됩니다. 네이티브 SDK나 config plugin이 필요해지면 dev-client 앱을 한 번 빌드한 뒤 사용합니다.
-
-```bash
-pnpm ios:dev-client
-# or
-pnpm android:dev-client
-```
-
-이후에는 아래 명령으로 Metro를 dev-client 모드로 실행합니다.
-
-```bash
-pnpm dev:mobile-client
 ```

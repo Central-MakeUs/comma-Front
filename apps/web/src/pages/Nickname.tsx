@@ -1,7 +1,15 @@
 import * as styles from './Nickname.css';
 import { TextInput, CtaButton } from '@comma/design-system';
+import { useEffect, useState } from 'react';
+import { login } from '../utils/auth';
 
 function Nickname() {
+  const [nickname, setNickname] = useState('');
+
+  useEffect(() => {
+    login();
+  }, []);
+  
   return (
     <div className={styles.container}>
       <div

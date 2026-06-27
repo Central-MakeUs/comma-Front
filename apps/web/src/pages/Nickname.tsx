@@ -12,7 +12,13 @@ function Nickname() {
           marginTop: 68
         }}
       >
-        <img src="/images/logo_glass.svg" alt="콤마 로고" width={110} height={24} style={{ marginBottom: 68 }} />
+        <img
+          src="/images/logo_glass.svg"
+          alt="콤마 로고"
+          width={110}
+          height={24}
+          style={{ marginBottom: 68 }}
+        />
         <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
           <span className={styles.title}>반가워요,</span>
           <span className={styles.title}>닉네임을 알려주세요</span>

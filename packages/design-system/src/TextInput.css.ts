@@ -162,6 +162,10 @@ export const textInputElementBarType = style({
   }
 });
 
+export const textInputElementVisualCaret = style({
+  caretColor: 'transparent'
+});
+
 export const textInputTypeOverlay = style({
   position: 'absolute',
   left: 20,
@@ -203,11 +207,6 @@ export const textInputFocusCaret = style([
     pointerEvents: 'none'
   }
 ]);
-
-export const textInputTextarea = style({
-  resize: 'none',
-  overflow: 'auto'
-});
 
 export const textInputHelper = style({
   display: 'flex',
@@ -251,7 +250,7 @@ export const textInputCounterCurrent = style({
   fontWeight: vars.typography.labelReadingB.fontWeight
 });
 
-export const textInputPlusButton = style({
+export const textInputPlusControl = style({
   position: 'absolute',
   top: '50%',
   right: 16,
@@ -265,7 +264,7 @@ export const textInputPlusButton = style({
   background: 'transparent',
   color: vars.color.iconPrimary,
   transform: 'translateY(-50%)',
-  cursor: 'pointer',
+  cursor: 'default',
   selectors: {
     '&:focus-visible': {
       outline: `2px solid ${vars.color.textPrimary}`,
@@ -273,6 +272,13 @@ export const textInputPlusButton = style({
     }
   }
 });
+
+export const textInputPlusButton = style([
+  textInputPlusControl,
+  {
+    cursor: 'pointer'
+  }
+]);
 
 export const textInputPlusIcon = style({
   width: 24,

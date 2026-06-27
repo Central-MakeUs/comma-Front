@@ -10,11 +10,13 @@ import {
   textInputElementBarType,
   textInputElementState,
   textInputElementVariant,
+  textInputElementVisualCaret,
   textInputFocusCaret,
   textInputHelper,
   textInputHelperText,
   textInputLabel,
   textInputPlusButton,
+  textInputPlusControl,
   textInputPlusIcon,
   textInputRoot,
   textInputRootState,
@@ -37,6 +39,7 @@ export type TextInputProps = {
   className?: string;
   disabled?: boolean;
   onChange?: (value: string) => void;
+  onPlusClick?: () => void;
 };
 
 function PlusIcon(props: SVGProps<SVGSVGElement>): ReactElement {
@@ -57,16 +60,25 @@ export function TextInput({
   maxLength,
   className,
   disabled = false,
-  onChange
+  onChange,
+  onPlusClick
 }: TextInputProps) {
   const inputId = useId();
+  const helperId = useId();
   const hasVisibleLabel = variant === 'field' && Boolean(title);
   const isBarType = variant === 'bar' && state === 'type';
   const isBarFocus = variant === 'bar' && state === 'focus';
+  const inputValue = value ?? '';
   const showsFieldTypeCaret =
-    (variant === 'field' || variant === 'fieldNoTitle') && state === 'type';
+    (variant === 'field' || variant === 'fieldNoTitle') &&
+    state === 'type' &&
+    inputValue.length === 0;
   const shouldShowFieldFooter =
     (variant === 'field' || variant === 'fieldNoTitle') && state === 'type';
+  const effectiveMaxLength = shouldShowFieldFooter ? (maxLength ?? 20) : maxLength;
+  const displayedValue =
+    effectiveMaxLength === undefined ? inputValue : inputValue.slice(0, effectiveMaxLength);
+  const hasHelper = Boolean(helperText) || shouldShowFieldFooter;
   const normalizedState = state === 'filledPlus' && variant !== 'bar' ? 'filled' : state;
   const rootClassName = [
     textInputRoot,
@@ -85,16 +97,18 @@ export function TextInput({
     textInputElement,
     textInputElementVariant[variant],
     textInputElementState[normalizedState],
-    isBarType ? textInputElementBarType : undefined
+    isBarType ? textInputElementBarType : undefined,
+    showsFieldTypeCaret ? textInputElementVisualCaret : undefined
   ]
     .filter(Boolean)
     .join(' ');
-  const inputValue = value ?? '';
   const ariaLabel = hasVisibleLabel ? undefined : title || placeholder || 'Text input';
-  const handleChange = (
-    event: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>
-  ) => {
-    onChange?.(event.currentTarget.value);
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const nextValue =
+      effectiveMaxLength === undefined
+        ? event.currentTarget.value
+        : event.currentTarget.value.slice(0, effectiveMaxLength);
+    onChange?.(nextValue);
   };
 
   return (
@@ -107,14 +121,15 @@ export function TextInput({
       <span className={controlClassName}>
         <input
           aria-label={ariaLabel}
+          aria-describedby={hasHelper ? helperId : undefined}
           className={elementClassName}
           disabled={disabled}
           id={inputId}
-          maxLength={maxLength}
+          maxLength={effectiveMaxLength}
           onChange={handleChange}
           placeholder={placeholder}
           type="text"
-          value={inputValue}
+          value={displayedValue}
         />
         {isBarFocus || showsFieldTypeCaret ? <span className={textInputFocusCaret} /> : null}
         {isBarType ? (
@@ -124,26 +139,33 @@ export function TextInput({
           </span>
         ) : null}
         {normalizedState === 'filledPlus' ? (
-          <button
-            aria-label="추가"
-            className={textInputPlusButton}
-            disabled={disabled}
-            type="button"
-          >
-            <PlusIcon className={textInputPlusIcon} />
-          </button>
+          onPlusClick ? (
+            <button
+              aria-label="추가"
+              className={textInputPlusButton}
+              disabled={disabled}
+              onClick={onPlusClick}
+              type="button"
+            >
+              <PlusIcon className={textInputPlusIcon} />
+            </button>
+          ) : (
+            <span aria-hidden="true" className={textInputPlusControl}>
+              <PlusIcon className={textInputPlusIcon} />
+            </span>
+          )
         ) : null}
       </span>
-      {helperText || shouldShowFieldFooter ? (
-        <span className={textInputHelper}>
+      {hasHelper ? (
+        <span className={textInputHelper} id={helperId}>
           <span className={textInputHelperText}>
             {helperText || '최대 20자까지 입력할 수 있어요'}
           </span>
           {shouldShowFieldFooter ? (
             <span className={textInputCounter}>
-              <span className={textInputCounterCurrent}>{inputValue.length}</span>
+              <span className={textInputCounterCurrent}>{displayedValue.length}</span>
               <span>/</span>
-              <span>{maxLength ?? 20}</span>
+              <span>{effectiveMaxLength}</span>
             </span>
           ) : null}
         </span>

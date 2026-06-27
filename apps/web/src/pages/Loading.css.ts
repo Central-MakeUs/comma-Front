@@ -1,4 +1,5 @@
 import { style } from "@vanilla-extract/css";
+import { typography, colors } from "@comma/design-system";
 
 export const container = style({
     backgroundImage: 'url(/images/loading_background.svg)',
@@ -17,16 +18,12 @@ export const container = style({
 })
 
 export const title = style({
-    fontFamily: 'Pretendard, sans-serif',
-    fontSize: 32,
-    fontWeight: 200,
-    color: '#FDFCFC',
+    ...typography.titleR,
+    color: colors.textPrimary,
 })
 
 export const desc = style({
-  fontFamily: 'Pretendard, sans-serif',
-  fontSize: 16,
-  fontWeight: 400,
-  color: '#C2BFBC',
+  ...typography.bodyReadingR,
+  color: colors.textTertiary,
   marginTop: 16,
 });

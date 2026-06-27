@@ -1,4 +1,5 @@
 import { style } from '@vanilla-extract/css';
+import { typography, colors } from "@comma/design-system";
 
 export const container = style({
   backgroundImage: 'url("/images/onboardingBackground_blur.svg")',
@@ -17,33 +18,24 @@ export const container = style({
 });
 
 export const title = style({
-    fontSize: 32,
-    fontWeight: 200,
-    fontFamily: 'Pretendard, sans-serif',
-    lineHeight: '135%',
-    color: '#FDFCFC',
+    ...typography.titleR,
+    color: colors.textPrimary,
 })
 
 export const desc = style({
-    fontSize: 16,
-    fontWeight: 500,
-    fontFamily: 'Pretendard, sans-serif',
-    lineHeight: '150%',
-    color: '#C2BFBC',
+    ...typography.bodyReadingR,
+    color: colors.textTertiary,
     marginTop: 16,
 })
 
 export const agreementNotice = style({
-  color: '#C2BFBC',
-  fontFamily: 'Pretendard, sans-serif',
-  fontSize: 12,
-  fontWeight: 500,
+  ...typography.captionR,
+  color: colors.textTertiary,
   textAlign: 'center',
   marginBottom: 24,
 });
 
 export const agreementAccent = style({
-  color: '#DBD8D7',
+  color: colors.textSecondary,
   textDecoration: 'underline',
-  fontWeight: 600
 });

@@ -9,7 +9,7 @@ export const router = createBrowserRouter([
     Component: Login
   },
   {
-    path: '/oauth/kakao/callback',
+    path: '/nickname',
     Component: Nickname
   },
   {

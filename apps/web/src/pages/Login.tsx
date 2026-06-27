@@ -1,7 +1,7 @@
 import * as styles from './Login.css';
 const REST_API_KEY = '52390aa7ae68cc144f3865e87379664b';
-// const REDIRECT_URI = 'http://127.0.0.1:5173/nickname';
-const REDIRECT_URI = 'https://comma-front-web.vercel.app/oauth/kakao/callback';
+const REDIRECT_URI = 'http://127.0.0.1:5173/nickname';
+// const REDIRECT_URI = 'https://comma-front-web.vercel.app/oauth/kakao/callback';
 
 function Login() {
   const onClick = () => {

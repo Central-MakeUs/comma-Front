@@ -7,8 +7,9 @@ function CallbackPage() {
 
   useEffect(() => {
     const handleLogin = async () => {
-      await login();
-      navigate('/nickname');
+      const res = await login();
+      if (res.success) navigate('/nickname');
+      else alert(res.message);
     };
     handleLogin();
   }, [navigate]);

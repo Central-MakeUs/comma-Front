@@ -1,11 +1,9 @@
-const BASE_URL = 'https://comma-production-9c37.up.railway.app';
-
 export const login = async () => {
   console.log('login start');
   const code = new URLSearchParams(window.location.search).get('code');
   console.log(code);
   const res = await (
-    await fetch(`${BASE_URL}/api/auth/login/KAKAO`, {
+    await fetch(`${import.meta.env.VITE_BASE_URL}/api/auth/login/KAKAO`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -16,4 +14,5 @@ export const login = async () => {
     })
   ).json();
   console.log(res);
+  return res;
 };

@@ -127,6 +127,9 @@ importers:
       '@vanilla-extract/css':
         specifier: ^1.21.0
         version: 1.21.0
+      '@vanilla-extract/recipes':
+        specifier: ^0.5.7
+        version: 0.5.7(@vanilla-extract/css@1.21.0)
       '@vitejs/plugin-react':
         specifier: ^4.6.0
         version: 4.7.0(vite@6.4.3(@types/node@26.0.1)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.48.0)(yaml@2.9.0))

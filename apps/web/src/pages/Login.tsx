@@ -1,4 +1,5 @@
 import * as styles from './Login.css';
+import {login} from '../utils/auth';
 
 function Login() {
   return (
@@ -24,7 +25,7 @@ function Login() {
         </div>
       </div>
       <div style={{ width: '100%', marginBottom: 80 }}>
-        <button className={styles.kakaoBtn} type="button">
+        <button className={styles.kakaoBtn} type="button" onClick={() => login()}>
           <img src="/images/kakao_logo.svg" alt="카카오 아이콘" width={18} height={18} />
           카카오톡으로 로그인
         </button>

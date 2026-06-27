@@ -13,6 +13,34 @@ packages/
   design-system/   # design tokens and brand constants
 ```
 
+## Assets
+
+Figma에서 export한 공통 에셋은 디자인 시스템 패키지에 저장합니다.
+
+```txt
+packages/design-system/assets/
+  logos/
+```
+
+앱에서는 `designAssets` manifest를 통해 사용합니다.
+
+```ts
+import { designAssets } from '@comma/design-system';
+
+const logo = designAssets.logos.symbolDefault.src;
+```
+
+## Fonts
+
+디자인 시스템에서 사용하는 공개 폰트는 로컬 파일로 저장하고 `@font-face`로 로드합니다.
+
+```txt
+packages/design-system/assets/fonts/
+  kepler-std/
+  outfit/
+  pretendard/
+```
+
 ## Bridge
 
 WebView 통신은 `@webview-bridge/web`, `@webview-bridge/react-native`, `zod` 기반으로 구성되어 있습니다.

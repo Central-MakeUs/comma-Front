@@ -34,7 +34,10 @@ const typographyTokenNames = [
   'labelReadingB',
   'labelReadingR',
   'captionB',
-  'captionR'
+  'captionR',
+  'engNum',
+  'systemEyebrow',
+  'systemSection'
 ] as const;
 
 const tokenGroupStyle: React.CSSProperties = {

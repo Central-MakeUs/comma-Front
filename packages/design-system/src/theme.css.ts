@@ -1,4 +1,14 @@
-import { createTheme } from '@vanilla-extract/css';
+/// <reference path="./font-assets.d.ts" />
+
+import { createTheme, globalFontFace } from '@vanilla-extract/css';
+import keplerBoldSemicondensedDisplay from '../assets/fonts/kepler-std/KeplerStd-BoldScnDisp.woff';
+import keplerBoldSemicondensedDisplayItalic from '../assets/fonts/kepler-std/KeplerStd-BoldScnItDisp.woff';
+import outfitLatinVariable from '../assets/fonts/outfit/Outfit-latin-variable.woff2';
+import pretendardExtraLight from '../assets/fonts/pretendard/Pretendard-ExtraLight.woff2';
+import pretendardLight from '../assets/fonts/pretendard/Pretendard-Light.woff2';
+import pretendardMedium from '../assets/fonts/pretendard/Pretendard-Medium.woff2';
+import pretendardRegular from '../assets/fonts/pretendard/Pretendard-Regular.woff2';
+import pretendardSemiBold from '../assets/fonts/pretendard/Pretendard-SemiBold.woff2';
 
 export const primitiveColors = {
   grayscale50: '#FDFCFC',
@@ -65,6 +75,64 @@ const pretendardFont =
 const outfitFont =
   'Outfit, Pretendard, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 const keplerCondensedFont = '"Kepler Std", Pretendard, ui-serif, Georgia, serif';
+
+const fontDisplay = 'swap';
+
+globalFontFace('Pretendard', {
+  src: `url(${pretendardExtraLight}) format("woff2")`,
+  fontWeight: '200',
+  fontStyle: 'normal',
+  fontDisplay
+});
+
+globalFontFace('Pretendard', {
+  src: `url(${pretendardLight}) format("woff2")`,
+  fontWeight: '300',
+  fontStyle: 'normal',
+  fontDisplay
+});
+
+globalFontFace('Pretendard', {
+  src: `url(${pretendardRegular}) format("woff2")`,
+  fontWeight: '400',
+  fontStyle: 'normal',
+  fontDisplay
+});
+
+globalFontFace('Pretendard', {
+  src: `url(${pretendardMedium}) format("woff2")`,
+  fontWeight: '500',
+  fontStyle: 'normal',
+  fontDisplay
+});
+
+globalFontFace('Pretendard', {
+  src: `url(${pretendardSemiBold}) format("woff2")`,
+  fontWeight: '600',
+  fontStyle: 'normal',
+  fontDisplay
+});
+
+globalFontFace('Outfit', {
+  src: `url(${outfitLatinVariable}) format("woff2-variations")`,
+  fontWeight: '100 900',
+  fontStyle: 'normal',
+  fontDisplay
+});
+
+globalFontFace('Kepler Std', {
+  src: `url(${keplerBoldSemicondensedDisplay}) format("woff")`,
+  fontWeight: '400',
+  fontStyle: 'normal',
+  fontDisplay
+});
+
+globalFontFace('Kepler Std', {
+  src: `url(${keplerBoldSemicondensedDisplayItalic}) format("woff")`,
+  fontWeight: '400',
+  fontStyle: 'italic',
+  fontDisplay
+});
 
 export const typography = {
   titleR: {

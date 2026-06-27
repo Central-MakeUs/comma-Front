@@ -1,26 +1,49 @@
-import { createTheme } from '@vanilla-extract/css';
+/// <reference path="./font-assets.d.ts" />
 
-export const colors = {
-  textPrimary: '#302C2C',
-  textSecondary: '#6A6262',
-  accent: '#5375B1',
-  highlight: '#5375B14D',
-  surface: '#FDFCFC',
-  surfaceGlass: '#FDFCFCA8',
-  surfaceSubtle: '#FDFCFC1A',
-  line: '#C2BFBC',
-  lineSubtle: '#C2BFBC1A',
-  disabled: '#DBD8D7',
-  neutral: '#58514C',
-  neutralSubtle: '#58514C1A',
-  error: '#FF6557',
-  black: '#000000',
-  white: '#FFFFFF',
-  background: '#FDFCFC',
-  foreground: '#302C2C',
-  muted: '#6A6262',
-  body: '#6A6262',
-  inverse: '#FDFCFC'
+import { createTheme, globalFontFace } from '@vanilla-extract/css';
+import keplerBoldSemicondensedDisplay from '../assets/fonts/kepler-std/KeplerStd-BoldScnDisp.woff';
+import keplerBoldSemicondensedDisplayItalic from '../assets/fonts/kepler-std/KeplerStd-BoldScnItDisp.woff';
+import outfitLatinVariable from '../assets/fonts/outfit/Outfit-latin-variable.woff2';
+import pretendardExtraLight from '../assets/fonts/pretendard/Pretendard-ExtraLight.woff2';
+import pretendardLight from '../assets/fonts/pretendard/Pretendard-Light.woff2';
+import pretendardMedium from '../assets/fonts/pretendard/Pretendard-Medium.woff2';
+import pretendardRegular from '../assets/fonts/pretendard/Pretendard-Regular.woff2';
+import pretendardSemiBold from '../assets/fonts/pretendard/Pretendard-SemiBold.woff2';
+
+export const primitiveColors = {
+  grayscale50: '#FDFCFC',
+  grayscale300: '#DBD8D7',
+  grayscale400: '#C2BFBC',
+  grayscale700: '#58514C',
+  grayscale800: '#423D38',
+  grayscale900: '#322E29',
+  grayscaleBlack: '#1A1814',
+  error: '#FF6557'
+} as const;
+
+export const semanticColors = {
+  backgroundPrimary: primitiveColors.grayscale900,
+  backgroundFill: primitiveColors.grayscale800,
+  textPrimary: primitiveColors.grayscale50,
+  textSecondary: primitiveColors.grayscale300,
+  textTertiary: primitiveColors.grayscale400,
+  textBlack: primitiveColors.grayscale900,
+  textBlackSecondary: primitiveColors.grayscale700,
+  iconPrimary: primitiveColors.grayscale50,
+  iconSecondary: primitiveColors.grayscale400,
+  iconBlack: primitiveColors.grayscale900,
+  linePrimary: primitiveColors.grayscale400,
+  lineSecondary: primitiveColors.grayscale700,
+  lineTertiary: primitiveColors.grayscale800,
+  error: primitiveColors.error
+} as const;
+
+export const colors = semanticColors;
+
+export const grid = {
+  columnCount: '4',
+  margin: '32px',
+  gutter: '12px'
 } as const;
 
 export const spacing = {
@@ -47,51 +70,196 @@ export const radii = {
   control: '5px'
 } as const;
 
+const pretendardFont =
+  'Pretendard, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+const outfitFont =
+  'Outfit, Pretendard, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+const keplerCondensedFont = '"Kepler Std", Pretendard, ui-serif, Georgia, serif';
+
+const fontDisplay = 'swap';
+
+globalFontFace('Pretendard', {
+  src: `url(${pretendardExtraLight}) format("woff2")`,
+  fontWeight: '200',
+  fontStyle: 'normal',
+  fontDisplay
+});
+
+globalFontFace('Pretendard', {
+  src: `url(${pretendardLight}) format("woff2")`,
+  fontWeight: '300',
+  fontStyle: 'normal',
+  fontDisplay
+});
+
+globalFontFace('Pretendard', {
+  src: `url(${pretendardRegular}) format("woff2")`,
+  fontWeight: '400',
+  fontStyle: 'normal',
+  fontDisplay
+});
+
+globalFontFace('Pretendard', {
+  src: `url(${pretendardMedium}) format("woff2")`,
+  fontWeight: '500',
+  fontStyle: 'normal',
+  fontDisplay
+});
+
+globalFontFace('Pretendard', {
+  src: `url(${pretendardSemiBold}) format("woff2")`,
+  fontWeight: '600',
+  fontStyle: 'normal',
+  fontDisplay
+});
+
+globalFontFace('Outfit', {
+  src: `url(${outfitLatinVariable}) format("woff2-variations")`,
+  fontWeight: '100 900',
+  fontStyle: 'normal',
+  fontDisplay
+});
+
+globalFontFace('Kepler Std', {
+  src: `url(${keplerBoldSemicondensedDisplay}) format("woff")`,
+  fontWeight: '400',
+  fontStyle: 'normal',
+  fontDisplay
+});
+
+globalFontFace('Kepler Std', {
+  src: `url(${keplerBoldSemicondensedDisplayItalic}) format("woff")`,
+  fontWeight: '400',
+  fontStyle: 'italic',
+  fontDisplay
+});
+
 export const typography = {
-  display: {
-    fontSize: '18px',
-    lineHeight: '26px',
-    fontWeight: '400'
+  titleR: {
+    fontFamily: pretendardFont,
+    fontSize: '32px',
+    lineHeight: '43.2px',
+    fontWeight: '200',
+    letterSpacing: '-1.28px'
   },
-  heading1: {
+  headingB: {
+    fontFamily: pretendardFont,
+    fontSize: '24px',
+    lineHeight: '33.6px',
+    fontWeight: '500',
+    letterSpacing: '-0.96px'
+  },
+  headingR: {
+    fontFamily: pretendardFont,
+    fontSize: '24px',
+    lineHeight: '33.6px',
+    fontWeight: '300',
+    letterSpacing: '-0.96px'
+  },
+  headlineB: {
+    fontFamily: pretendardFont,
+    fontSize: '20px',
+    lineHeight: '28px',
+    fontWeight: '500',
+    letterSpacing: '-0.8px'
+  },
+  headlineR: {
+    fontFamily: pretendardFont,
+    fontSize: '20px',
+    lineHeight: '28px',
+    fontWeight: '300',
+    letterSpacing: '-0.8px'
+  },
+  bodyNormalB: {
+    fontFamily: pretendardFont,
     fontSize: '16px',
-    lineHeight: '22px',
-    fontWeight: '600'
+    lineHeight: '24px',
+    fontWeight: '600',
+    letterSpacing: '-0.32px'
   },
-  heading2: {
+  bodyNormalR: {
+    fontFamily: pretendardFont,
+    fontSize: '16px',
+    lineHeight: '24px',
+    fontWeight: '400',
+    letterSpacing: '-0.32px'
+  },
+  bodyReadingB: {
+    fontFamily: pretendardFont,
+    fontSize: '16px',
+    lineHeight: '24px',
+    fontWeight: '600',
+    letterSpacing: '-0.32px'
+  },
+  bodyReadingR: {
+    fontFamily: pretendardFont,
+    fontSize: '16px',
+    lineHeight: '24px',
+    fontWeight: '400',
+    letterSpacing: '-0.32px'
+  },
+  labelNormalB: {
+    fontFamily: pretendardFont,
     fontSize: '14px',
-    lineHeight: '20px',
-    fontWeight: '400'
+    lineHeight: '21px',
+    fontWeight: '600',
+    letterSpacing: '-0.28px'
   },
-  body1: {
-    fontSize: '11px',
+  labelNormalR: {
+    fontFamily: pretendardFont,
+    fontSize: '14px',
+    lineHeight: '21px',
+    fontWeight: '400',
+    letterSpacing: '-0.28px'
+  },
+  labelReadingB: {
+    fontFamily: pretendardFont,
+    fontSize: '14px',
+    lineHeight: '21px',
+    fontWeight: '600',
+    letterSpacing: '-0.28px'
+  },
+  labelReadingR: {
+    fontFamily: pretendardFont,
+    fontSize: '14px',
+    lineHeight: '21px',
+    fontWeight: '400',
+    letterSpacing: '-0.28px'
+  },
+  captionB: {
+    fontFamily: pretendardFont,
+    fontSize: '12px',
     lineHeight: '18px',
-    fontWeight: '400'
+    fontWeight: '600',
+    letterSpacing: '-0.24px'
   },
-  body2: {
-    fontSize: '9px',
-    lineHeight: '16px',
-    fontWeight: '400'
+  captionR: {
+    fontFamily: pretendardFont,
+    fontSize: '12px',
+    lineHeight: '18px',
+    fontWeight: '500',
+    letterSpacing: '-0.24px'
   },
-  label1: {
-    fontSize: '10px',
-    lineHeight: '14px',
-    fontWeight: '500'
+  engNum: {
+    fontFamily: keplerCondensedFont,
+    fontSize: '48px',
+    lineHeight: '48px',
+    fontWeight: '400',
+    letterSpacing: '-0.96px'
   },
-  label2: {
-    fontSize: '9px',
-    lineHeight: '14px',
-    fontWeight: '500'
+  systemEyebrow: {
+    fontFamily: outfitFont,
+    fontSize: '24px',
+    lineHeight: '32.4px',
+    fontWeight: '500',
+    letterSpacing: '-0.24px'
   },
-  label3: {
-    fontSize: '8px',
-    lineHeight: '12px',
-    fontWeight: '500'
-  },
-  caption: {
-    fontSize: '8px',
-    lineHeight: '12px',
-    fontWeight: '400'
+  systemSection: {
+    fontFamily: outfitFont,
+    fontSize: '20px',
+    lineHeight: '27px',
+    fontWeight: '500',
+    letterSpacing: '-0.2px'
   }
 } as const;
 
@@ -104,12 +272,14 @@ export const shadows = {
 
 export const [themeClass, vars] = createTheme({
   color: colors,
+  grid,
   space: spacing,
   radius: radii,
   typography,
   shadow: shadows,
   font: {
-    body: 'Pretendard, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-    display: '"Kepler Std Condensed Display", Pretendard, ui-serif, Georgia, serif'
+    body: pretendardFont,
+    display: keplerCondensedFont,
+    label: outfitFont
   }
 });

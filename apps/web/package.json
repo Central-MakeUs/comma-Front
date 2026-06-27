@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
-    "dev:lan": "vite --host 0.0.0.0",
+    "dev:device": "vite --host 0.0.0.0 --strictPort",
     "build": "tsc -b && vite build",
     "typecheck": "tsc --noEmit"
   },

@@ -7,8 +7,8 @@ export const screen = style({
   display: 'grid',
   placeItems: 'center',
   padding: vars.space[6],
-  background: vars.color.background,
-  color: vars.color.foreground,
+  background: vars.color.backgroundPrimary,
+  color: vars.color.textPrimary,
   fontFamily: vars.font.body
 });
 
@@ -18,27 +18,27 @@ export const panel = style({
 
 export const eyebrow = style({
   margin: `0 0 ${vars.space[3]}`,
-  color: vars.color.muted,
-  fontSize: vars.typography.label1.fontSize,
-  fontWeight: vars.typography.label1.fontWeight,
-  lineHeight: vars.typography.label1.lineHeight,
+  color: vars.color.textTertiary,
+  fontSize: vars.typography.systemSection.fontSize,
+  fontWeight: vars.typography.systemSection.fontWeight,
+  lineHeight: vars.typography.systemSection.lineHeight,
   textTransform: 'uppercase'
 });
 
 export const title = style({
   margin: 0,
-  fontSize: 'clamp(42px, 10vw, 76px)',
-  lineHeight: 0.95,
-  fontFamily: vars.font.display,
-  fontWeight: 400
+  fontSize: vars.typography.engNum.fontSize,
+  lineHeight: vars.typography.engNum.lineHeight,
+  fontFamily: vars.typography.engNum.fontFamily,
+  fontWeight: vars.typography.engNum.fontWeight
 });
 
 export const description = style({
   margin: `${vars.space[6]} 0 ${vars.space[7]}`,
-  color: vars.color.body,
-  fontSize: vars.typography.display.fontSize,
-  fontWeight: vars.typography.display.fontWeight,
-  lineHeight: vars.typography.display.lineHeight
+  color: vars.color.textSecondary,
+  fontSize: vars.typography.bodyNormalR.fontSize,
+  fontWeight: vars.typography.bodyNormalR.fontWeight,
+  lineHeight: vars.typography.bodyNormalR.lineHeight
 });
 
 export const actionButton = recipe({
@@ -48,9 +48,9 @@ export const actionButton = recipe({
     borderRadius: vars.radius.control,
     padding: '0 18px',
     font: 'inherit',
-    fontSize: vars.typography.heading1.fontSize,
-    fontWeight: vars.typography.heading1.fontWeight,
-    lineHeight: vars.typography.heading1.lineHeight,
+    fontSize: vars.typography.bodyNormalB.fontSize,
+    fontWeight: vars.typography.bodyNormalB.fontWeight,
+    lineHeight: vars.typography.bodyNormalB.lineHeight,
     selectors: {
       '& + &': {
         marginLeft: 10
@@ -60,13 +60,13 @@ export const actionButton = recipe({
   variants: {
     tone: {
       primary: {
-        background: vars.color.accent,
-        color: vars.color.inverse
+        background: vars.color.textBlackSecondary,
+        color: vars.color.textPrimary
       },
       secondary: {
         background: 'transparent',
-        color: vars.color.foreground,
-        boxShadow: `inset 0 0 0 1px ${vars.color.line}`
+        color: vars.color.textPrimary,
+        boxShadow: `inset 0 0 0 1px ${vars.color.linePrimary}`
       }
     }
   },

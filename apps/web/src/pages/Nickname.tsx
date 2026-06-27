@@ -1,6 +1,6 @@
 import * as styles from './Nickname.css';
 import { TextInput, CtaButton } from '@comma/design-system';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { login } from '../utils/auth';
 
 function Nickname() {

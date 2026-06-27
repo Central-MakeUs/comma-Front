@@ -9,18 +9,17 @@ const config: StorybookConfig = {
     options: {}
   },
   async viteFinal(config) {
-    config.plugins = [...(config.plugins ?? []), vanillaExtractPlugin()];
-    config.optimizeDeps = {
-      ...config.optimizeDeps,
-      include: [
-        ...(config.optimizeDeps?.include ?? []),
-        'react',
-        'react-dom',
-        'react/jsx-dev-runtime',
-        'react/jsx-runtime'
-      ]
-    };
-    return config;
+    const { mergeConfig } = await import('vite');
+
+    return mergeConfig(config, {
+      plugins: [vanillaExtractPlugin()],
+      resolve: {
+        dedupe: ['react', 'react-dom']
+      },
+      optimizeDeps: {
+        include: ['react', 'react-dom', 'react/jsx-dev-runtime', 'react/jsx-runtime']
+      }
+    });
   }
 };
 

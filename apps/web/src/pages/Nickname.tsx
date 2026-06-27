@@ -1,7 +1,7 @@
-import * as styles from './Nickname.css';
-import { TextInput, CtaButton } from '@comma/design-system';
+import { CtaButton, TextInput } from '@comma/design-system';
 import { useEffect } from 'react';
 import { login } from '../utils/auth';
+import * as styles from './Nickname.css';
 
 function Nickname() {
   // const [nickname, setNickname] = useState('');
@@ -53,11 +53,7 @@ function Nickname() {
           <span className={styles.agreementAccent}>개인정보처리방침</span>에 동의하는 것으로
           간주합니다
         </p>
-        <CtaButton
-          children="시작하기"
-          state="disabled"
-          className={styles.ctaButtonStyle['disabled']}
-        />
+        <CtaButton state="disabled" className={styles.ctaButtonStyle.disabled} />
       </div>
     </div>
   );

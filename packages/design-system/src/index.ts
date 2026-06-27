@@ -8,6 +8,8 @@ export type { CtaButtonProps, CtaButtonState } from './CtaButton';
 export { CtaButton } from './CtaButton';
 export type { ActionButtonVariants } from './components.css';
 export { actionButton, description, eyebrow, panel, screen, title } from './components.css';
+export type { IconName, IconProps, IconVariant } from './Icon';
+export { Icon } from './Icon';
 export type { NavigationBarItem, NavigationBarProps } from './NavigationBar';
 export { NavigationBar } from './NavigationBar';
 export type { SelectButtonProps, SelectButtonState } from './SelectButton';

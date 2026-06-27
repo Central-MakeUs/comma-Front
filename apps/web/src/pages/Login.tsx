@@ -5,11 +5,11 @@ const REDIRECT_URI = 'http://127.0.0.1:5173/nickname';
 function Login() {
   const onClick = () => {
     window.location.href =
-    `https://kauth.kakao.com/oauth/authorize` +
-    `?response_type=code` +
-    `&client_id=${REST_API_KEY}` +
-    `&redirect_uri=${REDIRECT_URI}`;
-  }
+      `https://kauth.kakao.com/oauth/authorize` +
+      `?response_type=code` +
+      `&client_id=${REST_API_KEY}` +
+      `&redirect_uri=${REDIRECT_URI}`;
+  };
   return (
     <div className={styles.container}>
       <div

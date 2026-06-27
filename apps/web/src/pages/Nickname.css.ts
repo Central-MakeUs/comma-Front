@@ -44,17 +44,17 @@ export const inputStyle = style({
   ...typography.bodyNormalR,
   color: colors.textTertiary,
   boxShadow: 'inset -2px 0 10px 0 rgba(255,255,255,0.33)',
-  borderRadius: 100,
-})
+  borderRadius: 100
+});
 
 export const ctaButtonStyle = styleVariants({
   default: {
-    color: colors.textPrimary,
+    color: colors.textPrimary
   },
   pressed: {
-    color: colors.textPrimary,
+    color: colors.textPrimary
   },
   disabled: {
-    color: colors.textTertiary,
-  },
-})
+    color: colors.textTertiary
+  }
+});

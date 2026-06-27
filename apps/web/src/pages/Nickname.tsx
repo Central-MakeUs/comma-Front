@@ -4,12 +4,12 @@ import { useEffect, useState } from 'react';
 import { login } from '../utils/auth';
 
 function Nickname() {
-  const [nickname, setNickname] = useState('');
+  // const [nickname, setNickname] = useState('');
 
   useEffect(() => {
     login();
   }, []);
-  
+
   return (
     <div className={styles.container}>
       <div
@@ -36,7 +36,7 @@ function Nickname() {
             <br />
             언제든지 변경할 수 있어요.
           </p>
-          <TextInput variant='fieldNoTitle' placeholder='예) 낙엽' className={styles.inputStyle}/>
+          <TextInput variant="fieldNoTitle" placeholder="예) 낙엽" className={styles.inputStyle} />
         </div>
       </div>
       <div
@@ -53,7 +53,11 @@ function Nickname() {
           <span className={styles.agreementAccent}>개인정보처리방침</span>에 동의하는 것으로
           간주합니다
         </p>
-        <CtaButton children="시작하기" state='disabled' className={styles.ctaButtonStyle['disabled']}/>
+        <CtaButton
+          children="시작하기"
+          state="disabled"
+          className={styles.ctaButtonStyle['disabled']}
+        />
       </div>
     </div>
   );

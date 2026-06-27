@@ -58,3 +58,13 @@ export const ctaButtonStyle = styleVariants({
     color: colors.textTertiary
   }
 });
+
+export const noticeText = style({
+  ...typography.labelReadingR,
+  color: colors.textSecondary
+});
+
+export const noticeAccent = style({
+  ...typography.labelReadingB,
+  color: colors.textPrimary
+});

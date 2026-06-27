@@ -1,14 +1,8 @@
 import { CtaButton, TextInput } from '@comma/design-system';
-import { useEffect } from 'react';
-import { login } from '../utils/auth';
 import * as styles from './Nickname.css';
 
 function Nickname() {
   // const [nickname, setNickname] = useState('');
-
-  useEffect(() => {
-    login();
-  }, []);
 
   return (
     <div className={styles.container}>

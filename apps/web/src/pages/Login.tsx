@@ -1,8 +1,7 @@
 import * as styles from './Login.css';
 
-const REST_API_KEY = '52390aa7ae68cc144f3865e87379664b';
-const REDIRECT_URI = 'http://127.0.0.1:5173/nickname';
-// const REDIRECT_URI = 'https://comma-front-web.vercel.app/oauth/kakao/callback';
+const REST_API_KEY = import.meta.env.VITE_REST_API_KEY;
+const REDIRECT_URI = import.meta.env.VITE_REDIRECT_URI;
 
 function Login() {
   const onClick = () => {
@@ -10,7 +9,7 @@ function Login() {
       `https://kauth.kakao.com/oauth/authorize` +
       `?response_type=code` +
       `&client_id=${REST_API_KEY}` +
-      `&redirect_uri=${REDIRECT_URI}`;
+      `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
   };
   return (
     <div className={styles.container}>

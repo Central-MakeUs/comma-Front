@@ -1,14 +1,5 @@
-import { keyframes, style, styleVariants } from '@vanilla-extract/css';
+import { style, styleVariants } from '@vanilla-extract/css';
 import { vars } from './theme.css';
-
-const activeFadeIn = keyframes({
-  from: {
-    opacity: 0.45
-  },
-  to: {
-    opacity: 1
-  }
-});
 
 export const navigationBar = style({
   width: 344,
@@ -51,8 +42,7 @@ export const navigationItem = style({
 
 export const navigationItemTone = styleVariants({
   active: {
-    color: vars.color.iconPrimary,
-    animation: `${activeFadeIn} 0.3s ease-out`
+    color: vars.color.iconPrimary
   },
   inactive: {
     color: vars.color.iconSecondary
@@ -63,7 +53,8 @@ export const navigationIcon = style({
   width: 32,
   height: 32,
   display: 'block',
-  flexShrink: 0
+  flexShrink: 0,
+  transition: 'color 0.3s ease-out'
 });
 
 export const navigationLabel = style({
@@ -72,7 +63,8 @@ export const navigationLabel = style({
   overflow: 'hidden',
   textAlign: 'center',
   textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap'
+  whiteSpace: 'nowrap',
+  transition: 'color 0.3s ease-out, text-shadow 0.3s ease-out'
 });
 
 export const navigationLabelTone = styleVariants({
@@ -82,8 +74,7 @@ export const navigationLabelTone = styleVariants({
     fontWeight: vars.typography.captionB.fontWeight,
     lineHeight: vars.typography.captionB.lineHeight,
     letterSpacing: vars.typography.captionB.letterSpacing,
-    textShadow: vars.shadow.card,
-    animation: `${activeFadeIn} 0.3s ease-out`
+    textShadow: vars.shadow.card
   },
   inactive: {
     color: vars.color.textTertiary,

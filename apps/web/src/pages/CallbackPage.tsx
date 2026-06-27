@@ -1,15 +1,18 @@
 import { useEffect } from 'react';
-import { login } from '../utils/auth';
 import { useNavigate } from 'react-router-dom';
+import { login } from '../utils/auth';
 
 function CallbackPage() {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    useEffect(() => {
-        login();
-        navigate('/nickname');
-    }, []);
-    return (<div>Callback Page</div>);
+  useEffect(() => {
+    const handleLogin = async () => {
+      await login();
+      navigate('/nickname');
+    };
+    handleLogin();
+  }, [navigate]);
+  return <div>Callback Page</div>;
 }
 
 export default CallbackPage;

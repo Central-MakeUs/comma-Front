@@ -1,8 +1,8 @@
 import { createBrowserRouter } from 'react-router-dom';
+import CallbackPage from '../pages/CallbackPage';
 import Loading from '../pages/Loading';
 import Login from '../pages/Login';
 import Nickname from '../pages/Nickname';
-import CallbackPage from '../pages/CallbackPage';
 
 export const router = createBrowserRouter([
   {
@@ -19,6 +19,6 @@ export const router = createBrowserRouter([
   },
   {
     path: '/oauth/kakao/callback',
-    Component: CallbackPage,
+    Component: CallbackPage
   }
 ]);

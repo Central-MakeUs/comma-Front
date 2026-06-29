@@ -10,6 +10,8 @@ export type { ActionButtonVariants } from './components.css';
 export { actionButton, description, eyebrow, panel, screen, title } from './components.css';
 export type { IconName, IconProps, IconVariant } from './Icon';
 export { Icon } from './Icon';
+export type { ImageUploadProps, ImageUploadState } from './ImageUpload';
+export { ImageUpload } from './ImageUpload';
 export type { NavigationBarItem, NavigationBarProps } from './NavigationBar';
 export { NavigationBar } from './NavigationBar';
 export type { ProgressBarProps, ProgressBarStep } from './ProgressBar';

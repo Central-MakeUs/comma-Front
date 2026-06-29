@@ -1,5 +1,5 @@
 import { style, styleVariants } from '@vanilla-extract/css';
-import { vars } from './theme.css';
+import { vars } from '../theme.css';
 
 export const navigationBar = style({
   width: 344,

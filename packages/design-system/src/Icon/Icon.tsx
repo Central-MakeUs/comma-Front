@@ -1,6 +1,6 @@
 import type { ReactNode, SVGProps } from 'react';
 import { useId } from 'react';
-import { vars } from './theme.css';
+import { vars } from '../theme.css';
 
 export type StaticIconName =
   | 'x'

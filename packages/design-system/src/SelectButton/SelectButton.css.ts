@@ -1,5 +1,5 @@
 import { style, styleVariants } from '@vanilla-extract/css';
-import { vars } from './theme.css';
+import { vars } from '../theme.css';
 
 const pressedState = {
   background: 'rgb(17 17 17 / 10%)',

@@ -1,5 +1,5 @@
 import { style, styleVariants } from '@vanilla-extract/css';
-import { vars } from './theme.css';
+import { vars } from '../theme.css';
 
 const selectedBorder = `1px solid ${vars.color.linePrimary}`;
 const selectedPressedBorder = `1px solid ${vars.color.lineSecondary}`;

@@ -1,4 +1,4 @@
-import type { ReactElement, SVGProps } from 'react';
+import type { ReactElement } from 'react';
 import {
   navigationBar,
   navigationIcon,
@@ -7,6 +7,7 @@ import {
   navigationLabel,
   navigationLabelTone
 } from './NavigationBar.css';
+import type { NavigationBarIconProps } from './NavigationBarIcons';
 import { ArchiveIcon, FeedIcon, MyPageIcon, RestIcon } from './NavigationBarIcons';
 
 export type NavigationBarItem = 'rest' | 'feed' | 'archive' | 'mypage';
@@ -20,7 +21,7 @@ export type NavigationBarProps = {
 type NavigationItemConfig = {
   id: NavigationBarItem;
   label: string;
-  Icon: (props: SVGProps<SVGSVGElement>) => ReactElement;
+  Icon: (props: NavigationBarIconProps) => ReactElement;
 };
 
 const navigationItems = [
@@ -63,7 +64,7 @@ export function NavigationBar({ active, className, onItemSelect }: NavigationBar
             onClick={() => onItemSelect?.(id)}
             type="button"
           >
-            <Icon className={navigationIcon} />
+            <Icon active={isActive} className={navigationIcon} />
             <span className={`${navigationLabel} ${navigationLabelTone[tone]}`}>{label}</span>
           </button>
         );

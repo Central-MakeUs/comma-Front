@@ -43,14 +43,22 @@ function ChipArrow({ selected }: { selected: boolean }) {
 export function Chip({
   children = '기분',
   state = 'default',
-  selected = false,
+  selected,
   type = 'button',
   className,
   'aria-pressed': ariaPressed,
   ...buttonProps
 }: ChipProps) {
-  const isSelected = selected || state === 'selected' || state === 'selectedPressed';
-  const visualState: ChipState = selected ? 'selected' : state;
+  const isPressedState = state === 'defaultPressed' || state === 'selectedPressed';
+  const isSelected =
+    selected === undefined ? state === 'selected' || state === 'selectedPressed' : selected;
+  const visualState: ChipState = isSelected
+    ? isPressedState
+      ? 'selectedPressed'
+      : 'selected'
+    : isPressedState
+      ? 'defaultPressed'
+      : 'default';
   const buttonClassName = [chip, chipState[visualState], className].filter(Boolean).join(' ');
 
   return (

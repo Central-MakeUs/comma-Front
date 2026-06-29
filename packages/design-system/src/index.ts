@@ -12,6 +12,8 @@ export type { NavigationBarItem, NavigationBarProps } from './NavigationBar';
 export { NavigationBar } from './NavigationBar';
 export type { ProgressBarProps, ProgressBarStep } from './ProgressBar';
 export { ProgressBar } from './ProgressBar';
+export type { SecretToggleProps, SecretToggleState } from './SecretToggle';
+export { SecretToggle } from './SecretToggle';
 export type { SelectButtonProps, SelectButtonState } from './SelectButton';
 export { SelectButton } from './SelectButton';
 export type { TextInputProps, TextInputState, TextInputVariant } from './TextInput';

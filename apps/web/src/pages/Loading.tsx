@@ -1,6 +1,10 @@
+import { useLocation } from 'react-router-dom';
 import * as styles from './Loading.css';
 
 function Loading() {
+  const location = useLocation();
+  const { userName } = location.state;
+
   return (
     <div className={styles.container}>
       <img
@@ -12,7 +16,7 @@ function Loading() {
       />
       <div style={{ width: '100%', display: 'flex', flexDirection: 'column', marginBottom: 80 }}>
         <span className={styles.title}>반가워요,</span>
-        <span className={styles.title}>토마스님.</span>
+        <span className={styles.title}>{userName}님.</span>
         <p className={styles.desc}>
           지금 상태를 알려주시면
           <br />딱 맞는 휴식을 찾아드릴게요

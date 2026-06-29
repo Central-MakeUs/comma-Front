@@ -1,9 +1,11 @@
 import { CtaButton, TextInput } from '@comma/design-system';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import * as styles from './Nickname.css';
 
 function Nickname() {
   const [nickname, setNickname] = useState('');
+  const navigate = useNavigate();
   const [isAccepted, setIsAccepted] = useState(false);
   const onChange = (val: string) => {
     setNickname(val);
@@ -83,6 +85,9 @@ function Nickname() {
         <CtaButton
           state={isAccepted ? 'default' : 'disabled'}
           className={isAccepted ? styles.ctaButtonStyle.default : styles.ctaButtonStyle.disabled}
+          onClick={() => {
+            if (isAccepted) navigate('/loading', { state: { userName: nickname } });
+          }}
         />
       </div>
     </div>

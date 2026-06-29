@@ -1,5 +1,5 @@
 import { colors, typography } from '@comma/design-system';
-import { style } from '@vanilla-extract/css';
+import { style, styleVariants } from '@vanilla-extract/css';
 
 export const container = style({
   backgroundImage: 'url("/images/onboardingBackground_blur.svg")',
@@ -38,4 +38,33 @@ export const agreementNotice = style({
 export const agreementAccent = style({
   color: colors.textSecondary,
   textDecoration: 'underline'
+});
+
+export const inputStyle = style({
+  ...typography.bodyNormalR,
+  color: colors.textTertiary,
+  boxShadow: 'inset -2px 0 10px 0 rgba(255,255,255,0.33)',
+  borderRadius: 100
+});
+
+export const ctaButtonStyle = styleVariants({
+  default: {
+    color: colors.textPrimary
+  },
+  pressed: {
+    color: colors.textPrimary
+  },
+  disabled: {
+    color: colors.textTertiary
+  }
+});
+
+export const noticeText = style({
+  ...typography.labelReadingR,
+  color: colors.textSecondary
+});
+
+export const noticeAccent = style({
+  ...typography.labelReadingB,
+  color: colors.textPrimary
 });

@@ -1,6 +1,16 @@
 import * as styles from './Login.css';
 
+const REST_API_KEY = import.meta.env.VITE_REST_API_KEY;
+const REDIRECT_URI = import.meta.env.VITE_REDIRECT_URI;
+
 function Login() {
+  const onClick = () => {
+    window.location.href =
+      `https://kauth.kakao.com/oauth/authorize` +
+      `?response_type=code` +
+      `&client_id=${REST_API_KEY}` +
+      `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
+  };
   return (
     <div className={styles.container}>
       <div
@@ -24,7 +34,7 @@ function Login() {
         </div>
       </div>
       <div style={{ width: '100%', marginBottom: 80 }}>
-        <button className={styles.kakaoBtn} type="button">
+        <button className={styles.kakaoBtn} type="button" onClick={onClick}>
           <img src="/images/kakao_logo.svg" alt="카카오 아이콘" width={18} height={18} />
           카카오톡으로 로그인
         </button>

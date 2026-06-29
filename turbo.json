@@ -3,7 +3,8 @@
   "tasks": {
     "dev": {
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "env": ["VITE_REDIRECT_URI", "VITE_REST_API_KEY"]
     },
     "build": {
       "dependsOn": ["^build"],

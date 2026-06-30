@@ -39,23 +39,25 @@ export const subTitle = style({
 })
 
 export const rowScrollContainer = style({
-    width: '100%', 
+    width: '100%',
+    height: 354,
     overflowX: 'auto',
+    scrollSnapType: 'x mandatory',
     '::-webkit-scrollbar': {
         display: 'none',
     }
 })
 
 export const rowScrollWrapper = style({
-    display: 'flex', 
-    flexDirection: 'row', 
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
     width: 'max-content',
+    paddingLeft: 'calc((100vw - 280px) / 2)',
+    paddingRight: 'calc((100vw - 280px) / 2)',
 })
 
 export const imageUploadStyle = style({
-    width: 280,
-    height: 354,
-    borderRadius: 81,
     selectors: {
         '&::after': {
             content: '',

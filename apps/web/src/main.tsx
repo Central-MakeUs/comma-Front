@@ -5,6 +5,7 @@ import { appBridge } from './bridge';
 import './global.css';
 import { RouterProvider } from 'react-router-dom';
 import { router } from './router/index';
+import { themeClass } from '@comma/design-system';
 
 appBridge.addEventListener(POST_MESSAGE_EVENT.APP_READY, (message) => {
   console.log('app ready', message);
@@ -15,6 +16,8 @@ const rootElement = document.getElementById('root');
 if (!rootElement) {
   throw new Error('Root element was not found.');
 }
+
+rootElement.classList.add(themeClass);
 
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>

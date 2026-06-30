@@ -1,5 +1,5 @@
 import { style, styleVariants } from '@vanilla-extract/css';
-import { vars } from './theme.css';
+import { vars } from '../theme.css';
 
 const glassSurface = {
   background: 'rgb(194 191 188 / 10%)',

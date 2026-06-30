@@ -8,9 +8,28 @@ const MIN_W = 200, MAX_W = 280;
 const MIN_H = 253, MAX_H = 354;
 const SETTLED_STEP = MIN_W + CARD_GAP;
 
+function Modal({ onClose }: { onClose: () => void }) {
+    return (
+        <div className={styles.modalContainer}>
+            <div style={{width: '100%', display: 'flex', flexDirection: 'column', marginBottom: 32}}>
+                <div style={{width: '100%', display: 'flex', justifyContent: 'flex-end'}}>
+                    <Icon name='x' color={colors.iconPrimary} onClick={onClose}/>
+                </div>
+                <span className={styles.modalTitle}>휴식 재선택</span>
+                <span className={styles.modalDesc}>휴식을 다시 선택할까요?</span>
+            </div>
+            <div style={{width: '100%'}}>
+                <CtaButton children='취소' className={styles.cancleBtn} onClick={onClose}/>
+                <CtaButton children='확인' className={styles.confirmBtn}/>
+            </div>
+        </div>
+    )
+}
+
 function RestResult() {
     const scrollRef = useRef<HTMLDivElement>(null);
     const [scrollX, setScrollX] = useState(SETTLED_STEP);
+    const [showModal, setShowModal] = useState(false);
     const isJumping = useRef(false);
 
     const activeItem = Math.min(Math.max(Math.round(scrollX / SETTLED_STEP), 1), 5);
@@ -78,10 +97,17 @@ function RestResult() {
 
     return (
         <div className={styles.container}>
+            {showModal ? 
+                (
+                    <div style={{position: 'absolute', inset: 0, backgroundColor: 'rgba(26, 24, 20, 0.3)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 100}}>
+                        <Modal onClose={() => setShowModal(false)} />
+                    </div>
+                ) : null
+            }
             <div style={{position: 'absolute', top: 0, width: '100%', height: 120, background: 'linear-gradient(rgba(17, 17, 17, 0.66) 0%, rgba(17, 17, 17, 0) 100%)', zIndex: -1}}/>
             <div style={{position: 'absolute', bottom: 0, width: '100%', height: 600, background: 'linear-gradient(to top, rgba(17, 17, 17, 0.66) 0%, rgba(17, 17, 17, 0) 100%)', zIndex: -1}}/>
             <div style={{width: '100%', display: 'flex', justifyContent: 'flex-end', boxSizing: 'border-box', padding: '20px 32px'}}>
-                <Icon name='x' color={colors.iconPrimary} />
+                <Icon name='x' color={colors.iconPrimary} onClick={() => setShowModal(true)}/>
             </div>
             <div style={{width: '100%', display: 'flex', flexDirection: 'column'}}>
                 <div style={{width: '100%', boxSizing: 'border-box', paddingLeft: 32, paddingRight: 32, display: 'flex', flexDirection: 'column'}}>

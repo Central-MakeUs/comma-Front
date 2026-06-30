@@ -20,7 +20,9 @@ function Modal({ onClose }: { onClose: () => void }) {
         <span className={styles.modalDesc}>휴식을 다시 선택할까요?</span>
       </div>
       <div style={{ width: '100%' }}>
-        <CtaButton className={styles.cancleBtn} onClick={onClose}>취소</CtaButton>
+        <CtaButton className={styles.cancleBtn} onClick={onClose}>
+          취소
+        </CtaButton>
         <CtaButton className={styles.confirmBtn}>확인</CtaButton>
       </div>
     </div>

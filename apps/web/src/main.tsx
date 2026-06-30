@@ -3,9 +3,9 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { appBridge } from './bridge';
 import './global.css';
+import { themeClass } from '@comma/design-system';
 import { RouterProvider } from 'react-router-dom';
 import { router } from './router/index';
-import { themeClass } from '@comma/design-system';
 
 appBridge.addEventListener(POST_MESSAGE_EVENT.APP_READY, (message) => {
   console.log('app ready', message);

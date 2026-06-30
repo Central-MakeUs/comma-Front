@@ -24,6 +24,6 @@ export const router = createBrowserRouter([
   },
   {
     path: '/recommend-result',
-    Component: RestResult,
+    Component: RestResult
   }
 ]);

@@ -10,6 +10,8 @@ export type { CtaButtonProps, CtaButtonState } from './CtaButton';
 export { CtaButton } from './CtaButton';
 export type { ActionButtonVariants } from './components.css';
 export { actionButton, description, eyebrow, panel, screen, title } from './components.css';
+export type { FeedCardProps, FeedCardVariant } from './FeedCard';
+export { FeedCard } from './FeedCard';
 export type { FeedImageProps } from './FeedImage';
 export { FeedImage } from './FeedImage';
 export type { IconName, IconProps, IconVariant } from './Icon';

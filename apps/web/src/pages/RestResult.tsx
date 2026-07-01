@@ -1,8 +1,8 @@
 import { CtaButton, colors, Icon, ImageUpload, NavigationBar } from '@comma/design-system';
+import { assignInlineVars } from '@vanilla-extract/dynamic';
 import useEmblaCarousel from 'embla-carousel-react';
 import { useEffect, useState } from 'react';
 import * as styles from './RestResult.css';
-import { assignInlineVars } from '@vanilla-extract/dynamic';
 
 function Modal({ onClose }: { onClose: () => void }) {
   return (
@@ -71,13 +71,7 @@ function RestResult() {
   const [showModal, setShowModal] = useState(false);
   const [slideIdx, setSlideIdx] = useState(0);
   const [scales, setScales] = useState<number[]>([]);
-  const backgrounds = [
-    '/images/rest_1.svg',
-    '/images/rest_2.svg',
-    '',
-    '',
-    '/images/rest_5.svg',
-  ]
+  const backgrounds = ['/images/rest_1.svg', '/images/rest_2.svg', '', '', '/images/rest_5.svg'];
   const [embiaRef, emblaApi] = useEmblaCarousel({
     loop: true,
     align: 'center'
@@ -128,9 +122,12 @@ function RestResult() {
   };
 
   return (
-    <div className={styles.container} style={assignInlineVars({
-      [styles.backgroundImageVar] : `url(${backgrounds[slideIdx]}) center / cover no-repeat`
-    })}>
+    <div
+      className={styles.container}
+      style={assignInlineVars({
+        [styles.backgroundImageVar]: `url(${backgrounds[slideIdx]}) center / cover no-repeat`
+      })}
+    >
       {showModal ? (
         <div
           style={{

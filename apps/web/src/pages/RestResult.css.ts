@@ -16,7 +16,7 @@ export const container = style({
       position: 'absolute',
       inset: 0,
       background: backgroundImageVar,
-      zIndex: -10,
+      zIndex: -10
     },
     '&::after': {
       content: '',

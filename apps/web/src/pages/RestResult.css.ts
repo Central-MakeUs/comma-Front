@@ -3,9 +3,11 @@ import { style } from '@vanilla-extract/css';
 
 export const container = style({
   width: '100vw',
-  height: '100vh',
+  height: '100dvh',
+  overflow: 'hidden',
   boxSizing: 'border-box',
   paddingTop: 48,
+  position: 'relative',
   selectors: {
     '&::before': {
       content: '',

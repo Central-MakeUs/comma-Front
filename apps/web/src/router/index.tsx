@@ -3,7 +3,7 @@ import CallbackPage from '../pages/CallbackPage';
 import Loading from '../pages/Loading';
 import Login from '../pages/Login';
 import Nickname from '../pages/Nickname';
-import RecommendLoading from '../pages/Recommend_loading';
+import RestLoading from '../pages/RestLoading';
 import RestResult from '../pages/RestResult';
 
 export const router = createBrowserRouter([
@@ -29,6 +29,6 @@ export const router = createBrowserRouter([
   },
   {
     path: '/recommend-loading',
-    Component: RecommendLoading
+    Component: RestLoading
   }
 ]);

@@ -7,6 +7,15 @@ export type DesignAsset = {
 };
 
 export const designAssets = {
+  feed: {
+    image: {
+      src: new URL('../assets/feed/feed-image.svg', import.meta.url).href,
+      width: 393,
+      height: 499,
+      figmaNodeId: '1:13781',
+      description: 'Feed image'
+    }
+  },
   logos: {
     symbolDefault: {
       src: new URL('../assets/logos/symbol-default.png', import.meta.url).href,

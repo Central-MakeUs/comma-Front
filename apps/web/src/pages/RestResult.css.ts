@@ -39,24 +39,10 @@ export const subTitle = style({
   marginBottom: 30
 });
 
-export const rowScrollContainer = style({
-  width: '100%',
-  height: 354,
-  overflowX: 'auto',
-  scrollSnapType: 'x mandatory',
-  '::-webkit-scrollbar': {
-    display: 'none'
-  }
-});
-
-export const rowScrollWrapper = style({
-  display: 'flex',
-  flexDirection: 'row',
-  alignItems: 'center',
-  width: 'max-content',
-  paddingLeft: 'calc((100vw - 280px) / 2)',
-  paddingRight: 'calc((100vw - 280px) / 2)'
-});
+export const embiaSlide = style({
+  flex: '0 0 auto',
+  marginRight: 20,
+})
 
 export const imageUploadStyle = style({
   selectors: {

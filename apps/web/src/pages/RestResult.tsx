@@ -1,13 +1,7 @@
-import { CtaButton, colors, Icon, ImageUpload, NavigationBar } from '@comma/design-system';
-import { useEffect, useRef, useState } from 'react';
+import { CtaButton, colors, Icon, ImageUpload, NavigationBar, typography } from '@comma/design-system';
+import { useState, useEffect } from 'react';
+import useEmblaCarousel from 'embla-carousel-react';
 import * as styles from './RestResult.css';
-
-const CARD_GAP = 20;
-const MIN_W = 200,
-  MAX_W = 280;
-const MIN_H = 253,
-  MAX_H = 354;
-const SETTLED_STEP = MIN_W + CARD_GAP;
 
 function Modal({ onClose }: { onClose: () => void }) {
   return (
@@ -29,92 +23,54 @@ function Modal({ onClose }: { onClose: () => void }) {
   );
 }
 
-function RestResult() {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [scrollX, setScrollX] = useState(SETTLED_STEP);
-  const [showModal, setShowModal] = useState(false);
-  const isJumping = useRef(false);
-
-  const activeItem = Math.min(Math.max(Math.round(scrollX / SETTLED_STEP), 1), 5);
-
-  const cardDims = (cardIndex: number) => {
-    const t = Math.max(0, 1 - Math.abs(scrollX - cardIndex * SETTLED_STEP) / SETTLED_STEP);
-    return {
-      width: MIN_W + t * (MAX_W - MIN_W),
-      height: MIN_H + t * (MAX_H - MIN_H),
-      borderRadius: activeItem === cardIndex ? 70 : 50
-    };
-  };
-
-  const item1Inner = (dims: { width: number; height: number }) => (
-    <>
+function Card({imageSrc, num, cardStyle}:{imageSrc?:string, num?:number, cardStyle?:object}) {
+  return (
+    <div className={styles.embiaSlide}>
       <ImageUpload
         state="exist"
-        imageSrc="/images/rest_1.svg"
+        imageSrc={imageSrc}
         className={styles.imageUploadStyle}
-        style={dims}
+        style={cardStyle}
       />
-      <div
-        style={{
-          position: 'absolute',
-          bottom: 32,
-          left: 40,
-          width: 'calc(100% - 64px)',
-          textAlign: 'left',
-          zIndex: 2
-        }}
-      >
-        <span className={styles.imageNumStyle}>31</span>
-        <span className={styles.imageText}> 명이 함께하는 중</span>
-      </div>
-    </>
-  );
+      {num != null ? (
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 32,
+            left: 40,
+            width: 'calc(100% - 64px)',
+            textAlign: 'left',
+            zIndex: 2
+          }}
+        >
+          <span className={styles.imageNumStyle}>31</span>
+          <span className={styles.imageText}> 명이 함께하는 중</span>
+        </div>
+      ): null}
+    </div>
+  )
+}
 
+function RestResult() {
+  const [showModal, setShowModal] = useState(false);
+  const [slideIdx, setSlideIdx] = useState(1);
+  const [embiaRef, emblaApi] = useEmblaCarousel({
+    loop: true,
+    align: 'center',
+  });
   useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    el.scrollLeft = SETTLED_STEP;
-    setScrollX(SETTLED_STEP);
-  }, []);
+    if(!emblaApi) return;
+    const onSelect = () => {
+      setSlideIdx(emblaApi.selectedScrollSnap());
+    }
+    emblaApi.on('select', onSelect);
+    onSelect();
 
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-
-    let timeout: ReturnType<typeof setTimeout>;
-    const onScroll = () => {
-      if (!isJumping.current) {
-        setScrollX(el.scrollLeft);
-      }
-
-      clearTimeout(timeout);
-      timeout = setTimeout(() => {
-        if (isJumping.current) return;
-        const index = Math.round(el.scrollLeft / SETTLED_STEP);
-        if (index === 0) {
-          isJumping.current = true;
-          el.scrollLeft = 5 * SETTLED_STEP;
-          setScrollX(5 * SETTLED_STEP);
-          requestAnimationFrame(() => {
-            isJumping.current = false;
-          });
-        } else if (index === 6) {
-          isJumping.current = true;
-          el.scrollLeft = 1 * SETTLED_STEP;
-          setScrollX(1 * SETTLED_STEP);
-          requestAnimationFrame(() => {
-            isJumping.current = false;
-          });
-        }
-      }, 150);
-    };
-
-    el.addEventListener('scroll', onScroll);
-    return () => {
-      el.removeEventListener('scroll', onScroll);
-      clearTimeout(timeout);
-    };
-  }, []);
+  }, [emblaApi])
+  const setActiveCardStyle = (idx:number) => {
+    if(slideIdx == idx) return {width: 280, height: 354, borderRadius: 70}
+    else return {width: 200, height: 253, borderRadius: 50}
+  }
 
   return (
     <div className={styles.container}>
@@ -179,58 +135,13 @@ function RestResult() {
           <span className={styles.title}>가볍게 산책하기</span>
           <span className={styles.subTitle}>동네 한바퀴하면서 예쁜 하늘 사진 한장 어떠세요?</span>
         </div>
-        <div className={styles.rowScrollContainer} ref={scrollRef}>
-          <div className={styles.rowScrollWrapper}>
-            <div style={{ flexShrink: 0, marginRight: CARD_GAP, scrollSnapAlign: 'center' }}>
-              <ImageUpload
-                state="exist"
-                imageSrc="/images/rest_5.svg"
-                className={styles.imageUploadStyle}
-                style={cardDims(0)}
-              />
-            </div>
-            <div
-              style={{
-                position: 'relative',
-                flexShrink: 0,
-                marginRight: CARD_GAP,
-                scrollSnapAlign: 'center'
-              }}
-            >
-              {item1Inner(cardDims(1))}
-            </div>
-            <div style={{ flexShrink: 0, marginRight: CARD_GAP, scrollSnapAlign: 'center' }}>
-              <ImageUpload
-                state="exist"
-                imageSrc="/images/rest_2.svg"
-                className={styles.imageUploadStyle}
-                style={cardDims(2)}
-              />
-            </div>
-            <div style={{ flexShrink: 0, marginRight: CARD_GAP, scrollSnapAlign: 'center' }}>
-              <ImageUpload state="exist" className={styles.imageUploadStyle} style={cardDims(3)} />
-            </div>
-            <div style={{ flexShrink: 0, marginRight: CARD_GAP, scrollSnapAlign: 'center' }}>
-              <ImageUpload state="exist" className={styles.imageUploadStyle} style={cardDims(4)} />
-            </div>
-            <div style={{ flexShrink: 0, marginRight: CARD_GAP, scrollSnapAlign: 'center' }}>
-              <ImageUpload
-                state="exist"
-                imageSrc="/images/rest_5.svg"
-                className={styles.imageUploadStyle}
-                style={cardDims(5)}
-              />
-            </div>
-            <div
-              style={{
-                position: 'relative',
-                flexShrink: 0,
-                marginRight: CARD_GAP,
-                scrollSnapAlign: 'center'
-              }}
-            >
-              {item1Inner(cardDims(6))}
-            </div>
+        <div ref={embiaRef} style={{overflow: 'hidden'}}>
+          <div style={{display: 'flex', alignItems: 'center'}}>
+            <Card imageSrc="/images/rest_1.svg" num={31} cardStyle={setActiveCardStyle(0)}/>
+            <Card imageSrc="/images/rest_2.svg" cardStyle={setActiveCardStyle(1)}/>
+            <Card cardStyle={setActiveCardStyle(2)}/>
+            <Card cardStyle={setActiveCardStyle(3)}/>
+            <Card imageSrc="/images/rest_5.svg" cardStyle={setActiveCardStyle(4)}/>
           </div>
         </div>
         <div
@@ -250,7 +161,7 @@ function RestResult() {
             <div
               key={i}
               className={styles.dot}
-              style={{ backgroundColor: activeItem === i ? colors.iconPrimary : undefined }}
+              style={{backgroundColor: (slideIdx + 1) == i ? colors.iconPrimary : 'rgba(252, 252, 252, 0.15)'}}
             />
           ))}
         </div>

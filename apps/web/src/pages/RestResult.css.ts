@@ -1,5 +1,7 @@
 import { colors, radii, shadows, typography } from '@comma/design-system';
-import { style } from '@vanilla-extract/css';
+import { createVar, style } from '@vanilla-extract/css';
+
+export const backgroundImageVar = createVar();
 
 export const container = style({
   width: '100vw',
@@ -13,8 +15,8 @@ export const container = style({
       content: '',
       position: 'absolute',
       inset: 0,
-      background: `url('/images/rest_1.svg') center / cover no-repeat`,
-      zIndex: -10
+      background: backgroundImageVar,
+      zIndex: -10,
     },
     '&::after': {
       content: '',

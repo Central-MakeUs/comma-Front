@@ -53,24 +53,56 @@ function Card({imageSrc, num, cardStyle}:{imageSrc?:string, num?:number, cardSty
 
 function RestResult() {
   const [showModal, setShowModal] = useState(false);
-  const [slideIdx, setSlideIdx] = useState(1);
+  const [slideIdx, setSlideIdx] = useState(0);
+  const [scales, setScales] = useState<number[]>([]);
   const [embiaRef, emblaApi] = useEmblaCarousel({
     loop: true,
     align: 'center',
   });
+
   useEffect(() => {
-    if(!emblaApi) return;
+    if (!emblaApi) return;
+
     const onSelect = () => {
       setSlideIdx(emblaApi.selectedScrollSnap());
-    }
-    emblaApi.on('select', onSelect);
-    onSelect();
+    };
 
-  }, [emblaApi])
-  const setActiveCardStyle = (idx:number) => {
-    if(slideIdx == idx) return {width: 280, height: 354, borderRadius: 70}
-    else return {width: 200, height: 253, borderRadius: 50}
-  }
+    const onScroll = () => {
+      const engine = emblaApi.internalEngine();
+      const slideRegistry = engine.slideRegistry;
+      const scrollSnaps = emblaApi.scrollSnapList();
+      const scrollProgress = emblaApi.scrollProgress();
+      const newScales = slideRegistry.map((_, snapIdx) => {
+        let diff = Math.abs(scrollSnaps[snapIdx] - scrollProgress);
+        if (diff > 0.5) diff = 1 - diff;
+        return Math.max(0, 1 - diff * 8);
+      });
+
+      setScales(newScales);
+    };
+
+    emblaApi.on('select', onSelect);
+    emblaApi.on('scroll', onScroll);
+    emblaApi.on('reInit', onScroll);
+
+    onSelect();
+    onScroll();
+
+    return () => {
+      emblaApi.off('select', onSelect);
+      emblaApi.off('scroll', onScroll);
+      emblaApi.off('reInit', onScroll);
+    };
+  }, [emblaApi]);
+
+  const getCardStyle = (idx: number) => {
+    const progress = scales[idx] ?? 0;
+    return {
+      width: Math.round(200 + progress * 80),
+      height: Math.round(253 + progress * 101),
+      borderRadius: Math.round(50 + progress * 20),
+    };
+  };
 
   return (
     <div className={styles.container}>
@@ -135,13 +167,13 @@ function RestResult() {
           <span className={styles.title}>가볍게 산책하기</span>
           <span className={styles.subTitle}>동네 한바퀴하면서 예쁜 하늘 사진 한장 어떠세요?</span>
         </div>
-        <div ref={embiaRef} style={{overflow: 'hidden'}}>
+        <div ref={embiaRef} style={{overflow: 'hidden', height: 354}}>
           <div style={{display: 'flex', alignItems: 'center'}}>
-            <Card imageSrc="/images/rest_1.svg" num={31} cardStyle={setActiveCardStyle(0)}/>
-            <Card imageSrc="/images/rest_2.svg" cardStyle={setActiveCardStyle(1)}/>
-            <Card cardStyle={setActiveCardStyle(2)}/>
-            <Card cardStyle={setActiveCardStyle(3)}/>
-            <Card imageSrc="/images/rest_5.svg" cardStyle={setActiveCardStyle(4)}/>
+            <Card imageSrc="/images/rest_1.svg" num={31} cardStyle={getCardStyle(0)}/>
+            <Card imageSrc="/images/rest_2.svg" cardStyle={getCardStyle(1)}/>
+            <Card cardStyle={getCardStyle(2)}/>
+            <Card cardStyle={getCardStyle(3)}/>
+            <Card imageSrc="/images/rest_5.svg" cardStyle={getCardStyle(4)}/>
           </div>
         </div>
         <div

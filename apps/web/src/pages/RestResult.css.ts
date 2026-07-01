@@ -40,8 +40,11 @@ export const subTitle = style({
 });
 
 export const embiaSlide = style({
-  flex: '0 0 auto',
-  marginRight: 20,
+  flex: '0 0 280px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  marginRight: -20,
 })
 
 export const imageUploadStyle = style({

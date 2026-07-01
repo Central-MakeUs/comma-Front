@@ -9,6 +9,8 @@ export { Chip } from './Chip';
 export type { CtaButtonProps, CtaButtonState } from './CtaButton';
 export { CtaButton } from './CtaButton';
 export { description, eyebrow, panel, screen, title } from './components.css';
+export type { FeedBadookProps } from './FeedBadook';
+export { FeedBadook } from './FeedBadook';
 export type { FeedCardProps, FeedCardVariant } from './FeedCard';
 export { FeedCard } from './FeedCard';
 export type { FeedImageProps } from './FeedImage';
@@ -27,6 +29,8 @@ export type { SecretToggleProps, SecretToggleState } from './SecretToggle';
 export { SecretToggle } from './SecretToggle';
 export type { SelectButtonProps, SelectButtonState } from './SelectButton';
 export { SelectButton } from './SelectButton';
+export type { SmallButtonProps, SmallButtonState } from './SmallButton';
+export { SmallButton } from './SmallButton';
 export type { TextInputProps, TextInputState, TextInputVariant } from './TextInput';
 export { TextInput } from './TextInput';
 export {

@@ -1,5 +1,4 @@
 import { style } from '@vanilla-extract/css';
-import { type RecipeVariants, recipe } from '@vanilla-extract/recipes';
 import { vars } from './theme.css';
 
 export const screen = style({
@@ -40,39 +39,3 @@ export const description = style({
   fontWeight: vars.typography.bodyNormalR.fontWeight,
   lineHeight: vars.typography.bodyNormalR.lineHeight
 });
-
-export const actionButton = recipe({
-  base: {
-    minHeight: 44,
-    border: 0,
-    borderRadius: vars.radius.control,
-    padding: '0 18px',
-    font: 'inherit',
-    fontSize: vars.typography.bodyNormalB.fontSize,
-    fontWeight: vars.typography.bodyNormalB.fontWeight,
-    lineHeight: vars.typography.bodyNormalB.lineHeight,
-    selectors: {
-      '& + &': {
-        marginLeft: 10
-      }
-    }
-  },
-  variants: {
-    tone: {
-      primary: {
-        background: vars.color.textBlackSecondary,
-        color: vars.color.textPrimary
-      },
-      secondary: {
-        background: 'transparent',
-        color: vars.color.textPrimary,
-        boxShadow: `inset 0 0 0 1px ${vars.color.linePrimary}`
-      }
-    }
-  },
-  defaultVariants: {
-    tone: 'primary'
-  }
-});
-
-export type ActionButtonVariants = RecipeVariants<typeof actionButton>;

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="393" height="499" viewBox="0 0 393 499" fill="none">
+  <title>Feed image placeholder</title>
+  <rect width="393" height="499" fill="#322E29"/>
+  <path d="M0 0h393v499H0z" fill="url(#paint0_linear_1_13781)"/>
+  <circle cx="298" cy="105" r="58" fill="#FDFCFC" fill-opacity=".72"/>
+  <path d="M0 322c48-54 93-77 137-69 56 10 88 75 149 78 43 2 78-27 107-62v230H0V322Z" fill="#423D38" fill-opacity=".82"/>
+  <path d="M0 392c40-31 83-45 126-40 65 7 109 58 175 57 35-.5 65-16 92-37v127H0V392Z" fill="#1A1814" fill-opacity=".72"/>
+  <defs>
+    <linearGradient id="paint0_linear_1_13781" x1="0" y1="0" x2="393" y2="499" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FDFCFC"/>
+      <stop offset=".45" stop-color="#C2BFBC"/>
+      <stop offset="1" stop-color="#58514C"/>
+    </linearGradient>
+  </defs>
+</svg>

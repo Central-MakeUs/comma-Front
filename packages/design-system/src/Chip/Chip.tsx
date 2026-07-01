@@ -5,6 +5,7 @@ export type ChipState = 'default' | 'defaultPressed' | 'selected' | 'selectedPre
 
 export type ChipProps = Omit<ComponentPropsWithoutRef<'button'>, 'children' | 'type'> & {
   children?: ReactNode;
+  label?: ReactNode;
   state?: ChipState;
   selected?: boolean;
   type?: 'button' | 'submit' | 'reset';
@@ -41,7 +42,8 @@ function ChipArrow({ selected }: { selected: boolean }) {
 }
 
 export function Chip({
-  children = '기분',
+  children,
+  label = '기분',
   state = 'default',
   selected,
   type = 'button',
@@ -68,7 +70,7 @@ export function Chip({
       type={type}
       {...buttonProps}
     >
-      <span className={chipLabel}>{children}</span>
+      <span className={chipLabel}>{children ?? label}</span>
       <ChipArrow selected={isSelected} />
     </button>
   );

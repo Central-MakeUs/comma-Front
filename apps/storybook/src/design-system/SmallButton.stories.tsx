@@ -1,43 +1,39 @@
-import { Chip, type ChipState, themeClass, typography, vars } from '@comma/design-system';
+import {
+  SmallButton,
+  type SmallButtonState,
+  themeClass,
+  typography,
+  vars
+} from '@comma/design-system';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-type ChipStoryArgs = {
+type SmallButtonStoryArgs = {
   label: string;
-  state: ChipState;
-  selected: boolean;
+  state: SmallButtonState;
 };
 
-const chipStates = [
-  'default',
-  'defaultPressed',
-  'selected',
-  'selectedPressed'
-] satisfies ChipState[];
+const smallButtonStates = ['default', 'pressed'] satisfies SmallButtonState[];
 
 const meta = {
-  title: 'Design System/Chip',
+  title: 'Design System/SmallButton',
   argTypes: {
     state: {
       control: 'inline-radio',
-      options: chipStates
+      options: smallButtonStates
     },
     label: {
       control: 'text'
-    },
-    selected: {
-      control: 'boolean'
     }
   },
   args: {
     label: '기분',
-    state: 'default',
-    selected: false
+    state: 'default'
   }
-} satisfies Meta<ChipStoryArgs>;
+} satisfies Meta<SmallButtonStoryArgs>;
 
 export default meta;
 
-type Story = StoryObj<ChipStoryArgs>;
+type Story = StoryObj<SmallButtonStoryArgs>;
 
 const storySurfaceStyle: React.CSSProperties = {
   minHeight: 280,
@@ -61,7 +57,7 @@ const variantsSurfaceStyle: React.CSSProperties = {
 
 const variantGridStyle: React.CSSProperties = {
   display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fit, 80px)',
+  gridTemplateColumns: 'repeat(auto-fit, 60px)',
   gap: 16
 };
 
@@ -71,10 +67,21 @@ const stateLabelStyle: React.CSSProperties = {
   ...typography.captionB
 };
 
-export const Playground: Story = {
-  render: ({ label, state, selected }) => (
+export const Default: Story = {
+  render: ({ label }) => (
     <div className={themeClass} style={storySurfaceStyle}>
-      <Chip label={label} selected={selected} state={state} />
+      <SmallButton label={label} />
+    </div>
+  )
+};
+
+export const Pressed: Story = {
+  args: {
+    state: 'pressed'
+  },
+  render: ({ label }) => (
+    <div className={themeClass} style={storySurfaceStyle}>
+      <SmallButton label={label} state="pressed" />
     </div>
   )
 };
@@ -83,10 +90,10 @@ export const Variants: Story = {
   render: () => (
     <div className={themeClass} style={variantsSurfaceStyle}>
       <div style={variantGridStyle}>
-        {chipStates.map((state) => (
-          <div key={state} style={{ display: 'grid', gap: 8, width: 80 }}>
+        {smallButtonStates.map((state) => (
+          <div key={state} style={{ display: 'grid', gap: 8, width: 60 }}>
             <h3 style={stateLabelStyle}>{state}</h3>
-            <Chip label="기분" state={state} />
+            <SmallButton label="기분" state={state} />
           </div>
         ))}
       </div>

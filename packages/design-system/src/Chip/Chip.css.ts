@@ -16,6 +16,8 @@ export const chip = style({
   borderRadius: 100,
   padding: '6px 12px 6px 14px',
   overflow: 'hidden',
+  backdropFilter: 'blur(8px)',
+  WebkitBackdropFilter: 'blur(8px)',
   fontFamily: vars.font.body,
   fontSize: vars.typography.bodyNormalR.fontSize,
   fontWeight: vars.typography.bodyNormalR.fontWeight,
@@ -51,23 +53,27 @@ export const chipState = styleVariants({
   default: {
     background: 'rgb(194 191 188 / 10%)',
     color: vars.color.textSecondary,
-    boxShadow: 'inset -2px 0 40px rgb(255 255 255 / 10%)'
+    boxShadow:
+      'inset -2px 0 40px rgb(255 255 255 / 10%), inset 0 1px 0 rgb(255 255 255 / 18%), inset 0 -1px 0 rgb(255 255 255 / 8%)'
   },
   defaultPressed: {
     background: 'rgb(50 46 41 / 10%)',
     color: vars.color.textSecondary,
-    boxShadow: 'inset -2px 0 20px rgb(255 255 255 / 5%)'
+    boxShadow:
+      'inset -2px 0 20px rgb(255 255 255 / 5%), inset 0 1px 0 rgb(255 255 255 / 10%), inset 0 -1px 0 rgb(255 255 255 / 5%)'
   },
   selected: {
     background: 'rgb(88 81 76 / 10%)',
     border: selectedBorder,
     color: vars.color.textSecondary,
-    boxShadow: 'inset -2px 0 10px rgb(255 255 255 / 66%)'
+    boxShadow:
+      'inset -2px 0 10px rgb(255 255 255 / 66%), inset 0 1px 0 rgb(255 255 255 / 30%), inset 0 -1px 0 rgb(255 255 255 / 12%)'
   },
   selectedPressed: {
     background: 'rgb(88 81 76 / 5%)',
     border: selectedPressedBorder,
     color: vars.color.textSecondary,
-    boxShadow: 'inset -2px 0 10px rgb(255 255 255 / 33%)'
+    boxShadow:
+      'inset -2px 0 10px rgb(255 255 255 / 33%), inset 0 1px 0 rgb(255 255 255 / 16%), inset 0 -1px 0 rgb(255 255 255 / 8%)'
   }
 });

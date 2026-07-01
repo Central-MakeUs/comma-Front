@@ -3,6 +3,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { appBridge } from './bridge';
 import './global.css';
+import { themeClass } from '@comma/design-system';
 import { RouterProvider } from 'react-router-dom';
 import { router } from './router/index';
 
@@ -15,6 +16,8 @@ const rootElement = document.getElementById('root');
 if (!rootElement) {
   throw new Error('Root element was not found.');
 }
+
+rootElement.classList.add(themeClass);
 
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>

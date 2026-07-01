@@ -8,7 +8,7 @@ import {
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 type SmallButtonStoryArgs = {
-  children: string;
+  label: string;
   state: SmallButtonState;
 };
 
@@ -21,12 +21,12 @@ const meta = {
       control: 'inline-radio',
       options: smallButtonStates
     },
-    children: {
+    label: {
       control: 'text'
     }
   },
   args: {
-    children: '기분',
+    label: '기분',
     state: 'default'
   }
 } satisfies Meta<SmallButtonStoryArgs>;
@@ -68,9 +68,9 @@ const stateLabelStyle: React.CSSProperties = {
 };
 
 export const Default: Story = {
-  render: ({ children }) => (
+  render: ({ label }) => (
     <div className={themeClass} style={storySurfaceStyle}>
-      <SmallButton>{children}</SmallButton>
+      <SmallButton label={label} />
     </div>
   )
 };
@@ -79,9 +79,9 @@ export const Pressed: Story = {
   args: {
     state: 'pressed'
   },
-  render: ({ children }) => (
+  render: ({ label }) => (
     <div className={themeClass} style={storySurfaceStyle}>
-      <SmallButton state="pressed">{children}</SmallButton>
+      <SmallButton label={label} state="pressed" />
     </div>
   )
 };
@@ -93,7 +93,7 @@ export const Variants: Story = {
         {smallButtonStates.map((state) => (
           <div key={state} style={{ display: 'grid', gap: 8, width: 60 }}>
             <h3 style={stateLabelStyle}>{state}</h3>
-            <SmallButton state={state}>기분</SmallButton>
+            <SmallButton label="기분" state={state} />
           </div>
         ))}
       </div>

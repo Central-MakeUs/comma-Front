@@ -2,7 +2,7 @@ import { Chip, type ChipState, themeClass, typography, vars } from '@comma/desig
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 type ChipStoryArgs = {
-  children: string;
+  label: string;
   state: ChipState;
   selected: boolean;
 };
@@ -21,7 +21,7 @@ const meta = {
       control: 'inline-radio',
       options: chipStates
     },
-    children: {
+    label: {
       control: 'text'
     },
     selected: {
@@ -29,7 +29,7 @@ const meta = {
     }
   },
   args: {
-    children: '기분',
+    label: '기분',
     state: 'default',
     selected: false
   }
@@ -72,11 +72,9 @@ const stateLabelStyle: React.CSSProperties = {
 };
 
 export const Playground: Story = {
-  render: ({ children, state, selected }) => (
+  render: ({ label, state, selected }) => (
     <div className={themeClass} style={storySurfaceStyle}>
-      <Chip selected={selected} state={state}>
-        {children}
-      </Chip>
+      <Chip label={label} selected={selected} state={state} />
     </div>
   )
 };
@@ -88,7 +86,7 @@ export const Variants: Story = {
         {chipStates.map((state) => (
           <div key={state} style={{ display: 'grid', gap: 8, width: 80 }}>
             <h3 style={stateLabelStyle}>{state}</h3>
-            <Chip state={state}>기분</Chip>
+            <Chip label="기분" state={state} />
           </div>
         ))}
       </div>

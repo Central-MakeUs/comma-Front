@@ -5,12 +5,14 @@ export type SmallButtonState = 'default' | 'pressed';
 
 export type SmallButtonProps = Omit<ComponentPropsWithoutRef<'button'>, 'children' | 'type'> & {
   children?: ReactNode;
+  label?: ReactNode;
   state?: SmallButtonState;
   type?: 'button' | 'submit' | 'reset';
 };
 
 export function SmallButton({
-  children = '기분',
+  children,
+  label = '기분',
   state = 'default',
   type = 'button',
   className,
@@ -22,7 +24,7 @@ export function SmallButton({
 
   return (
     <button className={buttonClassName} type={type} {...buttonProps}>
-      <span className={smallButtonLabel}>{children}</span>
+      <span className={smallButtonLabel}>{children ?? label}</span>
     </button>
   );
 }

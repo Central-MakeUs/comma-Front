@@ -1,16 +1,23 @@
-import { CtaButton, colors, Icon, ImageUpload, NavigationBar, typography } from '@comma/design-system';
-import { useState, useEffect } from 'react';
+import { CtaButton, colors, Icon, ImageUpload, NavigationBar } from '@comma/design-system';
 import useEmblaCarousel from 'embla-carousel-react';
+import { useEffect, useState } from 'react';
 import * as styles from './RestResult.css';
 
 function Modal({ onClose }: { onClose: () => void }) {
   return (
-    <div className={styles.modalContainer} role="dialog" aria-modal="true" aria-labelledby="rest-select-modal-title">
+    <div
+      className={styles.modalContainer}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="rest-select-modal-title"
+    >
       <div style={{ width: '100%', display: 'flex', flexDirection: 'column', marginBottom: 32 }}>
         <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-end' }}>
           <Icon name="x" color={colors.iconPrimary} onClick={onClose} />
         </div>
-        <span className={styles.modalTitle} id="rest-select-modal-title">휴식 재선택</span>
+        <span className={styles.modalTitle} id="rest-select-modal-title">
+          휴식 재선택
+        </span>
         <span className={styles.modalDesc}>휴식을 다시 선택할까요?</span>
       </div>
       <div style={{ width: '100%' }}>
@@ -23,7 +30,15 @@ function Modal({ onClose }: { onClose: () => void }) {
   );
 }
 
-function Card({imageSrc, num, cardStyle}:{imageSrc?:string, num?:number, cardStyle?:object}) {
+function Card({
+  imageSrc,
+  num,
+  cardStyle
+}: {
+  imageSrc?: string;
+  num?: number;
+  cardStyle?: object;
+}) {
   return (
     <div className={styles.embiaSlide}>
       <ImageUpload
@@ -46,9 +61,9 @@ function Card({imageSrc, num, cardStyle}:{imageSrc?:string, num?:number, cardSty
           <span className={styles.imageNumStyle}>31</span>
           <span className={styles.imageText}> 명이 함께하는 중</span>
         </div>
-      ): null}
+      ) : null}
     </div>
-  )
+  );
 }
 
 function RestResult() {
@@ -57,7 +72,7 @@ function RestResult() {
   const [scales, setScales] = useState<number[]>([]);
   const [embiaRef, emblaApi] = useEmblaCarousel({
     loop: true,
-    align: 'center',
+    align: 'center'
   });
 
   useEffect(() => {
@@ -100,7 +115,7 @@ function RestResult() {
     return {
       width: Math.round(200 + progress * 80),
       height: Math.round(253 + progress * 101),
-      borderRadius: Math.round(50 + progress * 20),
+      borderRadius: Math.round(50 + progress * 20)
     };
   };
 
@@ -167,13 +182,13 @@ function RestResult() {
           <span className={styles.title}>가볍게 산책하기</span>
           <span className={styles.subTitle}>동네 한바퀴하면서 예쁜 하늘 사진 한장 어떠세요?</span>
         </div>
-        <div ref={embiaRef} style={{overflow: 'hidden', height: 354}}>
-          <div style={{display: 'flex', alignItems: 'center'}}>
-            <Card imageSrc="/images/rest_1.svg" num={31} cardStyle={getCardStyle(0)}/>
-            <Card imageSrc="/images/rest_2.svg" cardStyle={getCardStyle(1)}/>
-            <Card cardStyle={getCardStyle(2)}/>
-            <Card cardStyle={getCardStyle(3)}/>
-            <Card imageSrc="/images/rest_5.svg" cardStyle={getCardStyle(4)}/>
+        <div ref={embiaRef} style={{ overflow: 'hidden', height: 354 }}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <Card imageSrc="/images/rest_1.svg" num={31} cardStyle={getCardStyle(0)} />
+            <Card imageSrc="/images/rest_2.svg" cardStyle={getCardStyle(1)} />
+            <Card cardStyle={getCardStyle(2)} />
+            <Card cardStyle={getCardStyle(3)} />
+            <Card imageSrc="/images/rest_5.svg" cardStyle={getCardStyle(4)} />
           </div>
         </div>
         <div
@@ -193,7 +208,10 @@ function RestResult() {
             <div
               key={i}
               className={styles.dot}
-              style={{backgroundColor: (slideIdx + 1) == i ? colors.iconPrimary : 'rgba(252, 252, 252, 0.15)'}}
+              style={{
+                backgroundColor:
+                  slideIdx + 1 === i ? colors.iconPrimary : 'rgba(252, 252, 252, 0.15)'
+              }}
             />
           ))}
         </div>

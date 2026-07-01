@@ -44,8 +44,8 @@ export const embiaSlide = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  marginRight: -20,
-})
+  marginRight: -20
+});
 
 export const imageUploadStyle = style({
   selectors: {

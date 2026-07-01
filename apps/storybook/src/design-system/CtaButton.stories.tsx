@@ -2,7 +2,7 @@ import { CtaButton, type CtaButtonState, themeClass, typography, vars } from '@c
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 type CtaButtonStoryArgs = {
-  children: string;
+  label: string;
   state: CtaButtonState;
   disabled: boolean;
 };
@@ -16,7 +16,7 @@ const meta = {
       control: 'inline-radio',
       options: ctaButtonStates
     },
-    children: {
+    label: {
       control: 'text'
     },
     disabled: {
@@ -24,7 +24,7 @@ const meta = {
     }
   },
   args: {
-    children: '시작하기',
+    label: '시작하기',
     state: 'default',
     disabled: false
   }
@@ -67,11 +67,9 @@ const stateLabelStyle: React.CSSProperties = {
 };
 
 export const Playground: Story = {
-  render: ({ children, state, disabled }) => (
+  render: ({ label, state, disabled }) => (
     <div className={themeClass} style={storySurfaceStyle}>
-      <CtaButton disabled={disabled} state={state}>
-        {children}
-      </CtaButton>
+      <CtaButton disabled={disabled} label={label} state={state} />
     </div>
   )
 };
@@ -83,7 +81,7 @@ export const Variants: Story = {
         {ctaButtonStates.map((state) => (
           <div key={state} style={{ display: 'grid', gap: 8, width: 329 }}>
             <h3 style={stateLabelStyle}>{state === 'disabled' ? 'Disabled' : state}</h3>
-            <CtaButton state={state}>시작하기</CtaButton>
+            <CtaButton label="시작하기" state={state} />
           </div>
         ))}
       </div>

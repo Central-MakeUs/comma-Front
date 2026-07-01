@@ -5,6 +5,7 @@ export type CtaButtonState = 'default' | 'pressed' | 'disabled';
 
 export type CtaButtonProps = {
   children?: ReactNode;
+  label?: ReactNode;
   state?: CtaButtonState;
   disabled?: boolean;
   type?: 'button' | 'submit' | 'reset';
@@ -13,7 +14,8 @@ export type CtaButtonProps = {
 };
 
 export function CtaButton({
-  children = '시작하기',
+  children,
+  label = '시작하기',
   state = 'default',
   disabled = false,
   type = 'button',
@@ -28,7 +30,7 @@ export function CtaButton({
 
   return (
     <button className={buttonClassName} disabled={isDisabled} onClick={onClick} type={type}>
-      {children}
+      {children ?? label}
     </button>
   );
 }

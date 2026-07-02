@@ -1,16 +1,32 @@
 import * as styles from './Login.css';
 
 const REST_API_KEY = import.meta.env.VITE_REST_API_KEY;
-const REDIRECT_URI = import.meta.env.VITE_REDIRECT_URI;
+const KAKAO_REDIRECT_URI = import.meta.env.VITE_KAKAO_REDIRECT_URI;
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+const GOOGLE_REDIRECT_URI = import.meta.env.VITE_GOOGLE_REDIRECT_URI;
 
 function Login() {
-  const onClick = () => {
+  const onKakaoClick = () => {
     window.location.href =
       `https://kauth.kakao.com/oauth/authorize` +
       `?response_type=code` +
       `&client_id=${REST_API_KEY}` +
-      `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
+      `&redirect_uri=${encodeURIComponent(KAKAO_REDIRECT_URI)}`;
   };
+
+  const onGoogleClick = () => {
+    const params = new URLSearchParams({
+      client_id: GOOGLE_CLIENT_ID,
+      redirect_uri: GOOGLE_REDIRECT_URI,
+      response_type: "token",
+      scope: [
+        "https://www.googleapis.com/auth/userinfo.email",
+        "https://www.googleapis.com/auth/userinfo.profile",
+      ].join(" "),
+    });
+    window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+  }
+
   return (
     <div className={styles.container}>
       <div
@@ -34,7 +50,7 @@ function Login() {
         </div>
       </div>
       <div style={{ width: '100%', marginBottom: 80 }}>
-        <button className={styles.kakaoBtn} type="button" onClick={onClick}>
+        <button className={styles.kakaoBtn} type="button" onClick={onKakaoClick}>
           <img src="/images/kakao_logo.svg" alt="카카오 아이콘" width={18} height={18} />
           카카오톡으로 로그인
         </button>
@@ -42,7 +58,7 @@ function Login() {
           <img src="/images/apple_logo.svg" alt="애플 아이콘" width={16} height={19} />
           Apple로 로그인
         </button>
-        <button className={styles.googleBtn} type="button">
+        <button className={styles.googleBtn} type="button" onClick={onGoogleClick}>
           <img src="/images/google_logo.svg" alt="구글 아이콘" width={20} height={20} />
           Google로 로그인
         </button>

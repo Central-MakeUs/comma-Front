@@ -1,13 +1,18 @@
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { login } from '../utils/auth';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { login, fieldType } from '../utils/auth';
 
 function CallbackPage() {
   const navigate = useNavigate();
+  const {pathname} = useLocation();
 
   useEffect(() => {
     const handleLogin = async () => {
-      const res = await login();
+      let field:fieldType;
+      if(pathname === "/oauth/kakao/callback") field = 'KAKAO';
+      else if(pathname === '/oauth/google/callback') field = 'GOOGLE';
+      else field = 'APPLE';
+      const res = await login(field);
       if (res.success) navigate('/nickname');
       else alert(res.message);
     };

@@ -18,14 +18,14 @@ function Login() {
     const params = new URLSearchParams({
       client_id: GOOGLE_CLIENT_ID,
       redirect_uri: GOOGLE_REDIRECT_URI,
-      response_type: "token",
+      response_type: 'token',
       scope: [
-        "https://www.googleapis.com/auth/userinfo.email",
-        "https://www.googleapis.com/auth/userinfo.profile",
-      ].join(" "),
+        'https://www.googleapis.com/auth/userinfo.email',
+        'https://www.googleapis.com/auth/userinfo.profile'
+      ].join(' ')
     });
     window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
-  }
+  };
 
   return (
     <div className={styles.container}>

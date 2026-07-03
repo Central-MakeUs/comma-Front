@@ -8,6 +8,7 @@ import RestActivity from '../pages/RestActivity';
 import RestChecklist from '../pages/RestChecklist';
 import RestLoading from '../pages/RestLoading';
 import RestResult from '../pages/RestResult';
+import Feed from '../pages/Feed';
 
 export const router = createBrowserRouter([
   {
@@ -49,5 +50,9 @@ export const router = createBrowserRouter([
   {
     path: '/recommend-loading',
     Component: RestLoading
+  },
+  {
+    path: '/feed',
+    Component: Feed,
   }
 ]);

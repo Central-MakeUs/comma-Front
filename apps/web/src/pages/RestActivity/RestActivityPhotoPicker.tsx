@@ -2,7 +2,8 @@ import { colors, Icon, ImageUpload } from '@comma/design-system';
 import { type ChangeEvent, useEffect, useRef, useState } from 'react';
 import { appBridge } from '../../bridge';
 import { EMPTY_PHOTO_TILES, PHOTO_PICKER_IMAGES } from './RestActivity.constants';
-import * as styles from './RestActivity.css';
+import * as sharedStyles from './RestActivity.shared.css';
+import * as styles from './RestActivityPhotoPicker.css';
 
 type GalleryPhotoItem = {
   id: string;
@@ -58,15 +59,15 @@ export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivity
   };
 
   return (
-    <main className={styles.page}>
-      <div className={styles.photoPickerScreen}>
-        <div aria-hidden="true" className={styles.topGradient} />
-        <div aria-hidden="true" className={styles.bottomGradient} />
+    <main className={sharedStyles.page}>
+      <div className={styles.screen}>
+        <div aria-hidden="true" className={sharedStyles.topGradient} />
+        <div aria-hidden="true" className={sharedStyles.bottomGradient} />
 
-        <header className={styles.photoPickerHeader}>
+        <header className={styles.header}>
           <button
             aria-label="사진 선택 닫기"
-            className={styles.iconButton}
+            className={sharedStyles.iconButton}
             onClick={onClose}
             type="button"
           >
@@ -74,9 +75,9 @@ export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivity
           </button>
         </header>
 
-        <section className={styles.photoPickerContent} aria-label="사진 선택">
+        <section className={styles.content} aria-label="사진 선택">
           <ImageUpload
-            className={styles.upload}
+            className={sharedStyles.upload}
             onClick={() => fileInputRef.current?.click()}
             state="select"
           />

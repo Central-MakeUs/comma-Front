@@ -1,5 +1,6 @@
 import { CtaButton, colors, Icon } from '@comma/design-system';
-import * as styles from './RestActivity.css';
+import * as sharedStyles from './RestActivity.shared.css';
+import * as styles from './RestActivityReselectModal.css';
 
 type RestActivityReselectModalProps = {
   onCancel: () => void;
@@ -8,25 +9,30 @@ type RestActivityReselectModalProps = {
 
 export function RestActivityReselectModal({ onCancel, onConfirm }: RestActivityReselectModalProps) {
   return (
-    <div className={styles.modalOverlay}>
+    <div className={styles.overlay}>
       <section
         aria-labelledby="rest-activity-modal-title"
         aria-modal="true"
         className={styles.modal}
         role="dialog"
       >
-        <div className={styles.modalHeader}>
-          <button aria-label="닫기" className={styles.iconButton} onClick={onCancel} type="button">
+        <div className={styles.header}>
+          <button
+            aria-label="닫기"
+            className={sharedStyles.iconButton}
+            onClick={onCancel}
+            type="button"
+          >
             <Icon color={colors.iconPrimary} name="x" />
           </button>
         </div>
-        <div className={styles.modalText}>
-          <h2 className={styles.modalTitle} id="rest-activity-modal-title">
+        <div className={styles.text}>
+          <h2 className={styles.title} id="rest-activity-modal-title">
             휴식 재선택
           </h2>
-          <p className={styles.modalDescription}>휴식을 다시 선택할까요?</p>
+          <p className={styles.description}>휴식을 다시 선택할까요?</p>
         </div>
-        <div className={styles.modalActions}>
+        <div className={styles.actions}>
           <CtaButton className={styles.cancelButton} onClick={onCancel}>
             취소
           </CtaButton>

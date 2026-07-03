@@ -14,7 +14,8 @@ import {
   REST_TITLE,
   TAG_MAX_LENGTH
 } from './RestActivity.constants';
-import * as styles from './RestActivity.css';
+import * as sharedStyles from './RestActivity.shared.css';
+import * as styles from './RestActivityForm.css';
 import { RestActivityReselectModal } from './RestActivityReselectModal';
 
 type RestActivityFormProps = {
@@ -82,30 +83,33 @@ export function RestActivityForm({
     Boolean(imagePreview) && tags.length > 0 && comment.trim().length > 0 && !isCommentOverLimit;
 
   return (
-    <main className={styles.page}>
+    <main className={sharedStyles.page}>
       <div
-        className={styles.screen}
+        className={sharedStyles.screen}
         style={
           imagePreview
             ? assignInlineVars({
-                [styles.backgroundImageVar]: `url(${imagePreview})`
+                [sharedStyles.backgroundImageVar]: `url(${imagePreview})`
               })
             : undefined
         }
       >
         <div
           aria-hidden="true"
-          className={[styles.dimOverlay, imagePreview ? styles.dimOverlayVisible : undefined]
+          className={[
+            sharedStyles.dimOverlay,
+            imagePreview ? sharedStyles.dimOverlayVisible : undefined
+          ]
             .filter(Boolean)
             .join(' ')}
         />
-        <div aria-hidden="true" className={styles.topGradient} />
-        <div aria-hidden="true" className={styles.bottomGradient} />
+        <div aria-hidden="true" className={sharedStyles.topGradient} />
+        <div aria-hidden="true" className={sharedStyles.bottomGradient} />
 
         <header className={styles.header}>
           <button
             aria-label="휴식 재선택"
-            className={styles.iconButton}
+            className={sharedStyles.iconButton}
             onClick={onOpenReselectModal}
             type="button"
           >
@@ -115,15 +119,15 @@ export function RestActivityForm({
 
         <section className={styles.content} aria-labelledby="rest-activity-title">
           <div className={styles.heroText}>
-            <h1 className={styles.title} id="rest-activity-title">
+            <h1 className={sharedStyles.title} id="rest-activity-title">
               {REST_TITLE}
             </h1>
-            <p className={styles.description}>{REST_DESCRIPTION}</p>
+            <p className={sharedStyles.description}>{REST_DESCRIPTION}</p>
           </div>
 
           <div className={styles.uploadArea}>
             <ImageUpload
-              className={styles.upload}
+              className={sharedStyles.upload}
               imageAlt="업로드한 휴식 사진"
               imageSrc={imagePreview}
               onClick={onOpenPhotoPicker}
@@ -182,7 +186,11 @@ export function RestActivityForm({
             <span className={styles.visibilityLabel}>공개 여부</span>
             <SecretToggle checked={isSecret} onCheckedChange={setIsSecret} />
           </div>
-          <CtaButton className={styles.doneButton} disabled={!isComplete} onClick={onComplete}>
+          <CtaButton
+            className={sharedStyles.doneButton}
+            disabled={!isComplete}
+            onClick={onComplete}
+          >
             휴식 완료
           </CtaButton>
         </footer>

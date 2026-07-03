@@ -5,7 +5,8 @@ import {
   ACTIVITY_PROGRESS_TITLE,
   REST_DESCRIPTION
 } from './RestActivity.constants';
-import * as styles from './RestActivity.css';
+import * as sharedStyles from './RestActivity.shared.css';
+import * as styles from './RestActivityProgress.css';
 import { RestActivityReselectModal } from './RestActivityReselectModal';
 
 type RestActivityProgressProps = {
@@ -24,24 +25,24 @@ export function RestActivityProgress({
   onComplete
 }: RestActivityProgressProps) {
   return (
-    <main className={styles.page}>
+    <main className={sharedStyles.page}>
       <div
-        className={styles.screen}
+        className={sharedStyles.screen}
         style={assignInlineVars({
-          [styles.backgroundImageVar]: 'url(/images/rest_activity_progress.jpg)'
+          [sharedStyles.backgroundImageVar]: 'url(/images/rest_activity_progress.jpg)'
         })}
       >
         <div
           aria-hidden="true"
-          className={[styles.dimOverlay, styles.dimOverlayVisible].join(' ')}
+          className={[sharedStyles.dimOverlay, sharedStyles.dimOverlayVisible].join(' ')}
         />
-        <div aria-hidden="true" className={styles.topGradient} />
-        <div aria-hidden="true" className={styles.bottomGradient} />
+        <div aria-hidden="true" className={sharedStyles.topGradient} />
+        <div aria-hidden="true" className={sharedStyles.bottomGradient} />
 
-        <header className={styles.progressHeader}>
+        <header className={styles.header}>
           <button
             aria-label="휴식 재선택"
-            className={styles.iconButton}
+            className={sharedStyles.iconButton}
             onClick={onOpenReselectModal}
             type="button"
           >
@@ -49,12 +50,12 @@ export function RestActivityProgress({
           </button>
         </header>
 
-        <section className={styles.progressContent} aria-labelledby="rest-activity-progress-title">
-          <div className={styles.progressHeroText}>
-            <h1 className={styles.title} id="rest-activity-progress-title">
+        <section className={styles.content} aria-labelledby="rest-activity-progress-title">
+          <div className={styles.heroText}>
+            <h1 className={sharedStyles.title} id="rest-activity-progress-title">
               {ACTIVITY_PROGRESS_TITLE}
             </h1>
-            <p className={styles.description}>{REST_DESCRIPTION}</p>
+            <p className={sharedStyles.description}>{REST_DESCRIPTION}</p>
           </div>
 
           <div className={styles.participantRow}>
@@ -63,8 +64,8 @@ export function RestActivityProgress({
           </div>
         </section>
 
-        <footer className={styles.progressFooter}>
-          <CtaButton className={styles.doneButton} onClick={onComplete}>
+        <footer className={styles.footer}>
+          <CtaButton className={sharedStyles.doneButton} onClick={onComplete}>
             휴식 완료
           </CtaButton>
         </footer>

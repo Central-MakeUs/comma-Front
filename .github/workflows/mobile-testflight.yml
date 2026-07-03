@@ -1,0 +1,56 @@
+name: Mobile TestFlight
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - apps/mobile-shell/**
+      - packages/bridge/**
+      - package.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - .github/workflows/mobile-testflight.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mobile-testflight-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  ios-testflight:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.0.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: Setup Expo and EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: 20.5.1
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck mobile shell
+        run: pnpm --filter @comma/mobile-shell typecheck
+
+      - name: Build and submit iOS app
+        working-directory: apps/mobile-shell
+        run: eas build --platform ios --profile production --non-interactive --auto-submit

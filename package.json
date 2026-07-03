@@ -8,6 +8,8 @@
     "dev:storybook": "pnpm --filter @comma/storybook dev",
     "dev:device": "sh ./scripts/dev-device.sh",
     "dev:mobile": "turbo dev --filter=@comma/mobile-shell",
+    "mobile:ios:build": "cd apps/mobile-shell && eas build --platform ios --profile production",
+    "mobile:ios:submit": "cd apps/mobile-shell && eas submit --platform ios --profile production",
     "build:storybook": "pnpm --filter @comma/storybook build-storybook",
     "build": "turbo build",
     "typecheck": "turbo typecheck",

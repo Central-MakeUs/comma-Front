@@ -42,7 +42,7 @@ export const appBridge = bridge<AppBridge>({
       sortBy: [[MediaLibrary.SortBy.creationTime, false]]
     });
 
-    return await Promise.all(
+    const photoResults = await Promise.allSettled(
       assets.assets.map(async (asset) => {
         const assetInfo = await MediaLibrary.getAssetInfoAsync(asset, {
           shouldDownloadFromNetwork: true
@@ -56,6 +56,15 @@ export const appBridge = bridge<AppBridge>({
         };
       })
     );
+
+    return photoResults.flatMap((result) => {
+      if (result.status === 'fulfilled') {
+        return [result.value];
+      }
+
+      console.warn('Failed to load a gallery photo.', result.reason);
+      return [];
+    });
   }
 });
 

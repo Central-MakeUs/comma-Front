@@ -15,7 +15,6 @@ export const screen = style({
   overflowX: 'hidden',
   color: colors.textPrimary,
   background: colors.backgroundPrimary,
-  paddingTop: 48,
   paddingBottom: 140
 });
 

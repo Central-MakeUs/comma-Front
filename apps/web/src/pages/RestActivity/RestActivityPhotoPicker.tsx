@@ -1,30 +1,61 @@
 import { colors, Icon, ImageUpload } from '@comma/design-system';
-import type { ChangeEvent, RefObject } from 'react';
-import { EMPTY_PHOTO_TILES } from './RestActivity.constants';
+import { type ChangeEvent, useEffect, useRef, useState } from 'react';
+import { appBridge } from '../../bridge';
+import { EMPTY_PHOTO_TILES, PHOTO_PICKER_IMAGES } from './RestActivity.constants';
 import * as styles from './RestActivity.css';
 
-export type GalleryPhotoItem = {
+type GalleryPhotoItem = {
   id: string;
   src: string;
 };
 
 type RestActivityPhotoPickerProps = {
-  fileInputRef: RefObject<HTMLInputElement | null>;
-  photos: GalleryPhotoItem[];
   onClose: () => void;
-  onImageChange: (event: ChangeEvent<HTMLInputElement>) => void;
   onPhotoSelect: (src: string) => void;
 };
 
-export function RestActivityPhotoPicker({
-  fileInputRef,
-  photos,
-  onClose,
-  onImageChange,
-  onPhotoSelect
-}: RestActivityPhotoPickerProps) {
+export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivityPhotoPickerProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [galleryPhotos, setGalleryPhotos] = useState<GalleryPhotoItem[]>([]);
+  const photos = galleryPhotos.length > 0 ? galleryPhotos : PHOTO_PICKER_IMAGES;
   const tileCount = photos.length + 1;
   const emptyTileCount = (3 - (tileCount % 3)) % 3;
+
+  useEffect(() => {
+    let isActive = true;
+
+    appBridge
+      .getGalleryPhotos(30)
+      .then((nativePhotos) => {
+        if (!isActive) return;
+
+        setGalleryPhotos(
+          nativePhotos.map((photo) => ({
+            id: photo.id,
+            src: photo.uri
+          }))
+        );
+      })
+      .catch((error) => {
+        console.warn('Failed to load gallery photos.', error);
+        if (isActive) {
+          setGalleryPhotos([]);
+        }
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
+
+  const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.currentTarget.files?.[0];
+
+    if (!file) return;
+
+    onPhotoSelect(URL.createObjectURL(file));
+    event.currentTarget.value = '';
+  };
 
   return (
     <main className={styles.page}>
@@ -80,7 +111,7 @@ export function RestActivityPhotoPicker({
           ref={fileInputRef}
           accept="image/*"
           className={styles.hiddenInput}
-          onChange={onImageChange}
+          onChange={handleImageChange}
           type="file"
         />
       </div>

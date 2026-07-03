@@ -7,7 +7,7 @@ import {
   TextInput
 } from '@comma/design-system';
 import { assignInlineVars } from '@vanilla-extract/dynamic';
-import type { KeyboardEventHandler } from 'react';
+import { type KeyboardEvent, useState } from 'react';
 import {
   COMMENT_MAX_LENGTH,
   REST_DESCRIPTION,
@@ -19,57 +19,68 @@ import { RestActivityReselectModal } from './RestActivityReselectModal';
 
 type RestActivityFormProps = {
   imagePreview?: string;
-  tagInput: string;
-  tags: string[];
-  comment: string;
-  tagInputState: 'default' | 'focus' | 'type' | 'filled' | 'filledPlus';
-  commentState: 'default' | 'focus' | 'type' | 'filled' | 'filledPlus';
-  isCommentOverLimit: boolean;
-  isComplete: boolean;
-  isSecret: boolean;
   showReselectModal: boolean;
   onOpenPhotoPicker: () => void;
   onOpenReselectModal: () => void;
   onCancelReselect: () => void;
   onConfirmReselect: () => void;
   onComplete: () => void;
-  onTagInputChange: (value: string) => void;
-  onTagInputFocus: () => void;
-  onTagInputBlur: () => void;
-  onTagKeyDown: KeyboardEventHandler<HTMLInputElement>;
-  onAddTag: () => void;
-  onCommentChange: (value: string) => void;
-  onCommentFocus: () => void;
-  onCommentBlur: () => void;
-  onSecretChange: (checked: boolean) => void;
 };
+
+function normalizeTag(value: string) {
+  return value.replace(/^#+\s*/, '').trim();
+}
 
 export function RestActivityForm({
   imagePreview,
-  tagInput,
-  tags,
-  comment,
-  tagInputState,
-  commentState,
-  isCommentOverLimit,
-  isComplete,
-  isSecret,
   showReselectModal,
   onOpenPhotoPicker,
   onOpenReselectModal,
   onCancelReselect,
   onConfirmReselect,
-  onComplete,
-  onTagInputChange,
-  onTagInputFocus,
-  onTagInputBlur,
-  onTagKeyDown,
-  onAddTag,
-  onCommentChange,
-  onCommentFocus,
-  onCommentBlur,
-  onSecretChange
+  onComplete
 }: RestActivityFormProps) {
+  const [tagInput, setTagInput] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
+  const [comment, setComment] = useState('');
+  const [focusedInput, setFocusedInput] = useState<'tag' | 'comment'>();
+  const [isSecret, setIsSecret] = useState(false);
+
+  const handleAddTag = () => {
+    const nextTag = normalizeTag(tagInput);
+
+    if (!nextTag || tags.includes(nextTag)) return;
+
+    setTags((currentTags) => [...currentTags, nextTag]);
+    setTagInput('');
+  };
+
+  const handleTagKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key !== 'Enter') return;
+
+    event.preventDefault();
+    handleAddTag();
+  };
+
+  const tagInputState =
+    focusedInput === 'tag'
+      ? tagInput.length > 0
+        ? 'type'
+        : 'focus'
+      : tagInput.length > 0
+        ? 'filledPlus'
+        : 'default';
+  const isCommentOverLimit = comment.length > COMMENT_MAX_LENGTH;
+  const commentState = isCommentOverLimit
+    ? 'filled'
+    : focusedInput === 'comment'
+      ? 'type'
+      : comment.length > 0
+        ? 'filled'
+        : 'default';
+  const isComplete =
+    Boolean(imagePreview) && tags.length > 0 && comment.trim().length > 0 && !isCommentOverLimit;
+
   return (
     <main className={styles.page}>
       <div
@@ -125,11 +136,11 @@ export function RestActivityForm({
               <TextInput
                 className={styles.input}
                 maxLength={TAG_MAX_LENGTH}
-                onBlur={onTagInputBlur}
-                onChange={onTagInputChange}
-                onFocus={onTagInputFocus}
-                onKeyDown={onTagKeyDown}
-                onPlusClick={onAddTag}
+                onBlur={() => setFocusedInput(undefined)}
+                onChange={setTagInput}
+                onFocus={() => setFocusedInput('tag')}
+                onKeyDown={handleTagKeyDown}
+                onPlusClick={handleAddTag}
                 placeholder="예) 한강, 힐링"
                 state={tagInputState}
                 title="해시태그 추가"
@@ -153,9 +164,9 @@ export function RestActivityForm({
               helperText={comment.length > 0 ? '최대 20자까지 입력할 수 있어요' : undefined}
               helperTone={isCommentOverLimit ? 'error' : 'default'}
               maxLength={COMMENT_MAX_LENGTH}
-              onBlur={onCommentBlur}
-              onChange={onCommentChange}
-              onFocus={onCommentFocus}
+              onBlur={() => setFocusedInput(undefined)}
+              onChange={setComment}
+              onFocus={() => setFocusedInput('comment')}
               placeholder="예) 오랜만에 바람 쐬니 좋네요"
               showFooter={comment.length > 0}
               state={commentState}
@@ -169,7 +180,7 @@ export function RestActivityForm({
         <footer className={styles.footer}>
           <div className={styles.visibilityRow}>
             <span className={styles.visibilityLabel}>공개 여부</span>
-            <SecretToggle checked={isSecret} onCheckedChange={onSecretChange} />
+            <SecretToggle checked={isSecret} onCheckedChange={setIsSecret} />
           </div>
           <CtaButton className={styles.doneButton} disabled={!isComplete} onClick={onComplete}>
             휴식 완료

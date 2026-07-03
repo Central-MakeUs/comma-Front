@@ -26,22 +26,23 @@ type fieldType = 'feel' | 'body' | 'rest';
 
 interface ICategoryModal {
     field: fieldType,
+    onClick: (arg0:string) => void,
 }
 
-function CategoryModal({ field }: ICategoryModal) {
+function CategoryModal({ field, onClick }: ICategoryModal) {
     return (
         <div className={styles.chipModal}>
             {field == 'feel' ? (
-                feelCat.map((f) => (
-                    <div style={{padding: '8px 16px'}}>{f}</div>
+                feelCat.map((f, i) => (
+                    <div key={i} style={{padding: '8px 16px'}} onClick={() => onClick(f)}>{f}</div>
                 ))
             ) : field == 'body' ? (
-                bodyStateCat.map((b) => (
-                    <div style={{padding: '8px 16px'}}>{b}</div>
+                bodyStateCat.map((b, i) => (
+                    <div key={i} style={{padding: '8px 16px'}} onClick={() => onClick(b)}>{b}</div>
                 ))
             ) : (
-                restCat.map((r) => (
-                    <div style={{padding: '8px 16px'}}>{r}</div>
+                restCat.map((r, i) => (
+                    <div key={i} style={{padding: '8px 16px'}} onClick={() => onClick(r)}>{r}</div>
                 ))
             )}
         </div>
@@ -52,6 +53,10 @@ function Feed() {
     const [feelOpen, setFeelOpen] = useState(false);
     const [bodyOpen, setBodyOpen] = useState(false);
     const [restOpen, setRestOpen] = useState(false);
+
+    const [currentFeel, setCurrentFeel] = useState('기분');
+    const [currentBody, setCurrentBody] = useState('몸 상태');
+    const [currentRest, setCurrentRest] = useState('휴식');
 
     return (
         <div className={styles.container}>
@@ -66,28 +71,37 @@ function Feed() {
                     <div className={styles.title}>피드</div>
                     <div style={{display: 'flex', flexDirection: 'row', width: '100%', paddingTop: 8, paddingBottom: 16, paddingLeft: 24, paddingRight: 24, gap: 8}}>
                         <div style={{position: 'relative'}}>
-                            <Chip label='기분' state={feelOpen? 'selected' : 'default'} onClick={() => {
+                            <Chip label={currentFeel} state={feelOpen? 'selected' : 'default'} onClick={() => {
                                 setFeelOpen(prev => !prev);
                                 setBodyOpen(false);
                                 setRestOpen(false);
                             }}/>
-                            {feelOpen? <CategoryModal field='feel'/> : null}
+                            {feelOpen? <CategoryModal field='feel' onClick={(cat) => {
+                                setCurrentFeel(cat);
+                                setFeelOpen(false);
+                            }}/> : null}
                         </div>
                         <div style={{position: 'relative'}}>
-                            <Chip label='몸 상태' state={bodyOpen? 'selected' : 'default'} className={styles.secondChip} onClick={() => {
+                            <Chip label={currentBody} state={bodyOpen? 'selected' : 'default'} className={styles.secondChip} onClick={() => {
                                 setBodyOpen(prev => !prev);
                                 setFeelOpen(false);
                                 setRestOpen(false);
                             }}/>
-                            {bodyOpen? <CategoryModal field='body' /> : null}
+                            {bodyOpen? <CategoryModal field='body' onClick={(cat) => {
+                                setCurrentBody(cat);
+                                setBodyOpen(false);
+                            }}/> : null}
                         </div>
                         <div style={{position: 'relative'}}>
-                            <Chip label='휴식' state={restOpen? 'selected' : 'default'} onClick={() => {
+                            <Chip label={currentRest} state={restOpen? 'selected' : 'default'} onClick={() => {
                                 setRestOpen(prev => !prev);
                                 setFeelOpen(false);
                                 setBodyOpen(false);
                             }}/>
-                            {restOpen? <CategoryModal field='rest' /> : null}
+                            {restOpen? <CategoryModal field='rest' onClick={(cat) => {
+                                setCurrentRest(cat);
+                                setRestOpen(false);
+                            }}/> : null}
                         </div>
                     </div>
                 </div>

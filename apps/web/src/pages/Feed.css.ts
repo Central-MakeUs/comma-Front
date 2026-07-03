@@ -49,7 +49,7 @@ export const navBarStyle = style({
 })
 
 export const secondChip = style({
-    width: 97,
+    width: 'fit-content',
 })
 
 export const scrollContainer = style({
@@ -64,7 +64,7 @@ export const scrollContainer = style({
 
 export const chipModal = style({
     position: 'absolute',
-    top: '100%',
+    top: 'calc(100% + 8px)',
     left: 0,
     marginTop: 4,
     width: 180,

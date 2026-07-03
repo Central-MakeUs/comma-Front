@@ -147,6 +147,7 @@ export function TextInput({
         <input
           aria-label={ariaLabel}
           aria-describedby={hasHelper ? helperId : undefined}
+          aria-invalid={helperTone === 'error' ? true : undefined}
           className={elementClassName}
           disabled={disabled}
           id={inputId}

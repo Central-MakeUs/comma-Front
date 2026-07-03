@@ -11,6 +11,7 @@ export function ArchiveFeedList({ items }: ArchiveFeedListProps) {
     <section className={styles.list} aria-label="내 쉼표 1열 목록">
       {items.map((item) => (
         <FeedCard
+          className={styles.listCard}
           content={item.content}
           dateLabel={item.dateLabel}
           imageAlt={item.imageAlt}

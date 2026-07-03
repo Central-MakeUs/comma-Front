@@ -1,5 +1,5 @@
 import { colors, radii, typography } from '@comma/design-system';
-import { style, styleVariants } from '@vanilla-extract/css';
+import { globalStyle, style, styleVariants } from '@vanilla-extract/css';
 
 export const page = style({
   width: '100vw',
@@ -83,8 +83,16 @@ export const viewButtonState = styleVariants({
 export const list = style({
   width: '100%',
   display: 'grid',
-  justifyItems: 'center',
+  justifyItems: 'stretch',
   gap: 40
+});
+
+export const listCard = style({
+  width: '100% !important'
+});
+
+globalStyle(`${listCard} > div:first-child`, {
+  width: '100% !important'
 });
 
 export const grid = style({

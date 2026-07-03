@@ -104,6 +104,7 @@ export function TextInput({
       : inputValue.slice(0, effectiveMaxLength);
   const hasHelper = Boolean(helperText) || shouldShowFieldFooter;
   const normalizedState = state === 'filledPlus' && variant !== 'bar' ? 'filled' : state;
+  const shouldShowPlus = state === 'filledPlus';
   const rootClassName = [
     textInputRoot,
     textInputRootVariant[variant],
@@ -165,7 +166,7 @@ export function TextInput({
             <span className={textInputCaret} />
           </span>
         ) : null}
-        {normalizedState === 'filledPlus' ? (
+        {shouldShowPlus ? (
           onPlusClick ? (
             <button
               aria-label="추가"

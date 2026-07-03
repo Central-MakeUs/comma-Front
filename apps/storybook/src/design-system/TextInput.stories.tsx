@@ -20,7 +20,7 @@ type TextInputStoryArgs = {
 };
 
 const barStates = ['default', 'focus', 'type', 'filled', 'filledPlus'] satisfies TextInputState[];
-const fieldStates = ['default', 'type'] satisfies TextInputState[];
+const fieldStates = ['default', 'type', 'filledPlus'] satisfies TextInputState[];
 
 const meta = {
   title: 'Design System/TextInput',
@@ -122,6 +122,7 @@ function VariantGroup({
               title={variant === 'field' ? '한 줄 소감' : undefined}
               value={getSampleValue(variant, state)}
               variant={variant}
+              onPlusClick={state === 'filledPlus' ? () => undefined : undefined}
             />
           </div>
         ))}
@@ -157,6 +158,7 @@ function PlaygroundView({
         value={inputValue}
         variant={variant}
         onChange={setInputValue}
+        onPlusClick={state === 'filledPlus' ? () => undefined : undefined}
       />
     </div>
   );

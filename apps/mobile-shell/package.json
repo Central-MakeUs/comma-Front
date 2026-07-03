@@ -18,7 +18,7 @@
     "@webview-bridge/react-native": "^1.7.9",
     "expo": "~54.0.35",
     "expo-constants": "~18.0.13",
-    "expo-media-library": "^57.0.0",
+    "expo-media-library": "~18.2.1",
     "expo-splash-screen": "~31.0.13",
     "expo-status-bar": "^3.0.9",
     "react": "19.1.0",

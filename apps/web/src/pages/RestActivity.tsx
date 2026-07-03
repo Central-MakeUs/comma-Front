@@ -184,7 +184,8 @@ function RestActivity() {
       : comment.length > 0
         ? 'filled'
         : 'default';
-  const isComplete = Boolean(imagePreview) && tags.length > 0 && comment.trim().length > 0;
+  const isComplete =
+    Boolean(imagePreview) && tags.length > 0 && comment.trim().length > 0 && !isCommentOverLimit;
   const photoPickerItems = galleryPhotos.length > 0 ? galleryPhotos : PHOTO_PICKER_IMAGES;
 
   if (!isWritingStarted) {

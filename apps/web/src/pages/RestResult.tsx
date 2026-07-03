@@ -2,6 +2,7 @@ import { CtaButton, colors, Icon, ImageUpload, NavigationBar } from '@comma/desi
 import { assignInlineVars } from '@vanilla-extract/dynamic';
 import useEmblaCarousel from 'embla-carousel-react';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import * as styles from './RestResult.css';
 
 function Modal({ onClose }: { onClose: () => void }) {
@@ -68,6 +69,7 @@ function Card({
 }
 
 function RestResult() {
+  const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [slideIdx, setSlideIdx] = useState(0);
   const [scales, setScales] = useState<number[]>([]);
@@ -222,7 +224,7 @@ function RestResult() {
             />
           ))}
         </div>
-        <CtaButton className={styles.ctaButtonStyle} />
+        <CtaButton className={styles.ctaButtonStyle} onClick={() => navigate('/rest/activity')} />
       </div>
       <NavigationBar active="rest" className={styles.navStyle} />
     </div>

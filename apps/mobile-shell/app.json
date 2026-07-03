@@ -9,6 +9,12 @@
     "newArchEnabled": true,
     "plugins": [
       [
+        "expo-media-library",
+        {
+          "photosPermission": "휴식 사진을 선택할 수 있도록 사진 보관함 접근 권한이 필요해요."
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "image": "./assets/splash.png",

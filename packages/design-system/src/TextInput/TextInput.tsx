@@ -1,4 +1,11 @@
-import { type ChangeEvent, type ReactElement, type SVGProps, useId } from 'react';
+import {
+  type ChangeEvent,
+  type FocusEventHandler,
+  type KeyboardEventHandler,
+  type ReactElement,
+  type SVGProps,
+  useId
+} from 'react';
 import {
   textInputCaret,
   textInputControl,
@@ -6,6 +13,7 @@ import {
   textInputControlVariant,
   textInputCounter,
   textInputCounterCurrent,
+  textInputCounterCurrentTone,
   textInputElement,
   textInputElementBarType,
   textInputElementState,
@@ -14,6 +22,7 @@ import {
   textInputFocusCaret,
   textInputHelper,
   textInputHelperText,
+  textInputHelperTone,
   textInputLabel,
   textInputPlusButton,
   textInputPlusControl,
@@ -27,6 +36,7 @@ import {
 
 export type TextInputVariant = 'bar' | 'field' | 'fieldNoTitle';
 export type TextInputState = 'default' | 'focus' | 'type' | 'filled' | 'filledPlus';
+export type TextInputHelperTone = 'default' | 'error';
 
 export type TextInputProps = {
   variant: TextInputVariant;
@@ -35,10 +45,16 @@ export type TextInputProps = {
   placeholder?: string;
   value?: string;
   helperText?: string;
+  helperTone?: TextInputHelperTone;
   maxLength?: number;
+  enforceMaxLength?: boolean;
+  showFooter?: boolean;
   className?: string;
   disabled?: boolean;
   onChange?: (value: string) => void;
+  onBlur?: FocusEventHandler<HTMLInputElement>;
+  onFocus?: FocusEventHandler<HTMLInputElement>;
+  onKeyDown?: KeyboardEventHandler<HTMLInputElement>;
   onPlusClick?: () => void;
 };
 
@@ -57,10 +73,16 @@ export function TextInput({
   placeholder,
   value,
   helperText,
+  helperTone = 'default',
   maxLength,
+  enforceMaxLength = true,
+  showFooter = false,
   className,
   disabled = false,
   onChange,
+  onBlur,
+  onFocus,
+  onKeyDown,
   onPlusClick
 }: TextInputProps) {
   const inputId = useId();
@@ -74,10 +96,12 @@ export function TextInput({
     state === 'type' &&
     inputValue.length === 0;
   const shouldShowFieldFooter =
-    (variant === 'field' || variant === 'fieldNoTitle') && state === 'type';
+    (variant === 'field' || variant === 'fieldNoTitle') && (state === 'type' || showFooter);
   const effectiveMaxLength = shouldShowFieldFooter ? (maxLength ?? 20) : maxLength;
   const displayedValue =
-    effectiveMaxLength === undefined ? inputValue : inputValue.slice(0, effectiveMaxLength);
+    !enforceMaxLength || effectiveMaxLength === undefined
+      ? inputValue
+      : inputValue.slice(0, effectiveMaxLength);
   const hasHelper = Boolean(helperText) || shouldShowFieldFooter;
   const normalizedState = state === 'filledPlus' && variant !== 'bar' ? 'filled' : state;
   const rootClassName = [
@@ -105,7 +129,7 @@ export function TextInput({
   const ariaLabel = hasVisibleLabel ? undefined : title || placeholder || 'Text input';
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const nextValue =
-      effectiveMaxLength === undefined
+      !enforceMaxLength || effectiveMaxLength === undefined
         ? event.currentTarget.value
         : event.currentTarget.value.slice(0, effectiveMaxLength);
     onChange?.(nextValue);
@@ -125,8 +149,11 @@ export function TextInput({
           className={elementClassName}
           disabled={disabled}
           id={inputId}
-          maxLength={effectiveMaxLength}
+          maxLength={enforceMaxLength ? effectiveMaxLength : undefined}
+          onBlur={onBlur}
           onChange={handleChange}
+          onFocus={onFocus}
+          onKeyDown={onKeyDown}
           placeholder={placeholder}
           type="text"
           value={displayedValue}
@@ -157,13 +184,22 @@ export function TextInput({
         ) : null}
       </span>
       {hasHelper ? (
-        <span className={textInputHelper} id={helperId}>
+        <span
+          className={[textInputHelper, textInputHelperTone[helperTone]].join(' ')}
+          id={helperId}
+        >
           <span className={textInputHelperText}>
             {helperText || '최대 20자까지 입력할 수 있어요'}
           </span>
           {shouldShowFieldFooter ? (
             <span className={textInputCounter}>
-              <span className={textInputCounterCurrent}>{displayedValue.length}</span>
+              <span
+                className={[textInputCounterCurrent, textInputCounterCurrentTone[helperTone]].join(
+                  ' '
+                )}
+              >
+                {displayedValue.length}
+              </span>
               <span>/</span>
               <span>{effectiveMaxLength}</span>
             </span>

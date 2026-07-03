@@ -1,6 +1,7 @@
 import type { AppBridge, AppPostMessageSchema } from '@comma/bridge';
 import { POST_MESSAGE_EVENT } from '@comma/bridge';
 import { bridge, createWebView, postMessageSchema } from '@webview-bridge/react-native';
+import * as MediaLibrary from 'expo-media-library/legacy';
 import { Linking, Platform } from 'react-native';
 import { z } from 'zod';
 
@@ -16,6 +17,26 @@ export const appBridge = bridge<AppBridge>({
   },
   async setStatusBar(_style) {
     // Expo StatusBar is rendered declaratively in App.tsx.
+  },
+  async getGalleryPhotos(limit = 30) {
+    const permission = await MediaLibrary.requestPermissionsAsync(false, ['photo']);
+
+    if (!permission.granted) {
+      return [];
+    }
+
+    const assets = await MediaLibrary.getAssetsAsync({
+      first: limit,
+      mediaType: MediaLibrary.MediaType.photo,
+      sortBy: [[MediaLibrary.SortBy.creationTime, false]]
+    });
+
+    return assets.assets.map((asset) => ({
+      id: asset.id,
+      uri: asset.uri,
+      width: asset.width,
+      height: asset.height
+    }));
   }
 });
 

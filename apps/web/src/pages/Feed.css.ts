@@ -63,10 +63,7 @@ export const scrollContainer = style({
 })
 
 export const chipModal = style({
-    position: 'absolute',
-    top: 'calc(100% + 8px)',
-    left: 0,
-    marginTop: 4,
+    position: 'fixed',
     width: 180,
     borderRadius: 20,
     backgroundColor: 'rgba(50, 46, 41, 0.66)',

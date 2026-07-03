@@ -1,6 +1,6 @@
 import * as styles from './Feed.css';
 import { Icon, NavigationBar, Chip, FeedCard } from '@comma/design-system';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 const feelCat = [
     '전체',
@@ -17,6 +17,7 @@ const bodyStateCat = [
 ]
 
 const restCat = [
+    '전체',
     '아무것도 안하고 싶어',
     '조용히 혼자 있고 싶어',
     '몸을 움직이고 싶어',
@@ -27,11 +28,12 @@ type fieldType = 'feel' | 'body' | 'rest';
 interface ICategoryModal {
     field: fieldType,
     onClick: (arg0:string) => void,
+    style?: React.CSSProperties,
 }
 
-function CategoryModal({ field, onClick }: ICategoryModal) {
+function CategoryModal({ field, onClick, style }: ICategoryModal) {
     return (
-        <div className={styles.chipModal}>
+        <div className={styles.chipModal} style={style}>
             {field == 'feel' ? (
                 feelCat.map((f, i) => (
                     <div key={i} style={{padding: '8px 16px'}} onClick={() => onClick(f)}>{f}</div>
@@ -58,6 +60,19 @@ function Feed() {
     const [currentBody, setCurrentBody] = useState('몸 상태');
     const [currentRest, setCurrentRest] = useState('휴식');
 
+    const feelRef = useRef<HTMLDivElement>(null);
+    const bodyRef = useRef<HTMLDivElement>(null);
+    const restRef = useRef<HTMLDivElement>(null);
+
+    const [feelPos, setFeelPos] = useState<{ top: number, left: number }>();
+    const [bodyPos, setBodyPos] = useState<{ top: number, left: number }>();
+    const [restPos, setRestPos] = useState<{ top: number, left: number }>();
+
+    const getModalPos = (ref: React.RefObject<HTMLDivElement | null>) => {
+        const rect = ref.current?.getBoundingClientRect();
+        return rect ? { top: rect.bottom + 8, left: rect.left } : undefined;
+    }
+
     return (
         <div className={styles.container}>
             <div className={styles.headerContainer}>
@@ -69,36 +84,39 @@ function Feed() {
             <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
                 <div style={{width: '100%'}}>
                     <div className={styles.title}>피드</div>
-                    <div style={{display: 'flex', flexDirection: 'row', width: '100%', paddingTop: 8, paddingBottom: 16, paddingLeft: 24, paddingRight: 24, gap: 8}}>
-                        <div style={{position: 'relative'}}>
+                    <div style={{display: 'flex', flexDirection: 'row', width: '100%', paddingTop: 8, paddingBottom: 16, paddingLeft: 24, paddingRight: 24, gap: 8, overflowX: 'auto', overflowY: 'hidden'}}>
+                        <div ref={feelRef} style={{position: 'relative', flexShrink: 0}}>
                             <Chip label={currentFeel} state={feelOpen? 'selected' : 'default'} onClick={() => {
+                                setFeelPos(getModalPos(feelRef));
                                 setFeelOpen(prev => !prev);
                                 setBodyOpen(false);
                                 setRestOpen(false);
                             }}/>
-                            {feelOpen? <CategoryModal field='feel' onClick={(cat) => {
+                            {feelOpen? <CategoryModal field='feel' style={feelPos} onClick={(cat) => {
                                 setCurrentFeel(cat);
                                 setFeelOpen(false);
                             }}/> : null}
                         </div>
-                        <div style={{position: 'relative'}}>
+                        <div ref={bodyRef} style={{position: 'relative', flexShrink: 0}}>
                             <Chip label={currentBody} state={bodyOpen? 'selected' : 'default'} className={styles.secondChip} onClick={() => {
+                                setBodyPos(getModalPos(bodyRef));
                                 setBodyOpen(prev => !prev);
                                 setFeelOpen(false);
                                 setRestOpen(false);
                             }}/>
-                            {bodyOpen? <CategoryModal field='body' onClick={(cat) => {
+                            {bodyOpen? <CategoryModal field='body' style={bodyPos} onClick={(cat) => {
                                 setCurrentBody(cat);
                                 setBodyOpen(false);
                             }}/> : null}
                         </div>
-                        <div style={{position: 'relative'}}>
+                        <div ref={restRef} style={{position: 'relative', flexShrink: 0}}>
                             <Chip label={currentRest} state={restOpen? 'selected' : 'default'} onClick={() => {
+                                setRestPos(getModalPos(restRef));
                                 setRestOpen(prev => !prev);
                                 setFeelOpen(false);
                                 setBodyOpen(false);
                             }}/>
-                            {restOpen? <CategoryModal field='rest' onClick={(cat) => {
+                            {restOpen? <CategoryModal field='rest' style={restPos} onClick={(cat) => {
                                 setCurrentRest(cat);
                                 setRestOpen(false);
                             }}/> : null}

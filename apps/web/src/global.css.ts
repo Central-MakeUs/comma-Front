@@ -9,6 +9,10 @@ globalStyle('html, body, #root', {
   margin: 0
 });
 
+globalStyle('html, body', {
+  touchAction: 'manipulation'
+});
+
 globalFontFace('Pretendard', {
   src: 'url("/fonts/PretendardVariable.woff2") format("woff2")',
   fontDisplay: 'swap',

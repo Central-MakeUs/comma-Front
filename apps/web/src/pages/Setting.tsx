@@ -1,5 +1,6 @@
 import * as styles from './Setting.css';
-import { Icon, SmallButton, colors } from '@comma/design-system';
+import { Icon, SmallButton, colors, CtaButton } from '@comma/design-system';
+import { useState } from 'react';
 
 const settings = [
     '서비스 이용약관',
@@ -8,9 +9,39 @@ const settings = [
     '회원 탈퇴'
 ]
 
-function SettingList({text}:{text: string}) {
+const logOutSetting = {
+    title: '로그아웃',
+    desc: '로그아웃하면 다시 로그인해야\n서비스를 이용할 수 있어요.',
+    btnText: '로그아웃',
+}
+
+const withdrawSetting = {
+    title: '회원 탈퇴',
+    desc: '탈퇴하면 모든 기록과 아카이브가 영구 삭제되며\n복구할 수 없어요. 그래도 탈퇴하시겠어요?',
+    btnText: '확인',
+}
+
+const confirmWithdraw = {
+    title: '회원 탈퇴 확인',
+    desc: '정말 탈퇴 하시겠습니까?',
+    btnText: '탈퇴하기',
+}
+
+function Modal({title, desc, btnText, onCancelClick, onConfirmClick}:{title:string, desc:string, btnText:string, onCancelClick?: () => void, onConfirmClick?: () => void}) {
+    
     return (
-        <div className={styles.settingContainer}>
+        <div className={styles.confirmModal}>
+            <div className={styles.confirmTitle}>{title}</div>
+            <div className={styles.confirmDesc}>{desc}</div>
+            <CtaButton label='취소' className={styles.cancelBtn} onClick={onCancelClick}/>
+            <CtaButton label={btnText} state='default' className={styles.confirmBtn} onClick={onConfirmClick}/>
+        </div>
+    )
+}
+
+function SettingList({text, onClick}:{text: string, onClick?: () => void,}) {
+    return (
+        <div className={styles.settingContainer} onClick={onClick}>
             <span>{text}</span>
             <Icon name='rightArrow' color={colors.iconSecondary}/>
         </div>
@@ -18,6 +49,28 @@ function SettingList({text}:{text: string}) {
 }
 
 function Setting() {
+    const [logOutOpen, setLogOutOpen] = useState(false);
+    const [withdrawOpen, setWithdrawOpen] = useState(false);
+    const [confirmOpen, setConfirmOpen] = useState(false);
+
+    const onLogOutClick = () => {
+        setLogOutOpen(true);
+        setWithdrawOpen(false);
+        setConfirmOpen(false);
+    }
+
+    const onWithdrawClick = () => {
+        setWithdrawOpen(true);
+        setLogOutOpen(false);
+        setConfirmOpen(false);
+    }
+
+    const onConfirmClick = () => {
+        setConfirmOpen(true);
+        setLogOutOpen(false);
+        setWithdrawOpen(false);
+    }
+
     return (
         <div className={styles.container}>
             <div className={styles.header}>
@@ -40,10 +93,18 @@ function Setting() {
                 </div>
                 <div style={{width: '100%', marginTop: 32}}>
                     {settings.map((s, idx) => (
-                        <SettingList text={s} key={idx}/>
+                        <SettingList text={s} key={idx} onClick={s == '로그아웃' ? onLogOutClick : s == '회원 탈퇴' ? onWithdrawClick : undefined}/>
                     ))}
                 </div>
             </div>
+            {
+                logOutOpen? <Modal title={logOutSetting.title} desc={logOutSetting.desc} btnText={logOutSetting.btnText} onCancelClick={() => setLogOutOpen(false)} /> :
+                withdrawOpen ? <Modal title={withdrawSetting.title} desc={withdrawSetting.desc} btnText={withdrawSetting.btnText} onCancelClick={() => setWithdrawOpen(false)} onConfirmClick={() => {
+                    setWithdrawOpen(false);
+                    setConfirmOpen(true);
+                }}/> :
+                confirmOpen? <Modal title={confirmWithdraw.title} desc={confirmWithdraw.desc} btnText={confirmWithdraw.btnText} onCancelClick={() => setConfirmOpen(false)} /> : null
+            }
         </div>
     );
 }

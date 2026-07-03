@@ -124,6 +124,9 @@ importers:
       '@comma/design-system':
         specifier: workspace:*
         version: link:../../packages/design-system
+      '@use-funnel/react-router-dom':
+        specifier: 0.0.16
+        version: 0.0.16(react-router-dom@7.18.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0)
       '@vanilla-extract/css':
         specifier: ^1.21.0
         version: 1.21.0
@@ -1935,6 +1938,17 @@ packages:
     resolution: {integrity: sha512-TQMCz2pFJMfpNxmSfX1VSfTjwUIFx/mL+p1bnfM1xjjdla7Z+KnGMW/EhFbpckp3LyWAH4PgOsMwOMnIN+MBFg==}
     peerDependencies:
       '@urql/core': ^5.0.0
+
+  '@use-funnel/core@0.1.0':
+    resolution: {integrity: sha512-KEjBKTbOh5wd6CQZ1jYWhI6KuGrI9Pjn9CkmUgAYzonsyZE0lsiZ2/1RwsaWcxVO5RJBgfwCM8dRpibwm7An9w==}
+    peerDependencies:
+      react: '>=16.8'
+
+  '@use-funnel/react-router-dom@0.0.16':
+    resolution: {integrity: sha512-QH1N7+82MDmop3QASaXLlnAYx9ZL1D2lLnFQrW95UPUdctbiY2ZcydIn36LdzpQisj+fZcJUU13haTkACY6oHA==}
+    peerDependencies:
+      react: '>=16.8'
+      react-router-dom: '>=6'
 
   '@vanilla-extract/babel-plugin-debug-ids@1.2.2':
     resolution: {integrity: sha512-MeDWGICAF9zA/OZLOKwhoRlsUW+fiMwnfuOAqFVohL31Agj7Q/RBWAYweqjHLgFBCsdnr6XIfwjJnmb2znEWxw==}
@@ -6273,6 +6287,16 @@ snapshots:
     dependencies:
       '@urql/core': 5.2.0
       wonka: 6.3.6
+
+  '@use-funnel/core@0.1.0(react@19.0.0)':
+    dependencies:
+      react: 19.0.0
+
+  '@use-funnel/react-router-dom@0.0.16(react-router-dom@7.18.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0)':
+    dependencies:
+      '@use-funnel/core': 0.1.0(react@19.0.0)
+      react: 19.0.0
+      react-router-dom: 7.18.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
 
   '@vanilla-extract/babel-plugin-debug-ids@1.2.2':
     dependencies:

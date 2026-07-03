@@ -15,6 +15,7 @@ export function ArchiveFeedList({ items }: ArchiveFeedListProps) {
           content={item.content}
           dateLabel={item.dateLabel}
           imageAlt={item.imageAlt}
+          imageClassName={styles.listImage}
           imageHeart
           imageSrc={item.imageSrc}
           key={item.id}

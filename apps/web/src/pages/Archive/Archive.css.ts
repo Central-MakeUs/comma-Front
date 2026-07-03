@@ -1,5 +1,5 @@
 import { colors, radii, typography } from '@comma/design-system';
-import { globalStyle, style, styleVariants } from '@vanilla-extract/css';
+import { style, styleVariants } from '@vanilla-extract/css';
 
 export const page = style({
   width: '100vw',
@@ -87,11 +87,11 @@ export const list = style({
 });
 
 export const listCard = style({
-  width: '100% !important'
+  width: '100%'
 });
 
-globalStyle(`${listCard} > div:first-child`, {
-  width: '100% !important'
+export const listImage = style({
+  width: '100%'
 });
 
 export const grid = style({

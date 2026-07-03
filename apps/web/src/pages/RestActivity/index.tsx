@@ -1,6 +1,6 @@
 import { type ChangeEvent, type KeyboardEvent, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { appBridge } from '../bridge';
+import { appBridge } from '../../bridge';
 import { COMMENT_MAX_LENGTH, PHOTO_PICKER_IMAGES } from './RestActivity.constants';
 import { RestActivityForm } from './RestActivityForm';
 import { type GalleryPhotoItem, RestActivityPhotoPicker } from './RestActivityPhotoPicker';

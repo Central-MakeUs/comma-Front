@@ -13,7 +13,7 @@ function CallbackPage() {
       else if (pathname === '/oauth/google/callback') field = 'GOOGLE';
       else field = 'APPLE';
       const res = await login(field);
-      if(!res) alert("로그인 오류: 올바른 정보를 입력하세요.");
+      if (!res) alert('로그인 오류: 올바른 정보를 입력하세요.');
       else if (res.success) navigate('/nickname');
       else alert(res.message);
     };

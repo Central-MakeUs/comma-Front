@@ -1,8 +1,19 @@
 import type { AppBridge, AppPostMessageSchema } from '@comma/bridge';
 import { POST_MESSAGE_EVENT } from '@comma/bridge';
 import { bridge, createWebView, postMessageSchema } from '@webview-bridge/react-native';
+import * as MediaLibrary from 'expo-media-library';
 import { Linking, Platform } from 'react-native';
 import { z } from 'zod';
+
+const MAX_GALLERY_PHOTOS = 30;
+
+function clampGalleryLimit(limit: number) {
+  if (!Number.isFinite(limit)) {
+    return MAX_GALLERY_PHOTOS;
+  }
+
+  return Math.min(Math.max(Math.trunc(limit), 1), MAX_GALLERY_PHOTOS);
+}
 
 export const appBridge = bridge<AppBridge>({
   async openExternalBrowser(url: string) {
@@ -16,6 +27,44 @@ export const appBridge = bridge<AppBridge>({
   },
   async setStatusBar(_style) {
     // Expo StatusBar is rendered declaratively in App.tsx.
+  },
+  async getGalleryPhotos(limit = 30) {
+    const safeLimit = clampGalleryLimit(limit);
+    const permission = await MediaLibrary.requestPermissionsAsync(false, ['photo']);
+
+    if (!permission.granted) {
+      return [];
+    }
+
+    const assets = await MediaLibrary.getAssetsAsync({
+      first: safeLimit,
+      mediaType: MediaLibrary.MediaType.photo,
+      sortBy: [[MediaLibrary.SortBy.creationTime, false]]
+    });
+
+    const photoResults = await Promise.allSettled(
+      assets.assets.map(async (asset) => {
+        const assetInfo = await MediaLibrary.getAssetInfoAsync(asset, {
+          shouldDownloadFromNetwork: true
+        });
+
+        return {
+          id: asset.id,
+          uri: assetInfo.localUri ?? assetInfo.uri,
+          width: asset.width,
+          height: asset.height
+        };
+      })
+    );
+
+    return photoResults.flatMap((result) => {
+      if (result.status === 'fulfilled') {
+        return [result.value];
+      }
+
+      console.warn('Failed to load a gallery photo.', result.reason);
+      return [];
+    });
   }
 });
 

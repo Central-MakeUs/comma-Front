@@ -224,6 +224,13 @@ export const textInputHelper = style({
   letterSpacing: vars.typography.labelReadingR.letterSpacing
 });
 
+export const textInputHelperTone = styleVariants({
+  default: {},
+  error: {
+    color: vars.color.error
+  }
+});
+
 export const textInputHelperText = style({
   minWidth: 0,
   overflow: 'hidden',
@@ -248,6 +255,13 @@ export const textInputCounterCurrent = style({
   color: vars.color.textPrimary,
   textAlign: 'right',
   fontWeight: vars.typography.labelReadingB.fontWeight
+});
+
+export const textInputCounterCurrentTone = styleVariants({
+  default: {},
+  error: {
+    color: vars.color.error
+  }
 });
 
 export const textInputPlusControl = style({

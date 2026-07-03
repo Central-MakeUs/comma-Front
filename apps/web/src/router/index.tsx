@@ -25,6 +25,10 @@ export const router = createBrowserRouter([
     Component: CallbackPage
   },
   {
+    path: '/oauth/google/callback',
+    Component: CallbackPage
+  },
+  {
     path: '/recommend-result',
     Component: RestResult
   },

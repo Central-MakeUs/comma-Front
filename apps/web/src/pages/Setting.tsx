@@ -31,10 +31,12 @@ function Modal({title, desc, btnText, onCancelClick, onConfirmClick}:{title:stri
     
     return (
         <div className={styles.confirmModal}>
+            <div style={{margin: '0 auto', width: 36, height: 4, backgroundColor: colors.iconSecondary, borderRadius: 100}}/>
             <div className={styles.confirmTitle}>{title}</div>
             <div className={styles.confirmDesc}>{desc}</div>
             <CtaButton label='취소' className={styles.cancelBtn} onClick={onCancelClick}/>
             <CtaButton label={btnText} state='default' className={styles.confirmBtn} onClick={onConfirmClick}/>
+            <div style={{height: 36}}/>
         </div>
     )
 }

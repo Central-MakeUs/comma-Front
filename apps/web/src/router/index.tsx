@@ -62,6 +62,6 @@ export const router = createBrowserRouter([
   },
   {
     path: '/setting',
-    Component: Setting,
+    Component: Setting
   }
 ]);

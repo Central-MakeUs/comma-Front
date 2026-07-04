@@ -81,15 +81,17 @@ export const crownIcon = style({
 export const confirmModal = style({
     width: '100%',
     boxShadow: shadows.glassInset,
+    borderRadius: 36,
     backgroundColor: '#C2BFBC10',
-    borderRadius: '50px 50px 0 0',
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     boxSizing: 'border-box',
-    padding: '36px 24px',
+    paddingLeft: 24,
+    paddingRight: 24,
+    paddingTop: 8,
     position: 'absolute',
-    bottom: 0,
+    bottom: -36,
     backdropFilter: 'blur(10px)',
     WebkitBackdropFilter: 'blur(10px)',
 })
@@ -98,6 +100,9 @@ export const confirmTitle = style({
     color: colors.textPrimary,
     ...typography.headlineB,
     marginBottom: 16,
+    marginTop: 24,
+    width: '100%',
+    textAlign: 'left'
 })
 
 export const confirmDesc = style({
@@ -105,6 +110,8 @@ export const confirmDesc = style({
     ...typography.bodyReadingR,
     marginBottom: 32,
     whiteSpace: 'pre-line',
+    width: '100%',
+    textAlign: 'left',
 })
 
 export const cancelBtn = style({
@@ -116,4 +123,5 @@ export const cancelBtn = style({
 
 export const confirmBtn = style({
     boxShadow: 'none',
+    marginBottom: 40,
 })

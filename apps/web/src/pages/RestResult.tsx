@@ -1,6 +1,7 @@
 import { CtaButton, colors, Icon, ImageUpload, NavigationBar } from '@comma/design-system';
 import { assignInlineVars } from '@vanilla-extract/dynamic';
 import useEmblaCarousel from 'embla-carousel-react';
+import { getSvgPath } from "figma-squircle";
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as styles from './RestResult.css';
@@ -116,10 +117,13 @@ function RestResult() {
 
   const getCardStyle = (idx: number) => {
     const progress = scales[idx] ?? 0;
+    const width = Math.round(200 + progress * 80);
+    const height = Math.round(253 + progress * 101);
     return {
-      width: Math.round(200 + progress * 80),
-      height: Math.round(253 + progress * 101),
-      borderRadius: Math.round(50 + progress * 20)
+      width,
+      height,
+      borderRadius: 0,
+      clipPath: `path("M0 82.944 C0 14.6396 14.7469 0 83.552 0 H196.448 C265.253 0 280 14.6396 280 82.944 V271.056 C280 339.36 265.253 354 196.448 354 H83.552 C14.7469 354 0 339.36 0 271.056 V82.944 Z")`
     };
   };
 

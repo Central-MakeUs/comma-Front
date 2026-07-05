@@ -1,12 +1,16 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { type fieldType, login } from '../utils/auth';
 
 function CallbackPage() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const hasRun = useRef(false);
 
   useEffect(() => {
+    if (hasRun.current) return;
+    hasRun.current = true;
+
     const handleLogin = async () => {
       let field: fieldType;
       if (pathname === '/oauth/kakao/callback') field = 'KAKAO';

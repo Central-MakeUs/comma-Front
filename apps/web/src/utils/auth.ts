@@ -8,7 +8,10 @@ export const login = async (field: fieldType) => {
     code = new URLSearchParams(window.location.hash.slice(1)).get('access_token');
   if (!code) return null;
   console.log(code);
-  const redirectUri = window.location.origin + window.location.pathname;
+  let redirectUri;
+  if(field == 'KAKAO') redirectUri = import.meta.env.VITE_KAKAO_REDIRECT_URI;
+  else if(field == 'GOOGLE') redirectUri = import.meta.env.VITE_GOOGLE_REDIRECT_URI;
+  else redirectUri = import.meta.env.VITE_APPLE_REDIRECT_URI;
   const res = await (
     await fetch(`${import.meta.env.VITE_BASE_URL}/api/auth/login/${field}`, {
       method: 'POST',

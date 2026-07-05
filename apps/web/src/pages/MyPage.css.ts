@@ -94,3 +94,11 @@ export const navStyle = style({
     transform: 'translateX(-50%)',
     bottom: 40,
 })
+
+export const cardStyle = style({
+    width: 320,
+    height: 404,
+    backgroundColor: 'white',
+    borderRadius: 100,
+    flex: '0 0 320px',
+})

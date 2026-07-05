@@ -1,5 +1,6 @@
 import * as styles from './MyPage.css';
 import { Icon, SmallButton, ImageUpload, NavigationBar } from '@comma/design-system';
+import useEmblaCarousel from 'embla-carousel-react';
 
 function GaugeBar({percent}:{percent:number}) {
     return (
@@ -8,6 +9,14 @@ function GaugeBar({percent}:{percent:number}) {
                 <div className={styles.gaugeBarInner} style={{width: `${120*(percent/100)}px`}}/>
             </div>
             <span className={styles.gaugeText}>{percent}%</span>
+        </div>
+    )
+}
+
+function Card() {
+    return (
+        <div className={styles.cardStyle}>
+
         </div>
     )
 }
@@ -24,6 +33,11 @@ function AnswerContainer({num, text, percent}:{num:number, text:string, percent:
 }
 
 function MyPage() {
+    const [embiaRef, emblaApi] = useEmblaCarousel({
+        loop: true,
+        align: 'center'
+    });
+
     return (
         <div className={styles.container}>
             <div className={styles.header}>
@@ -39,9 +53,11 @@ function MyPage() {
                 </div>
                 <SmallButton label='닉네임 수정' className={styles.nicknameEditBtn}/>
             </div>
-            <div>
-                <ImageUpload />
-                <ImageUpload />
+            <div ref={embiaRef} style={{ overflow: 'hidden', height: 404}}>
+                <div style={{ display: 'flex', alignItems: 'center'}}>
+                    <Card />
+                    <Card />
+                </div>
             </div>
             <div style={{width: '100%', marginTop: 48, paddingBottom: 155, paddingLeft: 32, paddingRight: 32,}}>
                 <div className={styles.questionContainer}><span className={styles.questionNum}>Q1.</span>지금 기분이 어때요?</div>

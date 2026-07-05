@@ -17,7 +17,7 @@ export const login = async (field: fieldType) => {
       },
       body: JSON.stringify({
         code,
-        redirectUri,
+        redirectUri
       })
     })
   ).json();

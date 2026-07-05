@@ -8,6 +8,7 @@ export const login = async (field: fieldType) => {
     code = new URLSearchParams(window.location.hash.slice(1)).get('access_token');
   if (!code) return null;
   console.log(code);
+  const redirectUri = window.location.href;
   const res = await (
     await fetch(`${import.meta.env.VITE_BASE_URL}/api/auth/login/${field}`, {
       method: 'POST',
@@ -15,7 +16,8 @@ export const login = async (field: fieldType) => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        code
+        code,
+        redirectUri,
       })
     })
   ).json();

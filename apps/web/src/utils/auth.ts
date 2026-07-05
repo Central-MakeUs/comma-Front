@@ -3,8 +3,8 @@ export type fieldType = 'KAKAO' | 'GOOGLE' | 'APPLE';
 export const login = async (field: fieldType) => {
   console.log('login start');
   let code: string | null = null;
-  if (field === 'KAKAO') code = new URLSearchParams(window.location.search).get('code');
-  else if (field === 'GOOGLE')
+  if (field === 'KAKAO' || field == 'APPLE') code = new URLSearchParams(window.location.search).get('code');
+  else
     code = new URLSearchParams(window.location.hash.slice(1)).get('access_token');
   if (!code) return null;
   console.log(code);

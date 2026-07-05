@@ -10,6 +10,7 @@ import RestChecklist from '../pages/RestChecklist';
 import RestLoading from '../pages/RestLoading';
 import RestResult from '../pages/RestResult';
 import Setting from '../pages/Setting';
+import MyPage from '../pages/MyPage';
 
 export const router = createBrowserRouter([
   {
@@ -63,5 +64,9 @@ export const router = createBrowserRouter([
   {
     path: '/setting',
     Component: Setting
-  }
+  },
+  {
+    path: '/mypage',
+    Component: MyPage,
+  },
 ]);

@@ -20,7 +20,7 @@ function Login() {
     const params = new URLSearchParams({
       client_id: GOOGLE_CLIENT_ID,
       redirect_uri: GOOGLE_REDIRECT_URI,
-      response_type: 'token',
+      response_type: 'code',
       scope: [
         'https://www.googleapis.com/auth/userinfo.email',
         'https://www.googleapis.com/auth/userinfo.profile'

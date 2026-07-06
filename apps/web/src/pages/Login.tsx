@@ -6,7 +6,7 @@ const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 const GOOGLE_REDIRECT_URI = import.meta.env.VITE_GOOGLE_REDIRECT_URI;
 
 function Login() {
-  const onKakaoClick = (e:React.MouseEvent<HTMLButtonElement>) => {
+  const onKakaoClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     window.location.href =
       `https://kauth.kakao.com/oauth/authorize` +
@@ -15,7 +15,7 @@ function Login() {
       `&redirect_uri=${encodeURIComponent(KAKAO_REDIRECT_URI)}`;
   };
 
-  const onGoogleClick = (e:React.MouseEvent<HTMLButtonElement>) => {
+  const onGoogleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     const params = new URLSearchParams({
       client_id: GOOGLE_CLIENT_ID,
@@ -29,7 +29,7 @@ function Login() {
     window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
   };
 
-  const onAppleClick = async (e:React.MouseEvent<HTMLButtonElement>) => {
+  const onAppleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     window.AppleID?.auth.init({
       clientId: '[CLIENT_ID]',
@@ -37,17 +37,17 @@ function Login() {
       redirectURI: `${import.meta.env.VITE_APPLE_REDIRECT_URI}`,
       state: '[STATE]',
       nonce: '[NONCE]',
-      usePopup: false,
+      usePopup: false
     });
 
     try {
       const res = await window.AppleID?.auth.signIn();
       console.log(res);
-    } catch(err) {
+    } catch (err) {
       console.log(err);
       alert('애플 로그인 중 에러 발생');
     }
-  }
+  };
 
   return (
     <div className={styles.container}>

@@ -29,7 +29,7 @@ export const router = createBrowserRouter([
   },
   {
     path: '/oauth/apple/callback',
-    Component: CallbackPage,
+    Component: CallbackPage
   },
   {
     path: '/recommend-result',

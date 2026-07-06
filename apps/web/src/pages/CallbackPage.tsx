@@ -15,7 +15,11 @@ function CallbackPage() {
       let field: fieldType;
       if (pathname === '/oauth/kakao/callback') field = 'KAKAO';
       else if (pathname === '/oauth/google/callback') field = 'GOOGLE';
-      else field = 'APPLE';
+      else if (pathname === '/oauth/apple/callback') field = 'APPLE';
+      else {
+        alert('올바른 callback path를 명시해주세요.');
+        return;
+      }
       const res = await login(field);
       if (!res) alert('로그인 오류: 올바른 정보를 입력하세요.');
       else if (res.success) navigate('/nickname');

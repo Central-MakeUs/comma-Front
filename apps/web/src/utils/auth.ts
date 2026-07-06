@@ -5,7 +5,7 @@ export const login = async (field: fieldType) => {
   let code: string | null = null;
   code = new URLSearchParams(window.location.search).get('code');
   if (!code) return null;
-  console.log(code);
+  // console.log(code);
   let redirectUri: string;
   if (field === 'KAKAO') redirectUri = import.meta.env.VITE_KAKAO_REDIRECT_URI;
   else if (field === 'GOOGLE') redirectUri = import.meta.env.VITE_GOOGLE_REDIRECT_URI;
@@ -22,6 +22,6 @@ export const login = async (field: fieldType) => {
       })
     })
   ).json();
-  console.log(res);
+  // console.log(res);
   return res;
 };

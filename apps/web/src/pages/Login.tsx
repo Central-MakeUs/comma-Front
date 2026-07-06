@@ -32,11 +32,9 @@ function Login() {
   const onAppleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     window.AppleID?.auth.init({
-      clientId: '[CLIENT_ID]',
-      scope: 'email',
+      clientId: import.meta.env.VITE_APPLE_CLIENT_ID,
+      scope: 'email name',
       redirectURI: `${import.meta.env.VITE_APPLE_REDIRECT_URI}`,
-      state: '[STATE]',
-      nonce: '[NONCE]',
       usePopup: false
     });
 

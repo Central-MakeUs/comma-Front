@@ -9,19 +9,39 @@
     "newArchEnabled": true,
     "plugins": [
       [
+        "expo-media-library",
+        {
+          "granularPermissions": ["photo"],
+          "photosPermission": "휴식 사진을 선택할 수 있도록 사진 보관함 접근 권한이 필요해요."
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "image": "./assets/splash.png",
-          "resizeMode": "cover"
+          "resizeMode": "cover",
+          "backgroundColor": "#1a1814",
+          "enableFullScreenImage_legacy": true
         }
       ]
     ],
     "ios": {
-      "supportsTablet": true
+      "bundleIdentifier": "com.comma.app",
+      "buildNumber": "3",
+      "supportsTablet": true,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "edgeToEdgeEnabled": true,
       "package": "com.anonymous.comma"
+    },
+    "extra": {
+      "webUrl": "https://comma-front-web.vercel.app/",
+      "eas": {
+        "projectId": "6769c796-0c29-40a4-8afb-24f4e6df08de"
+      }
     }
   }
 }

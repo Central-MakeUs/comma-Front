@@ -4,8 +4,13 @@ globalStyle('*', {
   boxSizing: 'border-box'
 });
 
-globalStyle('body', {
+globalStyle('html, body, #root', {
+  minHeight: '100%',
   margin: 0
+});
+
+globalStyle('html, body', {
+  touchAction: 'manipulation'
 });
 
 globalFontFace('Pretendard', {
@@ -15,6 +20,5 @@ globalFontFace('Pretendard', {
 });
 
 globalStyle('body', {
-  margin: 0,
   fontFamily: 'Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif'
 });

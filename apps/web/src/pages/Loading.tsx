@@ -3,7 +3,7 @@ import * as styles from './Loading.css';
 
 function Loading() {
   const location = useLocation();
-  const { userName } = location.state;
+  const userName = (location.state as { userName?: string } | null)?.userName ?? '콤마';
 
   return (
     <div className={styles.container}>

@@ -14,6 +14,9 @@ export const appBridge = linkBridge<BridgeStore<AppBridge>, AppPostMessageSchema
         version: 'dev'
       };
     },
-    async setStatusBar() {}
+    async setStatusBar() {},
+    async getGalleryPhotos() {
+      return [];
+    }
   }
 });

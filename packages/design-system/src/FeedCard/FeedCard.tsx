@@ -19,6 +19,7 @@ export type FeedCardProps = Omit<ComponentPropsWithoutRef<'div'>, 'children' | '
   imageSrc?: string;
   imageAlt?: string;
   imageHeart?: boolean;
+  imageClassName?: string;
   title?: string;
   timeLabel?: string;
   dateLabel?: string;
@@ -37,6 +38,7 @@ export function FeedCard({
   imageSrc,
   imageAlt,
   imageHeart = false,
+  imageClassName,
   title = '꿈꾸는 소녀',
   timeLabel = '3분 전',
   dateLabel = '2026. 07. 23',
@@ -52,7 +54,12 @@ export function FeedCard({
 
   return (
     <div className={rootClassName} {...divProps}>
-      <FeedImage heart={imageHeart} imageAlt={imageAlt} imageSrc={imageSrc} />
+      <FeedImage
+        className={imageClassName}
+        heart={imageHeart}
+        imageAlt={imageAlt}
+        imageSrc={imageSrc}
+      />
       <div className={body}>
         <div className={metaRow}>
           {variant === 'my' ? (

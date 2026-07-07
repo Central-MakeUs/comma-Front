@@ -32,7 +32,7 @@ export const router = createBrowserRouter([
     Component: CallbackPage
   },
   {
-    path: '/recommend-result',
+    path: '/rest/result',
     Component: RestResult
   },
   {
@@ -48,7 +48,7 @@ export const router = createBrowserRouter([
     Component: Archive
   },
   {
-    path: '/recommend-loading',
+    path: '/rest/loading',
     Component: RestLoading
   },
   {

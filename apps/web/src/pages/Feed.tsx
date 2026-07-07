@@ -1,6 +1,7 @@
 import { Chip, FeedCard, Icon, NavigationBar } from '@comma/design-system';
 import { useRef, useState } from 'react';
 import * as styles from './Feed.css';
+import { useNavigate } from 'react-router-dom';
 
 const feelCat = ['전체', '멍하고 싶어', '기분 전환이 필요해', '가볍게 해볼 수 있어'];
 
@@ -56,6 +57,8 @@ function Feed() {
   const [feelPos, setFeelPos] = useState<{ top: number; left: number }>();
   const [bodyPos, setBodyPos] = useState<{ top: number; left: number }>();
   const [restPos, setRestPos] = useState<{ top: number; left: number }>();
+
+  const navigate = useNavigate();
 
   const getModalPos = (ref: React.RefObject<HTMLDivElement | null>) => {
     const rect = ref.current?.getBoundingClientRect();
@@ -167,7 +170,22 @@ function Feed() {
           <FeedCard />
         </div>
       </div>
-      <NavigationBar active="feed" className={styles.navBarStyle} />
+      <NavigationBar active="feed" className={styles.navBarStyle} onItemSelect={(item) => {
+        switch(item) {
+          case 'rest':
+             navigate('/rest/result');
+             break;
+          case 'feed':
+            navigate('/feed');
+            break;
+          case 'archive':
+            navigate('/archive');
+            break;
+          case 'mypage':
+            navigate('/mypage');
+            break;
+        }
+      }}/>
     </div>
   );
 }

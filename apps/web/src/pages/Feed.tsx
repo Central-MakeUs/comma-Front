@@ -1,7 +1,7 @@
 import { Chip, FeedCard, Icon, NavigationBar } from '@comma/design-system';
 import { useRef, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import * as styles from './Feed.css';
-import { useNavigate, Link } from 'react-router-dom';
 
 const feelCat = ['전체', '멍하고 싶어', '기분 전환이 필요해', '가볍게 해볼 수 있어'];
 
@@ -48,11 +48,11 @@ function Feed() {
 
   const feelRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
-  const restRef = useRef<HTMLDivElement>(null);
+  const _restRef = useRef<HTMLDivElement>(null);
 
   const [feelPos, setFeelPos] = useState<{ top: number; left: number }>();
   const [bodyPos, setBodyPos] = useState<{ top: number; left: number }>();
-  const [restPos, setRestPos] = useState<{ top: number; left: number }>();
+  const [_restPos, _setRestPos] = useState<{ top: number; left: number }>();
 
   const navigate = useNavigate();
 
@@ -69,7 +69,7 @@ function Feed() {
           <br />
           잠깐 쉼표 찍으러 갈까요?
         </span>
-        <Link className={styles.headerLink} to='/rest/checklist'>
+        <Link className={styles.headerLink} to="/rest/checklist">
           휴식하기 <Icon name="rightArrow" />
         </Link>
       </div>
@@ -142,22 +142,26 @@ function Feed() {
           <FeedCard />
         </div>
       </div>
-      <NavigationBar active="feed" className={styles.navBarStyle} onItemSelect={(item) => {
-        switch(item) {
-          case 'rest':
-             navigate('/rest/result');
-             break;
-          case 'feed':
-            navigate('/feed');
-            break;
-          case 'archive':
-            navigate('/archive');
-            break;
-          case 'mypage':
-            navigate('/mypage');
-            break;
-        }
-      }}/>
+      <NavigationBar
+        active="feed"
+        className={styles.navBarStyle}
+        onItemSelect={(item) => {
+          switch (item) {
+            case 'rest':
+              navigate('/rest/result');
+              break;
+            case 'feed':
+              navigate('/feed');
+              break;
+            case 'archive':
+              navigate('/archive');
+              break;
+            case 'mypage':
+              navigate('/mypage');
+              break;
+          }
+        }}
+      />
     </div>
   );
 }

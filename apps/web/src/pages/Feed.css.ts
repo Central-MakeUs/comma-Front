@@ -31,7 +31,7 @@ export const headerLink = style({
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'flex-end',
-  textDecoration: 'none',
+  textDecoration: 'none'
 });
 
 export const title = style({

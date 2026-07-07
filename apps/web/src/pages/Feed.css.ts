@@ -30,7 +30,8 @@ export const headerLink = style({
   color: colors.textPrimary,
   display: 'flex',
   justifyContent: 'center',
-  alignItems: 'flex-end'
+  alignItems: 'flex-end',
+  textDecoration: 'none',
 });
 
 export const title = style({

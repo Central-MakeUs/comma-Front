@@ -6,7 +6,8 @@ const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 const GOOGLE_REDIRECT_URI = import.meta.env.VITE_GOOGLE_REDIRECT_URI;
 
 function Login() {
-  const onKakaoClick = () => {
+  const onKakaoClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
     window.location.href =
       `https://kauth.kakao.com/oauth/authorize` +
       `?response_type=code` +
@@ -14,17 +15,36 @@ function Login() {
       `&redirect_uri=${encodeURIComponent(KAKAO_REDIRECT_URI)}`;
   };
 
-  const onGoogleClick = () => {
+  const onGoogleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
     const params = new URLSearchParams({
       client_id: GOOGLE_CLIENT_ID,
       redirect_uri: GOOGLE_REDIRECT_URI,
-      response_type: 'token',
+      response_type: 'code',
       scope: [
         'https://www.googleapis.com/auth/userinfo.email',
         'https://www.googleapis.com/auth/userinfo.profile'
       ].join(' ')
     });
     window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+  };
+
+  const onAppleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    window.AppleID?.auth.init({
+      clientId: import.meta.env.VITE_APPLE_CLIENT_ID,
+      scope: 'email name',
+      redirectURI: `${import.meta.env.VITE_APPLE_REDIRECT_URI}`,
+      usePopup: false
+    });
+
+    try {
+      const res = await window.AppleID?.auth.signIn();
+      console.log(res);
+    } catch (err) {
+      console.log(err);
+      alert('애플 로그인 중 에러 발생');
+    }
   };
 
   return (
@@ -54,7 +74,7 @@ function Login() {
           <img src="/images/kakao_logo.svg" alt="카카오 아이콘" width={18} height={18} />
           카카오톡으로 로그인
         </button>
-        <button className={styles.appleBtn} type="button">
+        <button className={styles.appleBtn} type="button" onClick={onAppleClick}>
           <img src="/images/apple_logo.svg" alt="애플 아이콘" width={16} height={19} />
           Apple로 로그인
         </button>

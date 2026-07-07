@@ -1,7 +1,7 @@
 import { Chip, FeedCard, Icon, NavigationBar } from '@comma/design-system';
 import { useRef, useState } from 'react';
 import * as styles from './Feed.css';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 const feelCat = ['전체', '멍하고 싶어', '기분 전환이 필요해', '가볍게 해볼 수 있어'];
 
@@ -73,9 +73,9 @@ function Feed() {
           <br />
           잠깐 쉼표 찍으러 갈까요?
         </span>
-        <span className={styles.headerLink}>
+        <Link className={styles.headerLink} to='/rest/checklist'>
           휴식하기 <Icon name="rightArrow" />
-        </span>
+        </Link>
       </div>
       <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
         <div style={{ width: '100%' }}>

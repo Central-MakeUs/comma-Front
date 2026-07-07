@@ -7,8 +7,6 @@ const feelCat = ['전체', '멍하고 싶어', '기분 전환이 필요해', '�
 
 const bodyStateCat = ['전체', '완전 방전이야', '견딜 만해', '안 피곤해'];
 
-const restCat = ['전체', '아무것도 안하고 싶어', '조용히 혼자 있고 싶어', '몸을 움직이고 싶어'];
-
 type fieldType = 'feel' | 'body' | 'rest';
 
 interface ICategoryModal {
@@ -28,7 +26,7 @@ const itemStyle: React.CSSProperties = {
 };
 
 function CategoryModal({ field, onClick, style }: ICategoryModal) {
-  const items = field === 'feel' ? feelCat : field === 'body' ? bodyStateCat : restCat;
+  const items = field === 'feel' ? feelCat : bodyStateCat;
 
   return (
     <div className={styles.chipModal} style={style}>
@@ -44,11 +42,9 @@ function CategoryModal({ field, onClick, style }: ICategoryModal) {
 function Feed() {
   const [feelOpen, setFeelOpen] = useState(false);
   const [bodyOpen, setBodyOpen] = useState(false);
-  const [restOpen, setRestOpen] = useState(false);
 
   const [currentFeel, setCurrentFeel] = useState('기분');
   const [currentBody, setCurrentBody] = useState('몸 상태');
-  const [currentRest, setCurrentRest] = useState('휴식');
 
   const feelRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -102,7 +98,6 @@ function Feed() {
                   setFeelPos(getModalPos(feelRef));
                   setFeelOpen((prev) => !prev);
                   setBodyOpen(false);
-                  setRestOpen(false);
                 }}
               />
               {feelOpen ? (
@@ -125,7 +120,6 @@ function Feed() {
                   setBodyPos(getModalPos(bodyRef));
                   setBodyOpen((prev) => !prev);
                   setFeelOpen(false);
-                  setRestOpen(false);
                 }}
               />
               {bodyOpen ? (
@@ -135,28 +129,6 @@ function Feed() {
                   onClick={(cat) => {
                     setCurrentBody(cat);
                     setBodyOpen(false);
-                  }}
-                />
-              ) : null}
-            </div>
-            <div ref={restRef} style={{ position: 'relative', flexShrink: 0 }}>
-              <Chip
-                label={currentRest}
-                state={restOpen ? 'selected' : 'default'}
-                onClick={() => {
-                  setRestPos(getModalPos(restRef));
-                  setRestOpen((prev) => !prev);
-                  setFeelOpen(false);
-                  setBodyOpen(false);
-                }}
-              />
-              {restOpen ? (
-                <CategoryModal
-                  field="rest"
-                  style={restPos}
-                  onClick={(cat) => {
-                    setCurrentRest(cat);
-                    setRestOpen(false);
                   }}
                 />
               ) : null}

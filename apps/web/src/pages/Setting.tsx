@@ -1,6 +1,7 @@
 import { CtaButton, colors, Icon, SmallButton } from '@comma/design-system';
 import { useState } from 'react';
 import * as styles from './Setting.css';
+import { useNavigate } from 'react-router-dom';
 
 const settings = ['서비스 이용약관', '개인정보 처리방침', '로그아웃', '회원 탈퇴'];
 
@@ -73,6 +74,7 @@ function Setting() {
   const [logOutOpen, setLogOutOpen] = useState(false);
   const [withdrawOpen, setWithdrawOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const navigate = useNavigate();
 
   const onLogOutClick = () => {
     setLogOutOpen(true);
@@ -95,7 +97,7 @@ function Setting() {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <Icon name="rightArrow" className={styles.leftArrow} />
+        <Icon name="rightArrow" className={styles.leftArrow} onClick={() => navigate(-1)}/>
         <span>설정</span>
       </div>
       <div style={{ width: '100%', marginTop: 24 }}>

@@ -29,23 +29,23 @@ function Login() {
     window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
   };
 
-  const onAppleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    window.AppleID?.auth.init({
-      clientId: import.meta.env.VITE_APPLE_CLIENT_ID,
-      scope: 'email name',
-      redirectURI: `${import.meta.env.VITE_APPLE_REDIRECT_URI}`,
-      usePopup: false
-    });
+  // const onAppleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
+  //   e.preventDefault();
+  //   window.AppleID?.auth.init({
+  //     clientId: import.meta.env.VITE_APPLE_CLIENT_ID,
+  //     scope: 'email name',
+  //     redirectURI: `${import.meta.env.VITE_APPLE_REDIRECT_URI}`,
+  //     usePopup: false
+  //   });
 
-    try {
-      const res = await window.AppleID?.auth.signIn();
-      console.log(res);
-    } catch (err) {
-      console.log(err);
-      alert('애플 로그인 중 에러 발생');
-    }
-  };
+  //   try {
+  //     const res = await window.AppleID?.auth.signIn();
+  //     console.log(res);
+  //   } catch (err) {
+  //     console.log(err);
+  //     alert('애플 로그인 중 에러 발생');
+  //   }
+  // };
 
   return (
     <div className={styles.container}>
@@ -74,7 +74,7 @@ function Login() {
           <img src="/images/kakao_logo.svg" alt="카카오 아이콘" width={18} height={18} />
           카카오톡으로 로그인
         </button>
-        <button className={styles.appleBtn} type="button" onClick={onAppleClick}>
+        <button className={styles.appleBtn} type="button" >
           <img src="/images/apple_logo.svg" alt="애플 아이콘" width={16} height={19} />
           Apple로 로그인
         </button>

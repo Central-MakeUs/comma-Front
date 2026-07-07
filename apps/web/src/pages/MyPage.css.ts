@@ -100,5 +100,4 @@ export const cardStyle = style({
     height: 404,
     backgroundColor: 'white',
     borderRadius: 100,
-    flex: '0 0 320px',
 })

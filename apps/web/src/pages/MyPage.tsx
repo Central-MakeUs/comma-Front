@@ -1,5 +1,5 @@
 import * as styles from './MyPage.css';
-import { Icon, SmallButton, ImageUpload, NavigationBar } from '@comma/design-system';
+import { Icon, SmallButton, NavigationBar } from '@comma/design-system';
 import useEmblaCarousel from 'embla-carousel-react';
 
 function GaugeBar({percent}:{percent:number}) {
@@ -15,8 +15,10 @@ function GaugeBar({percent}:{percent:number}) {
 
 function Card() {
     return (
-        <div className={styles.cardStyle}>
+        <div style={{flex: '0 0 320px', paddingLeft: 16}}>
+            <div className={styles.cardStyle}>
 
+            </div>
         </div>
     )
 }
@@ -34,8 +36,9 @@ function AnswerContainer({num, text, percent}:{num:number, text:string, percent:
 
 function MyPage() {
     const [embiaRef, emblaApi] = useEmblaCarousel({
-        loop: true,
-        align: 'center'
+        loop: false,
+        containScroll: false,
+        align: 'center',
     });
 
     return (
@@ -54,7 +57,10 @@ function MyPage() {
                 <SmallButton label='닉네임 수정' className={styles.nicknameEditBtn}/>
             </div>
             <div ref={embiaRef} style={{ overflow: 'hidden', height: 404}}>
-                <div style={{ display: 'flex', alignItems: 'center'}}>
+                <div style={{ display: 'flex', alignItems: 'center', marginLeft: -16, paddingLeft: 'calc((100% - 320px) / 2)', paddingRight: 'calc((100% - 320px) / 2)'}}>
+                    <Card />
+                    <Card />
+                    <Card />
                     <Card />
                     <Card />
                 </div>

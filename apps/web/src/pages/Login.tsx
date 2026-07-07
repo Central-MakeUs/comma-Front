@@ -74,7 +74,7 @@ function Login() {
           <img src="/images/kakao_logo.svg" alt="카카오 아이콘" width={18} height={18} />
           카카오톡으로 로그인
         </button>
-        <button className={styles.appleBtn} type="button" >
+        <button className={styles.appleBtn} type="button">
           <img src="/images/apple_logo.svg" alt="애플 아이콘" width={16} height={19} />
           Apple로 로그인
         </button>

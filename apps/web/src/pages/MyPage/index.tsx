@@ -7,6 +7,7 @@ import { interpolatePath, lerp } from '../../utils/interpolatePath';
 import MyPageAnswerContainer from './MyPageAnswerContainer';
 import MyPageCard from './MyPageCard';
 import MyPageNicknameModal from './MyPageNicknameModal';
+import { useNavigate } from 'react-router-dom';
 
 function MyPage() {
     const [embiaRef, emblaApi] = useEmblaCarousel({
@@ -36,6 +37,7 @@ function MyPage() {
     ]);
     const [xs, setXs] = useState([0, 0, 0, 0, 0]);
     const [showModal, setShowModal] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
         if(!emblaApi) return;
@@ -141,7 +143,21 @@ function MyPage() {
                     <MyPageAnswerContainer num={3} text={'넉넉(6시간이상)'} percent={5}/>
                 </div>
             </div>
-            <NavigationBar active='mypage' className={styles.navStyle}/>
+            <NavigationBar active='mypage' className={styles.navStyle} onItemSelect={(item) => {
+                switch(item) {
+                    case 'rest':
+                        navigate('/rest/checklist');
+                        break;
+                    case 'feed':
+                        navigate('/feed');
+                        break;
+                    case 'archive':
+                        navigate('/archive');
+                        break;
+                    case 'mypage':
+                        break;
+                }
+            }}/>
         </div>
     )
 }

@@ -76,52 +76,9 @@ export const questionContainer = style({
     marginBottom: 20,
 })
 
-export const answerNum = style({
-    ...typography.engNum,
-    color: colors.textPrimary,
-    fontSize: 24,
-    marginRight: 6,
-})
-
-export const answerContainer = style({
-    ...typography.labelNormalR,
-    color: colors.textPrimary,
-})
-
-export const gaugeBar = style({
-    backgroundColor: colors.lineSecondary,
-    width: 120,
-    height: 4,
-    borderRadius: 100,
-})
-
-export const gaugeBarInner = style({
-    backgroundColor: colors.textPrimary,
-    height: 4,
-    borderRadius: 100,
-})
-
-export const gaugeText = style({
-    ...typography.bodyNormalR,
-    color: colors.textTertiary,
-    marginLeft: 16,
-})
-
 export const navStyle = style({
     position: 'fixed',
     left: '50%',
     transform: 'translateX(-50%)',
     bottom: 40,
-})
-
-export const cardStyle = style({
-    width: 320,
-    height: 404,
-    backgroundColor: 'white',
-    boxShadow: 'inset 0 4px 10px 0 #FFFFFF20, 0 4px 40px #00000020',
-    boxSizing: 'border-box',
-    padding: 32,
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'space-between',
 })

@@ -3,55 +3,9 @@ import { Icon, SmallButton, NavigationBar, typography, colors } from '@comma/des
 import useEmblaCarousel from 'embla-carousel-react';
 import { useState, useEffect } from 'react';
 import { assignInlineVars } from '@vanilla-extract/dynamic';
-import { interpolatePath, lerp } from '../utils/interpolatePath';
-
-function GaugeBar({percent}:{percent:number}) {
-    return (
-        <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
-            <div className={styles.gaugeBar}>
-                <div className={styles.gaugeBarInner} style={{width: `${120*(percent/100)}px`}}/>
-            </div>
-            <span className={styles.gaugeText}>{percent}%</span>
-        </div>
-    )
-}
-
-function Card({backgroundUrl, num, count, title, path, width, height, x}:{backgroundUrl?:string, num:number, count:number, title:string, path:string, width:number, height:number, x:number}) {
-    return (
-        <div style={{position: 'absolute', top: '50%', left: 0, transform: `translate(${x}px, -50%)`, width, height}}>
-            <div className={styles.cardStyle} style=
-                {{
-                    width,
-                    height,
-                    clipPath: `path("${path}")`,
-                    backgroundImage: `linear-gradient(rgba(17, 17, 17, 0) 0%, #111111 100%), url(${backgroundUrl})`,
-                    backgroundSize: 'cover',
-                    backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'center',
-                }}
-            >
-                <div style={{...typography.engNum, fontSize: 64, color: '#FCFCFC66', textAlign: 'right'}}>#{num}</div>
-                <div style={{display: 'flex', flexDirection: 'column'}}>
-                    <div>
-                        <span style={{...typography.engNum, fontSize: 48, color: colors.textPrimary}}>{count}</span><span style={{...typography.headingR, color: colors.textSecondary}}> 회</span>
-                    </div>
-                    <span style={{...typography.headingB, color: colors.textSecondary}}>{title}</span>
-                </div>
-            </div>
-        </div>
-    )
-}
-
-function AnswerContainer({num, text, percent}:{num:number, text:string, percent:number}) {
-    return (
-        <div style={{width: '100%', display: 'flex', flexDirection: 'row', alignItems: 'center',justifyContent: 'space-between', padding: 0,}}>
-            <div className={styles.answerContainer}>
-                <span className={styles.answerNum}>#{num}</span> {text}
-            </div>
-            <GaugeBar percent={percent}/>
-        </div>
-    )
-}
+import { interpolatePath, lerp } from '../../utils/interpolatePath';
+import MyPageAnswerContainer from './MyPageAnswerContainer';
+import MyPageCard from './MyPageCard';
 
 function MyPage() {
     const [embiaRef, emblaApi] = useEmblaCarousel({
@@ -159,25 +113,25 @@ function MyPage() {
                     <div style={{flex: `0 0 ${SMALL_WIDTH}px`, height: BIG_HEIGHT}}/>
                 </div>
                 <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-                    <Card backgroundUrl='/images/rest_1.svg' num={1} count={13} title='가볍게 산책하기' path={paths[0]} width={sizes[0].width} height={sizes[0].height} x={xs[0]}/>
-                    <Card backgroundUrl='/images/rest_5.svg' num={2} count={5} title='title2' path={paths[1]} width={sizes[1].width} height={sizes[1].height} x={xs[1]}/>
-                    <Card num={3} count={4} title='title3' path={paths[2]} width={sizes[2].width} height={sizes[2].height} x={xs[2]}/>
-                    <Card num={4} count={3} title='title4' path={paths[3]} width={sizes[3].width} height={sizes[3].height} x={xs[3]}/>
-                    <Card backgroundUrl='/images/rest_2.svg' num={5} count={2} title='title5' path={paths[4]} width={sizes[4].width} height={sizes[4].height} x={xs[4]}/>
+                    <MyPageCard backgroundUrl='/images/rest_1.svg' num={1} count={13} title='가볍게 산책하기' path={paths[0]} width={sizes[0].width} height={sizes[0].height} x={xs[0]}/>
+                    <MyPageCard backgroundUrl='/images/rest_5.svg' num={2} count={5} title='title2' path={paths[1]} width={sizes[1].width} height={sizes[1].height} x={xs[1]}/>
+                    <MyPageCard num={3} count={4} title='title3' path={paths[2]} width={sizes[2].width} height={sizes[2].height} x={xs[2]}/>
+                    <MyPageCard num={4} count={3} title='title4' path={paths[3]} width={sizes[3].width} height={sizes[3].height} x={xs[3]}/>
+                    <MyPageCard backgroundUrl='/images/rest_2.svg' num={5} count={2} title='title5' path={paths[4]} width={sizes[4].width} height={sizes[4].height} x={xs[4]}/>
                 </div>
             </div>
             <div style={{width: '100%', marginTop: 48, paddingBottom: 155, paddingLeft: 32, paddingRight: 32,}}>
                 <div className={styles.questionContainer}><span className={styles.questionNum}>Q1.</span>지금 기분이 어때요?</div>
                 <div>
-                    <AnswerContainer num={1} text={'멍하고 싶어'} percent={55}/>
-                    <AnswerContainer num={2} text={'기분 전환이 필요해'} percent={35}/>
-                    <AnswerContainer num={3} text={'가볍게 해볼 수 있어'} percent={10}/>
+                    <MyPageAnswerContainer num={1} text={'멍하고 싶어'} percent={55}/>
+                    <MyPageAnswerContainer num={2} text={'기분 전환이 필요해'} percent={35}/>
+                    <MyPageAnswerContainer num={3} text={'가볍게 해볼 수 있어'} percent={10}/>
                 </div>
                 <div className={styles.questionContainer} style={{marginTop: 40}}><span className={styles.questionNum}>Q2.</span>어느정도 시간이 있어요?</div>
                 <div>
-                    <AnswerContainer num={1} text={'잠깐(1시간 이내)'} percent={70}/>
-                    <AnswerContainer num={2} text={'여유(1-6시간이내)'} percent={25}/>
-                    <AnswerContainer num={3} text={'넉넉(6시간이상)'} percent={5}/>
+                    <MyPageAnswerContainer num={1} text={'잠깐(1시간 이내)'} percent={70}/>
+                    <MyPageAnswerContainer num={2} text={'여유(1-6시간이내)'} percent={25}/>
+                    <MyPageAnswerContainer num={3} text={'넉넉(6시간이상)'} percent={5}/>
                 </div>
             </div>
             <NavigationBar active='mypage' className={styles.navStyle}/>

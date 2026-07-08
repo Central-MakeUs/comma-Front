@@ -3,6 +3,7 @@ import { Icon, SmallButton, NavigationBar, typography, colors } from '@comma/des
 import useEmblaCarousel from 'embla-carousel-react';
 import { useState, useEffect } from 'react';
 import { assignInlineVars } from '@vanilla-extract/dynamic';
+import { interpolatePath, lerp } from '../utils/interpolatePath';
 
 function GaugeBar({percent}:{percent:number}) {
     return (
@@ -15,12 +16,14 @@ function GaugeBar({percent}:{percent:number}) {
     )
 }
 
-function Card({backgroundUrl, num, count, title}:{backgroundUrl?:string, num:number, count:number, title:string}) {
+function Card({backgroundUrl, num, count, title, path, width, height}:{backgroundUrl?:string, num:number, count:number, title:string, path:string, width:number, height:number}) {
     return (
-        <div style={{flex: '0 0 320px', paddingLeft: 16}}>
+        <div style={{flex: `0 0 ${width}px`}}>
             <div className={styles.cardStyle} style=
                 {{
-                    clipPath: 'path("M0 94.659C0 16.7073 16.8536 0 95.488 0H224.512C303.146 0 320 16.7073 320 94.659V309.341C320 387.293 303.146 404 224.512 404H95.488C16.8536 404 0 387.293 0 309.341V94.659Z")',
+                    width,
+                    height,
+                    clipPath: `path("${path}")`,
                     backgroundImage: `linear-gradient(rgba(17, 17, 17, 0) 0%, #111111 100%), url(${backgroundUrl})`,
                     backgroundSize: 'cover',
                     backgroundRepeat: 'no-repeat',
@@ -55,20 +58,55 @@ function MyPage() {
         loop: false,
         containScroll: false,
         align: 'center',
+        watchResize: false,
     });
     const [bgUrl, setBgUrl] = useState('');
     const backgrounds = ['/images/rest_1.svg', '/images/rest_5.svg', '', '', '/images/rest_2.svg'];
+    const BIG_PATH =
+    'M0 94.659C0 16.7073 16.8536 0 95.488 0H224.512C303.146 0 320 16.7073 320 94.659V309.341C320 387.293 303.146 404 224.512 404H95.488C16.8536 404 0 387.293 0 309.341V94.659Z';
+    const SMALL_PATH =
+    'M0 70.9943C0 12.5305 12.6402 0 71.616 0H168.384C227.36 0 240 12.5305 240 70.9943V232.006C240 290.469 227.36 303 168.384 303H71.616C12.6402 303 0 290.469 0 232.006V70.9943Z';
+    const BIG_WIDTH = 320;
+    const BIG_HEIGHT = 404;
+    const SMALL_WIDTH = 240;
+    const SMALL_HEIGHT = 303;
+    const [paths, setPaths] = useState([BIG_PATH, SMALL_PATH, SMALL_PATH, SMALL_PATH, SMALL_PATH]);
+    const [sizes, setSizes] = useState([
+        { width: BIG_WIDTH, height: BIG_HEIGHT },
+        { width: SMALL_WIDTH, height: SMALL_HEIGHT },
+        { width: SMALL_WIDTH, height: SMALL_HEIGHT },
+        { width: SMALL_WIDTH, height: SMALL_HEIGHT },
+        { width: SMALL_WIDTH, height: SMALL_HEIGHT },
+    ]);
+
     useEffect(() => {
         if(!emblaApi) return;
+        const updateCardTransforms = () => {
+            const scrollProgress = emblaApi.scrollProgress();
+            const snapList = emblaApi.scrollSnapList();
+            const scales = snapList.map((snap) => {
+                const diff = Math.abs(scrollProgress - snap);
+                return Math.max(0, 1 - diff * 4);
+            });
+            setPaths(scales.map((s) => interpolatePath(SMALL_PATH, BIG_PATH, s)))
+            setSizes(scales.map((s) => ({
+                width: lerp(SMALL_WIDTH, BIG_WIDTH, s),
+                height: lerp(SMALL_HEIGHT, BIG_HEIGHT, s),
+            })))
+        }
         const onSelect = () => {
             const index = emblaApi.selectedScrollSnap();
-            console.log(index);
-            setBgUrl(backgrounds[index])   
+            setBgUrl(backgrounds[index]);
         }
+        updateCardTransforms();
         onSelect();
+        emblaApi.on('scroll', updateCardTransforms);
+        emblaApi.on('reInit', updateCardTransforms);
         emblaApi.on('select', onSelect);
 
         return () =>{
+            emblaApi.off('scroll', updateCardTransforms);
+            emblaApi.off('reInit', updateCardTransforms);
             emblaApi.off('select', onSelect);
         }
 
@@ -98,12 +136,12 @@ function MyPage() {
                 <SmallButton label='닉네임 수정' className={styles.nicknameEditBtn}/>
             </div>
             <div ref={embiaRef} style={{ overflow: 'hidden', height: 404}}>
-                <div style={{ display: 'flex', alignItems: 'center', marginLeft: -16, paddingLeft: 'calc((100% - 320px) / 2)', paddingRight: 'calc((100% - 320px) / 2)'}}>
-                    <Card backgroundUrl='/images/rest_1.svg' num={1} count={13} title='가볍게 산책하기'/>
-                    <Card backgroundUrl='/images/rest_5.svg' num={2} count={5} title='title2'/>
-                    <Card num={3} count={4} title='title3'/>
-                    <Card num={4} count={3} title='title4'/>
-                    <Card backgroundUrl='/images/rest_2.svg' num={5} count={2} title='title5'/>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16, paddingLeft: 'calc((100% - 320px) / 2)', paddingRight: 'calc((100% - 320px) / 2)'}}>
+                    <Card backgroundUrl='/images/rest_1.svg' num={1} count={13} title='가볍게 산책하기' path={paths[0]} width={sizes[0].width} height={sizes[0].height}/>
+                    <Card backgroundUrl='/images/rest_5.svg' num={2} count={5} title='title2' path={paths[1]} width={sizes[1].width} height={sizes[1].height}/>
+                    <Card num={3} count={4} title='title3' path={paths[2]} width={sizes[2].width} height={sizes[2].height}/>
+                    <Card num={4} count={3} title='title4' path={paths[3]} width={sizes[3].width} height={sizes[3].height}/>
+                    <Card backgroundUrl='/images/rest_2.svg' num={5} count={2} title='title5' path={paths[4]} width={sizes[4].width} height={sizes[4].height}/>
                 </div>
             </div>
             <div style={{width: '100%', marginTop: 48, paddingBottom: 155, paddingLeft: 32, paddingRight: 32,}}>

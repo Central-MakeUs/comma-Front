@@ -4,13 +4,13 @@ import CallbackPage from '../pages/CallbackPage';
 import Feed from '../pages/Feed';
 import Loading from '../pages/Loading';
 import Login from '../pages/Login';
+import MyPage from '../pages/MyPage';
 import Nickname from '../pages/Nickname';
 import RestActivity from '../pages/RestActivity';
 import RestChecklist from '../pages/RestChecklist';
 import RestLoading from '../pages/RestLoading';
 import RestResult from '../pages/RestResult';
 import Setting from '../pages/Setting';
-import MyPage from '../pages/MyPage';
 
 export const router = createBrowserRouter([
   {
@@ -67,6 +67,6 @@ export const router = createBrowserRouter([
   },
   {
     path: '/mypage',
-    Component: MyPage,
-  },
+    Component: MyPage
+  }
 ]);

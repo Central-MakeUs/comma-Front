@@ -1,5 +1,5 @@
 import * as styles from './MyPage.css';
-import { Icon, SmallButton, NavigationBar } from '@comma/design-system';
+import { Icon, SmallButton, NavigationBar, typography, colors } from '@comma/design-system';
 import useEmblaCarousel from 'embla-carousel-react';
 
 function GaugeBar({percent}:{percent:number}) {
@@ -13,11 +13,25 @@ function GaugeBar({percent}:{percent:number}) {
     )
 }
 
-function Card() {
+function Card({backgroundUrl, num, count, title}:{backgroundUrl?:string, num:number, count:number, title:string}) {
     return (
         <div style={{flex: '0 0 320px', paddingLeft: 16}}>
-            <div className={styles.cardStyle}>
-
+            <div className={styles.cardStyle} style=
+                {{
+                    clipPath: 'path("M0 94.659C0 16.7073 16.8536 0 95.488 0H224.512C303.146 0 320 16.7073 320 94.659V309.341C320 387.293 303.146 404 224.512 404H95.488C16.8536 404 0 387.293 0 309.341V94.659Z")',
+                    backgroundImage: `linear-gradient(rgba(17, 17, 17, 0) 0%, #111111 100%), url(${backgroundUrl})`,
+                    backgroundSize: 'cover',
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'center',
+                }}
+            >
+                <div style={{...typography.engNum, fontSize: 64, color: '#FCFCFC66', textAlign: 'right'}}>#{num}</div>
+                <div style={{display: 'flex', flexDirection: 'column'}}>
+                    <div>
+                        <span style={{...typography.engNum, fontSize: 48, color: colors.textPrimary}}>{count}</span><span style={{...typography.headingR, color: colors.textSecondary}}> 회</span>
+                    </div>
+                    <span style={{...typography.headingB, color: colors.textSecondary}}>{title}</span>
+                </div>
             </div>
         </div>
     )
@@ -58,11 +72,11 @@ function MyPage() {
             </div>
             <div ref={embiaRef} style={{ overflow: 'hidden', height: 404}}>
                 <div style={{ display: 'flex', alignItems: 'center', marginLeft: -16, paddingLeft: 'calc((100% - 320px) / 2)', paddingRight: 'calc((100% - 320px) / 2)'}}>
-                    <Card />
-                    <Card />
-                    <Card />
-                    <Card />
-                    <Card />
+                    <Card backgroundUrl='/images/rest_1.svg' num={1} count={13} title='가볍게 산책하기'/>
+                    <Card backgroundUrl='/images/rest_2.svg' num={2} count={5} title='title2'/>
+                    <Card num={3} count={4} title='title3'/>
+                    <Card num={4} count={3} title='title4'/>
+                    <Card backgroundUrl='/images/rest_5.svg' num={5} count={2} title='title5'/>
                 </div>
             </div>
             <div style={{width: '100%', marginTop: 48, paddingBottom: 155, paddingLeft: 32, paddingRight: 32,}}>

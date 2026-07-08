@@ -16,9 +16,9 @@ function GaugeBar({percent}:{percent:number}) {
     )
 }
 
-function Card({backgroundUrl, num, count, title, path, width, height}:{backgroundUrl?:string, num:number, count:number, title:string, path:string, width:number, height:number}) {
+function Card({backgroundUrl, num, count, title, path, width, height, x}:{backgroundUrl?:string, num:number, count:number, title:string, path:string, width:number, height:number, x:number}) {
     return (
-        <div style={{flex: `0 0 ${width}px`}}>
+        <div style={{position: 'absolute', top: '50%', left: 0, transform: `translate(${x}px, -50%)`, width, height}}>
             <div className={styles.cardStyle} style=
                 {{
                     width,
@@ -57,7 +57,6 @@ function MyPage() {
     const [embiaRef, emblaApi] = useEmblaCarousel({
         loop: false,
         containScroll: false,
-        align: 'center',
         watchResize: false,
     });
     const [bgUrl, setBgUrl] = useState('');
@@ -70,6 +69,8 @@ function MyPage() {
     const BIG_HEIGHT = 404;
     const SMALL_WIDTH = 240;
     const SMALL_HEIGHT = 303;
+    const GAP = 16;
+    const CARD_COUNT = 5;
     const [paths, setPaths] = useState([BIG_PATH, SMALL_PATH, SMALL_PATH, SMALL_PATH, SMALL_PATH]);
     const [sizes, setSizes] = useState([
         { width: BIG_WIDTH, height: BIG_HEIGHT },
@@ -78,21 +79,35 @@ function MyPage() {
         { width: SMALL_WIDTH, height: SMALL_HEIGHT },
         { width: SMALL_WIDTH, height: SMALL_HEIGHT },
     ]);
+    const [xs, setXs] = useState([0, 0, 0, 0, 0]);
 
     useEffect(() => {
         if(!emblaApi) return;
         const updateCardTransforms = () => {
+            const viewportWidth = emblaApi.rootNode().getBoundingClientRect().width;
             const scrollProgress = emblaApi.scrollProgress();
-            const snapList = emblaApi.scrollSnapList();
-            const scales = snapList.map((snap) => {
-                const diff = Math.abs(scrollProgress - snap);
-                return Math.max(0, 1 - diff * 4);
+            const virtualIndex = scrollProgress * (CARD_COUNT - 1);
+
+            const scales = Array.from({ length: CARD_COUNT }, (_, i) => Math.max(0, 1 - Math.abs(virtualIndex - i)));
+            const widths = scales.map((s) => lerp(SMALL_WIDTH, BIG_WIDTH, s));
+            const heights = scales.map((s) => lerp(SMALL_HEIGHT, BIG_HEIGHT, s));
+
+            const lefts: number[] = [];
+            let cursor = 0;
+            widths.forEach((w) => {
+                lefts.push(cursor);
+                cursor += w + GAP;
             });
+            const centers = widths.map((w, i) => lefts[i] + w / 2);
+
+            const lowerIndex = Math.max(0, Math.min(CARD_COUNT - 2, Math.floor(virtualIndex)));
+            const frac = virtualIndex - lowerIndex;
+            const focalCenter = lerp(centers[lowerIndex], centers[lowerIndex + 1], frac);
+            const virtualScrollLeft = focalCenter - viewportWidth / 2;
+
             setPaths(scales.map((s) => interpolatePath(SMALL_PATH, BIG_PATH, s)))
-            setSizes(scales.map((s) => ({
-                width: lerp(SMALL_WIDTH, BIG_WIDTH, s),
-                height: lerp(SMALL_HEIGHT, BIG_HEIGHT, s),
-            })))
+            setSizes(widths.map((w, i) => ({ width: w, height: heights[i] })))
+            setXs(lefts.map((l) => l - virtualScrollLeft))
         }
         const onSelect = () => {
             const index = emblaApi.selectedScrollSnap();
@@ -135,13 +150,20 @@ function MyPage() {
                 </div>
                 <SmallButton label='닉네임 수정' className={styles.nicknameEditBtn}/>
             </div>
-            <div ref={embiaRef} style={{ overflow: 'hidden', height: 404}}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 16, paddingLeft: 'calc((100% - 320px) / 2)', paddingRight: 'calc((100% - 320px) / 2)'}}>
-                    <Card backgroundUrl='/images/rest_1.svg' num={1} count={13} title='가볍게 산책하기' path={paths[0]} width={sizes[0].width} height={sizes[0].height}/>
-                    <Card backgroundUrl='/images/rest_5.svg' num={2} count={5} title='title2' path={paths[1]} width={sizes[1].width} height={sizes[1].height}/>
-                    <Card num={3} count={4} title='title3' path={paths[2]} width={sizes[2].width} height={sizes[2].height}/>
-                    <Card num={4} count={3} title='title4' path={paths[3]} width={sizes[3].width} height={sizes[3].height}/>
-                    <Card backgroundUrl='/images/rest_2.svg' num={5} count={2} title='title5' path={paths[4]} width={sizes[4].width} height={sizes[4].height}/>
+            <div ref={embiaRef} style={{ position: 'relative', overflow: 'hidden', height: 404}}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: GAP}}>
+                    <div style={{flex: `0 0 ${SMALL_WIDTH}px`, height: BIG_HEIGHT}}/>
+                    <div style={{flex: `0 0 ${SMALL_WIDTH}px`, height: BIG_HEIGHT}}/>
+                    <div style={{flex: `0 0 ${SMALL_WIDTH}px`, height: BIG_HEIGHT}}/>
+                    <div style={{flex: `0 0 ${SMALL_WIDTH}px`, height: BIG_HEIGHT}}/>
+                    <div style={{flex: `0 0 ${SMALL_WIDTH}px`, height: BIG_HEIGHT}}/>
+                </div>
+                <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+                    <Card backgroundUrl='/images/rest_1.svg' num={1} count={13} title='가볍게 산책하기' path={paths[0]} width={sizes[0].width} height={sizes[0].height} x={xs[0]}/>
+                    <Card backgroundUrl='/images/rest_5.svg' num={2} count={5} title='title2' path={paths[1]} width={sizes[1].width} height={sizes[1].height} x={xs[1]}/>
+                    <Card num={3} count={4} title='title3' path={paths[2]} width={sizes[2].width} height={sizes[2].height} x={xs[2]}/>
+                    <Card num={4} count={3} title='title4' path={paths[3]} width={sizes[3].width} height={sizes[3].height} x={xs[3]}/>
+                    <Card backgroundUrl='/images/rest_2.svg' num={5} count={2} title='title5' path={paths[4]} width={sizes[4].width} height={sizes[4].height} x={xs[4]}/>
                 </div>
             </div>
             <div style={{width: '100%', marginTop: 48, paddingBottom: 155, paddingLeft: 32, paddingRight: 32,}}>

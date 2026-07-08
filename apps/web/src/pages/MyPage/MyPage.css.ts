@@ -81,4 +81,7 @@ export const navStyle = style({
     left: '50%',
     transform: 'translateX(-50%)',
     bottom: 40,
+    backdropFilter: 'blur(10px)',
+    WebkitBackdropFilter: 'blur(10px)',
+    backgroundColor: '#1A181310',
 })

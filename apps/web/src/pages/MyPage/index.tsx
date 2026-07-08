@@ -138,7 +138,7 @@ function MyPage() {
       <div className={styles.header}>
         <span>마이페이지</span>
         <div className={styles.headerIconContainer}>
-          <Icon name="setting" />
+          <Icon name="setting" onClick={() => navigate('/setting')}/>
         </div>
       </div>
       <div

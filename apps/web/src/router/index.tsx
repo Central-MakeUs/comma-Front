@@ -32,6 +32,10 @@ export const router = createBrowserRouter([
     Component: CallbackPage
   },
   {
+    path: '/oauth/apple/callback',
+    Component: CallbackPage
+  },
+  {
     path: '/rest/result',
     Component: RestResult
   },

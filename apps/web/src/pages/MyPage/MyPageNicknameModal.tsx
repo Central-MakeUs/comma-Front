@@ -1,7 +1,10 @@
 import { CtaButton, TextInput } from '@comma/design-system';
 import * as styles from './MyPageNicknameModal.css';
+import { useState } from 'react';
 
 function MyPageNicknameModal({ onCancelClick }: { onCancelClick: () => void }) {
+  const [value, setValue] = useState('');
+
   return (
     <div className={styles.container}>
       <div className={styles.icon} />
@@ -22,6 +25,8 @@ function MyPageNicknameModal({ onCancelClick }: { onCancelClick: () => void }) {
           maxLength={10}
           helperText="최대 10자까지 입력할 수 있어요"
           showFooter={true}
+          value={value}
+          onChange={(val) => setValue(val)}
         />
         <div
           style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}

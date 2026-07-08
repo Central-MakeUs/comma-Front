@@ -1,6 +1,6 @@
 import { CtaButton, TextInput } from '@comma/design-system';
-import * as styles from './MyPageNicknameModal.css';
 import { useState } from 'react';
+import * as styles from './MyPageNicknameModal.css';
 
 function MyPageNicknameModal({ onCancelClick }: { onCancelClick: () => void }) {
   const [value, setValue] = useState('');

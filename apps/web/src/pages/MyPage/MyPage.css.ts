@@ -1,4 +1,4 @@
-import { colors, shadows, typography } from '@comma/design-system';
+import { colors, typography } from '@comma/design-system';
 import { style, createVar } from '@vanilla-extract/css';
 
 export const backgroundImageVar = createVar();

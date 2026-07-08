@@ -1,11 +1,12 @@
 import * as styles from './MyPage.css';
-import { Icon, SmallButton, NavigationBar, typography, colors } from '@comma/design-system';
+import { Icon, SmallButton, NavigationBar } from '@comma/design-system';
 import useEmblaCarousel from 'embla-carousel-react';
 import { useState, useEffect } from 'react';
 import { assignInlineVars } from '@vanilla-extract/dynamic';
 import { interpolatePath, lerp } from '../../utils/interpolatePath';
 import MyPageAnswerContainer from './MyPageAnswerContainer';
 import MyPageCard from './MyPageCard';
+import MyPageNicknameModal from './MyPageNicknameModal';
 
 function MyPage() {
     const [embiaRef, emblaApi] = useEmblaCarousel({
@@ -34,6 +35,7 @@ function MyPage() {
         { width: SMALL_WIDTH, height: SMALL_HEIGHT },
     ]);
     const [xs, setXs] = useState([0, 0, 0, 0, 0]);
+    const [showModal, setShowModal] = useState(false);
 
     useEffect(() => {
         if(!emblaApi) return;
@@ -86,6 +88,11 @@ function MyPage() {
         <div className={styles.container} style={assignInlineVars({
             [styles.backgroundImageVar]: `url(${bgUrl}) no-repeat center / cover`
         })}>
+            {showModal? (
+                <div style={{position: 'fixed', zIndex: 2, inset: 0, backgroundColor: '#1A181466'}}>
+                    <MyPageNicknameModal onCancelClick={() => setShowModal(false)}/>
+                </div>
+            ) : null}
             <div style={{position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column'}}>
                 <div  style={{width: '100%', height: 447, background: 'linear-gradient(#11111166 0%, rgba(17, 17, 17, 0) 100%)'}}/>
                 <div style={{flex: 1, width: '100%', background: 'linear-gradient(to top, #11111166 0%, rgba(17, 17, 17, 0) 100%)'}}/>
@@ -102,7 +109,7 @@ function MyPage() {
                     <span className={styles.title}>꿈꾸는 소녀</span>
                     <span className={styles.desc}>마지막 쉼표 3시간 전</span>
                 </div>
-                <SmallButton label='닉네임 수정' className={styles.nicknameEditBtn}/>
+                <SmallButton label='닉네임 수정' className={styles.nicknameEditBtn} onClick={() => setShowModal(true)}/>
             </div>
             <div ref={embiaRef} style={{ position: 'relative', overflow: 'hidden', height: 404}}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: GAP}}>

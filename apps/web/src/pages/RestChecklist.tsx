@@ -127,7 +127,7 @@ function RestChecklist() {
                     selectThenMove(`RestNeed:${restNeed}`, () => {
                       setSelectedKey(undefined);
                       void history.replace('RestNeed', { ...context, restNeed });
-                      void navigate('/recommend-loading');
+                      void navigate('/rest/loading');
                     })
                   }
                 />

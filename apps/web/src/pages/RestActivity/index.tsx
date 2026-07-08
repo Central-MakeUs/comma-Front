@@ -35,7 +35,7 @@ function RestActivity() {
   };
 
   const handleConfirmReselect = () => navigate('/rest/checklist');
-  const handleComplete = () => navigate('/recommend-result');
+  const handleComplete = () => navigate('/rest/result');
 
   if (!isWritingStarted) {
     return (

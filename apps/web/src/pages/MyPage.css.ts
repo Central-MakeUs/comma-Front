@@ -1,10 +1,29 @@
 import { colors, shadows, typography } from '@comma/design-system';
-import { style } from '@vanilla-extract/css';
+import { style, createVar } from '@vanilla-extract/css';
+
+export const backgroundImageVar = createVar();
 
 export const container = style({
     width: '100vw',
     minHeight: '100dvh',
-    backgroundColor: 'black',
+    position: 'relative',
+    selectors: {
+        '&::before': {
+            content: '',
+            position: 'absolute',
+            inset: 0,
+            background: backgroundImageVar,
+            zIndex: -10,
+        },
+        '&::after': {
+            content: '',
+            position: 'absolute',
+            inset: 0,
+            backdropFilter: 'blur(40px)',
+            zIndex: -1,
+            backgroundColor: '#1A181450',
+        }
+    }
 })
 
 export const header = style({

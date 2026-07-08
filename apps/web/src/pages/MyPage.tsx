@@ -1,6 +1,8 @@
 import * as styles from './MyPage.css';
 import { Icon, SmallButton, NavigationBar, typography, colors } from '@comma/design-system';
 import useEmblaCarousel from 'embla-carousel-react';
+import { useState, useEffect } from 'react';
+import { assignInlineVars } from '@vanilla-extract/dynamic';
 
 function GaugeBar({percent}:{percent:number}) {
     return (
@@ -54,9 +56,34 @@ function MyPage() {
         containScroll: false,
         align: 'center',
     });
+    const [bgUrl, setBgUrl] = useState('');
+    const backgrounds = ['/images/rest_1.svg', '/images/rest_5.svg', '', '', '/images/rest_2.svg'];
+    useEffect(() => {
+        if(!emblaApi) return;
+        const onSelect = () => {
+            const index = emblaApi.selectedScrollSnap();
+            console.log(index);
+            setBgUrl(backgrounds[index])   
+        }
+        onSelect();
+        emblaApi.on('select', onSelect);
+
+        return () =>{
+            emblaApi.off('select', onSelect);
+        }
+
+    }, [emblaApi])
+
 
     return (
-        <div className={styles.container}>
+        <div className={styles.container} style={assignInlineVars({
+            [styles.backgroundImageVar]: `url(${bgUrl}) no-repeat center / cover`
+        })}>
+            <div style={{position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column'}}>
+                <div  style={{width: '100%', height: 447, background: 'linear-gradient(#11111166 0%, rgba(17, 17, 17, 0) 100%)'}}/>
+                <div style={{flex: 1, width: '100%', background: 'linear-gradient(to top, #11111166 0%, rgba(17, 17, 17, 0) 100%)'}}/>
+            </div>
+            <div />
             <div className={styles.header}>
                 <span>마이페이지</span>
                 <div className={styles.headerIconContainer}>
@@ -73,10 +100,10 @@ function MyPage() {
             <div ref={embiaRef} style={{ overflow: 'hidden', height: 404}}>
                 <div style={{ display: 'flex', alignItems: 'center', marginLeft: -16, paddingLeft: 'calc((100% - 320px) / 2)', paddingRight: 'calc((100% - 320px) / 2)'}}>
                     <Card backgroundUrl='/images/rest_1.svg' num={1} count={13} title='가볍게 산책하기'/>
-                    <Card backgroundUrl='/images/rest_2.svg' num={2} count={5} title='title2'/>
+                    <Card backgroundUrl='/images/rest_5.svg' num={2} count={5} title='title2'/>
                     <Card num={3} count={4} title='title3'/>
                     <Card num={4} count={3} title='title4'/>
-                    <Card backgroundUrl='/images/rest_5.svg' num={5} count={2} title='title5'/>
+                    <Card backgroundUrl='/images/rest_2.svg' num={5} count={2} title='title5'/>
                 </div>
             </div>
             <div style={{width: '100%', marginTop: 48, paddingBottom: 155, paddingLeft: 32, paddingRight: 32,}}>

@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom';
 import Archive from '../pages/Archive';
 import CallbackPage from '../pages/CallbackPage';
+import Feed from '../pages/Feed';
 import Loading from '../pages/Loading';
 import Login from '../pages/Login';
 import Nickname from '../pages/Nickname';
@@ -35,7 +36,7 @@ export const router = createBrowserRouter([
     Component: CallbackPage
   },
   {
-    path: '/recommend-result',
+    path: '/rest/result',
     Component: RestResult
   },
   {
@@ -51,7 +52,11 @@ export const router = createBrowserRouter([
     Component: Archive
   },
   {
-    path: '/recommend-loading',
+    path: '/rest/loading',
     Component: RestLoading
+  },
+  {
+    path: '/feed',
+    Component: Feed
   }
 ]);

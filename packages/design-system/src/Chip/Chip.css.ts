@@ -5,7 +5,7 @@ const selectedBorder = `1px solid ${vars.color.linePrimary}`;
 const selectedPressedBorder = `1px solid ${vars.color.lineSecondary}`;
 
 export const chip = style({
-  width: 80,
+  width: 'fit-content',
   height: 36,
   display: 'inline-flex',
   alignItems: 'center',

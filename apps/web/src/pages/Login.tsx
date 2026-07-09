@@ -38,7 +38,7 @@ function Login() {
       clientId: APPLE_CLIENT_ID,
       scope: 'email name',
       redirectURI: `${APPLE_REDIRECT_URI}`,
-      usePopup: false
+      usePopup: true,
     });
 
     try {

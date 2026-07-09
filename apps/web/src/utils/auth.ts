@@ -1,9 +1,11 @@
 export type fieldType = 'KAKAO' | 'GOOGLE' | 'APPLE';
 
-export const login = async (field: fieldType) => {
+export const login = async (field: fieldType, appleCode?: string) => {
   console.log('login start');
   let code: string | null = null;
-  code = new URLSearchParams(window.location.search).get('code');
+  if (field !== 'APPLE') code = new URLSearchParams(window.location.search).get('code');
+  else code = appleCode ?? null;
+
   if (!code) return null;
   // console.log(code);
   let redirectUri: string;

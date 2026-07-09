@@ -1,5 +1,5 @@
-import * as styles from './Login.css';
 import { useNavigate } from 'react-router-dom';
+import * as styles from './Login.css';
 
 const REST_API_KEY = import.meta.env.VITE_REST_API_KEY;
 const KAKAO_REDIRECT_URI = import.meta.env.VITE_KAKAO_REDIRECT_URI;
@@ -10,9 +10,9 @@ const APPLE_REDIRECT_URI = import.meta.env.VITE_APPLE_REDIRECT_URI;
 
 interface IAppleRes {
   authorization: {
-    code: string,
-    id_token: string,
-  }
+    code: string;
+    id_token: string;
+  };
 }
 
 function Login() {
@@ -54,7 +54,7 @@ function Login() {
     try {
       const res = (await window.AppleID?.auth.signIn()) as IAppleRes;
       console.log(res);
-      navigate('/oauth/apple/callback', {state: {code: res.authorization.code}})
+      navigate('/oauth/apple/callback', { state: { code: res.authorization.code } });
     } catch (err) {
       console.log(err);
       alert('애플 로그인 중 에러 발생');

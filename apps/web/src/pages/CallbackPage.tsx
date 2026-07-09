@@ -29,7 +29,7 @@ function CallbackPage() {
       else alert(res.message);
     };
     handleLogin();
-  }, [navigate, pathname, location.state.code]);
+  }, [navigate, pathname]);
   return <div>Callback Page</div>;
 }
 

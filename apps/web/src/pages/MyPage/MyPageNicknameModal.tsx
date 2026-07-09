@@ -32,7 +32,7 @@ function MyPageNicknameModal({ onCancelClick }: { onCancelClick: () => void }) {
           style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
         >
           <CtaButton label="취소" className={styles.cancelBtn} onClick={onCancelClick} />
-          <CtaButton label="저장하기" state={value.length > 0 ? 'default' : 'disabled'}/>
+          <CtaButton label="저장하기" state={value.length > 0 ? 'default' : 'disabled'} />
         </div>
       </form>
     </div>

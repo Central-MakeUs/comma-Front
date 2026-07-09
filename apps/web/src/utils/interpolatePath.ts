@@ -5,13 +5,13 @@ export const lerp = (a: number, b: number, t: number) => {
 export const interpolatePath = (smallPath: string, bigPath: string, progress: number) => {
   const regex = /-?\d*\.?\d+/g;
 
-  const small = smallPath.match(regex)?.map(Number);
-  const big = bigPath.match(regex)?.map(Number);
+  const small = smallPath.match(regex)?.map(Number) ?? [];
+  const big = bigPath.match(regex)?.map(Number) ?? [];
 
   let index = 0;
 
   return bigPath.replace(regex, () => {
-    const value = lerp(small[index], big[index], progress);
+    const value = lerp(small[index] ?? 0, big[index] ?? 0, progress);
 
     index++;
 

@@ -4,6 +4,8 @@ const REST_API_KEY = import.meta.env.VITE_REST_API_KEY;
 const KAKAO_REDIRECT_URI = import.meta.env.VITE_KAKAO_REDIRECT_URI;
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 const GOOGLE_REDIRECT_URI = import.meta.env.VITE_GOOGLE_REDIRECT_URI;
+const APPLE_CLIENT_ID = import.meta.env.VITE_APPLE_CLIENT_ID;
+const APPLE_REDIRECT_URI = import.meta.env.VITE_APPLE_REDIRECT_URI;
 
 function Login() {
   const onKakaoClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -31,10 +33,11 @@ function Login() {
 
   const onAppleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
+    console.log(APPLE_CLIENT_ID);
     window.AppleID?.auth.init({
-      clientId: import.meta.env.VITE_APPLE_CLIENT_ID,
+      clientId: APPLE_CLIENT_ID,
       scope: 'email name',
-      redirectURI: `${import.meta.env.VITE_APPLE_REDIRECT_URI}`,
+      redirectURI: `${APPLE_REDIRECT_URI}`,
       usePopup: false
     });
 

@@ -195,7 +195,7 @@ function MyPage() {
             backgroundUrl="/images/rest_5.svg"
             num={2}
             count={5}
-            title="title2"
+            title="가볍게 산책하기"
             path={paths[1]}
             width={sizes[1].width}
             height={sizes[1].height}
@@ -204,7 +204,7 @@ function MyPage() {
           <MyPageCard
             num={3}
             count={4}
-            title="title3"
+            title="가볍게 산책하기"
             path={paths[2]}
             width={sizes[2].width}
             height={sizes[2].height}
@@ -213,7 +213,7 @@ function MyPage() {
           <MyPageCard
             num={4}
             count={3}
-            title="title4"
+            title="가볍게 산책하기"
             path={paths[3]}
             width={sizes[3].width}
             height={sizes[3].height}
@@ -223,7 +223,7 @@ function MyPage() {
             backgroundUrl="/images/rest_2.svg"
             num={5}
             count={2}
-            title="title5"
+            title="가볍게 산책하기"
             path={paths[4]}
             width={sizes[4].width}
             height={sizes[4].height}

@@ -1,4 +1,4 @@
-import { Icon, NavigationBar, SmallButton } from '@comma/design-system';
+import { Icon, NavigationBar, SmallButton, colors } from '@comma/design-system';
 import { assignInlineVars } from '@vanilla-extract/dynamic';
 import useEmblaCarousel from 'embla-carousel-react';
 import { useLayoutEffect, useRef, useState } from 'react';
@@ -9,7 +9,7 @@ import MyPageAnswerContainer from './MyPageAnswerContainer';
 import MyPageCard from './MyPageCard';
 import MyPageNicknameModal from './MyPageNicknameModal';
 
-const backgrounds = ['/images/rest_1.svg', '/images/rest_5.svg', '', '', '/images/rest_2.svg'];
+const backgrounds = ['/images/rest_1.svg', '/images/rest_5.svg', '/images/feed-image.svg', '/images/feed-image.svg', '/images/rest_2.svg'];
 
 const BIG_PATH =
   'M0 94.659C0 16.7073 16.8536 0 95.488 0H224.512C303.146 0 320 16.7073 320 94.659V309.341C320 387.293 303.146 404 224.512 404H95.488C16.8536 404 0 387.293 0 309.341V94.659Z';
@@ -138,7 +138,9 @@ function MyPage() {
       <div className={styles.header}>
         <span>마이페이지</span>
         <div className={styles.headerIconContainer}>
-          <Icon name="setting" onClick={() => navigate('/setting')} />
+          <button style={{border: 'none', background: 'transparent', width: 44, height: 44, color: colors.iconSecondary}} onClick={() => navigate('/setting')}>
+            <Icon name="setting" />
+          </button>
         </div>
       </div>
       <div

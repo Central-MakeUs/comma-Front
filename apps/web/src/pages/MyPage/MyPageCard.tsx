@@ -37,7 +37,7 @@ function MyPageCard({
           width,
           height,
           clipPath: `path("${path}")`,
-          backgroundImage: `linear-gradient(rgba(17, 17, 17, 0) 0%, #111111 100%), url(${backgroundUrl})`,
+          backgroundImage: `linear-gradient(rgba(17, 17, 17, 0) 0%, #111111 100%), url(${backgroundUrl? backgroundUrl : '/images/feed-image.svg'})`,
           backgroundSize: 'cover',
           backgroundRepeat: 'no-repeat',
           backgroundPosition: 'center'

@@ -4,7 +4,8 @@ import { type fieldType, login } from '../utils/auth';
 
 function CallbackPage() {
   const navigate = useNavigate();
-  const { pathname } = useLocation();
+  const location = useLocation();
+  const pathname = location.pathname;
   const hasRun = useRef(false);
 
   useEffect(() => {
@@ -20,7 +21,9 @@ function CallbackPage() {
         alert('올바른 callback path를 명시해주세요.');
         return;
       }
-      const res = await login(field);
+      let res;
+      if(field != 'APPLE') res = await login(field);
+      else res = await login(field, location.state.code);
       if (!res) alert('로그인 오류: 올바른 정보를 입력하세요.');
       else if (res.success) navigate('/nickname');
       else alert(res.message);

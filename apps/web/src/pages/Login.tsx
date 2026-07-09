@@ -1,4 +1,5 @@
 import * as styles from './Login.css';
+import { useNavigate } from 'react-router-dom';
 
 const REST_API_KEY = import.meta.env.VITE_REST_API_KEY;
 const KAKAO_REDIRECT_URI = import.meta.env.VITE_KAKAO_REDIRECT_URI;
@@ -7,7 +8,16 @@ const GOOGLE_REDIRECT_URI = import.meta.env.VITE_GOOGLE_REDIRECT_URI;
 const APPLE_CLIENT_ID = import.meta.env.VITE_APPLE_CLIENT_ID;
 const APPLE_REDIRECT_URI = import.meta.env.VITE_APPLE_REDIRECT_URI;
 
+interface IAppleRes {
+  authorization: {
+    code: string,
+    id_token: string,
+  }
+}
+
 function Login() {
+  const navigate = useNavigate();
+
   const onKakaoClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     window.location.href =
@@ -42,8 +52,9 @@ function Login() {
     });
 
     try {
-      const res = await window.AppleID?.auth.signIn();
+      const res = (await window.AppleID?.auth.signIn()) as IAppleRes;
       console.log(res);
+      navigate('/oauth/apple/callback', {state: {code: res.authorization.code}})
     } catch (err) {
       console.log(err);
       alert('애플 로그인 중 에러 발생');

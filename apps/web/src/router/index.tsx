@@ -9,6 +9,7 @@ import RestActivity from '../pages/RestActivity';
 import RestChecklist from '../pages/RestChecklist';
 import RestLoading from '../pages/RestLoading';
 import RestResult from '../pages/RestResult';
+import Setting from '../pages/Setting';
 
 export const router = createBrowserRouter([
   {
@@ -58,5 +59,9 @@ export const router = createBrowserRouter([
   {
     path: '/feed',
     Component: Feed
+  },
+  {
+    path: '/setting',
+    Component: Setting
   }
 ]);

@@ -5,7 +5,9 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { Platform, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import type { WebViewErrorEvent, WebViewMessageEvent } from 'react-native-webview/lib/WebViewTypes';
 import { postMessage, WebView } from './src/bridge';
+import * as WebBrowser from 'expo-web-browser';
 
 type WebUrlConfig = {
   error?: string;
@@ -58,6 +60,18 @@ const getWebUrlConfig = (): WebUrlConfig => {
 
 SplashScreen.preventAutoHideAsync();
 
+const handleMessage = async (event: WebViewMessageEvent) => {
+  const message = JSON.parse(event.nativeEvent.data);
+  switch(message.type) {
+    case 'GOOGLE_LOGIN':
+      await WebBrowser.openAuthSessionAsync(
+        process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID,
+        process.env.EXPO_PUBLIC_GOOGLE_REDIRECT_URI
+      )
+      break;
+  }
+}
+
 export default function App() {
   const { error, url: webUrl } = getWebUrlConfig();
 
@@ -91,7 +105,7 @@ export default function App() {
           originWhitelist={['*']}
           javaScriptEnabled
           domStorageEnabled
-          onError={(event) => {
+          onError={(event: WebViewErrorEvent) => {
             console.warn('Failed to load web app.', {
               webUrl,
               description: event.nativeEvent.description
@@ -103,6 +117,7 @@ export default function App() {
             });
             SplashScreen.hideAsync();
           }}
+          onMessage={handleMessage}
         />
       </View>
     </SafeAreaProvider>

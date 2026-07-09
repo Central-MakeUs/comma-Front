@@ -2,12 +2,12 @@ import { POST_MESSAGE_EVENT } from '@comma/bridge';
 import Constants from 'expo-constants';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
+import * as WebBrowser from 'expo-web-browser';
 import { useEffect } from 'react';
 import { Platform, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import type { WebViewErrorEvent, WebViewMessageEvent } from 'react-native-webview/lib/WebViewTypes';
 import { postMessage, WebView } from './src/bridge';
-import * as WebBrowser from 'expo-web-browser';
 
 type WebUrlConfig = {
   error?: string;
@@ -62,15 +62,15 @@ SplashScreen.preventAutoHideAsync();
 
 const handleMessage = async (event: WebViewMessageEvent) => {
   const message = JSON.parse(event.nativeEvent.data);
-  switch(message.type) {
+  switch (message.type) {
     case 'GOOGLE_LOGIN':
       await WebBrowser.openAuthSessionAsync(
         process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID,
         process.env.EXPO_PUBLIC_GOOGLE_REDIRECT_URI
-      )
+      );
       break;
   }
-}
+};
 
 export default function App() {
   const { error, url: webUrl } = getWebUrlConfig();

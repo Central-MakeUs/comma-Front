@@ -29,16 +29,16 @@ function Login() {
 
   const onGoogleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    const isMobileWebView = typeof window !== 'undefined' && window.ReactNativeWebView !== undefined;
-    if(isMobileWebView) {
+    const isMobileWebView =
+      typeof window !== 'undefined' && window.ReactNativeWebView !== undefined;
+    if (isMobileWebView) {
       window.ReactNativeWebView?.postMessage(
         JSON.stringify({
-          type: 'GOOGLE_LOGIN',
+          type: 'GOOGLE_LOGIN'
         })
       );
       return;
-    }
-    else {
+    } else {
       const params = new URLSearchParams({
         client_id: GOOGLE_CLIENT_ID,
         redirect_uri: GOOGLE_REDIRECT_URI,

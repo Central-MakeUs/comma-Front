@@ -6,6 +6,7 @@ function CallbackPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const pathname = location.pathname;
+  const appleCode = location.state?.code;
   const hasRun = useRef(false);
 
   useEffect(() => {
@@ -23,13 +24,22 @@ function CallbackPage() {
       }
       let res: Awaited<ReturnType<typeof login>>;
       if (field !== 'APPLE') res = await login(field);
-      else res = await login(field, location.state.code);
-      if (!res) alert('로그인 오류: 올바른 정보를 입력하세요.');
-      else if (res.success) navigate('/nickname');
-      else alert(res.message);
+      else {
+        if (!appleCode) {
+          alert('APPLE 코드가 없습니다.');
+          return;
+        }
+        res = await login(field, appleCode);
+      }
+      if (!res) {
+        alert('로그인 오류: 올바른 정보를 입력하세요.');
+      } else if (res.success) navigate('/nickname');
+      else {
+        alert(res.message);
+      }
     };
     handleLogin();
-  }, [navigate, pathname, location.state.code]);
+  }, [navigate, pathname, appleCode]);
   return <div>Callback Page</div>;
 }
 

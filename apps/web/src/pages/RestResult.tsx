@@ -149,25 +149,25 @@ function RestResult() {
   const infos = [
     {
       title: '가볍게 산책하기',
-      subTitle: '동네 산책하면서 예쁜 하늘 사진 한장 어떠세요?',
+      subTitle: '동네 산책하면서 예쁜 하늘 사진 한장 어떠세요?'
     },
     {
       title: '예시 타이틀',
-      subTitle: '예시 설명',
+      subTitle: '예시 설명'
     },
     {
       title: '예시 타이틀',
-      subTitle: '예시 설명',
+      subTitle: '예시 설명'
     },
     {
       title: '예시 타이틀',
-      subTitle: '예시 설명',
+      subTitle: '예시 설명'
     },
     {
       title: '예시 타이틀',
-      subTitle: '예시 설명',
-    },
-  ]
+      subTitle: '예시 설명'
+    }
+  ];
   const [paths, setPaths] = useState([BIG_PATH, SMALL_PATH, SMALL_PATH, SMALL_PATH, SMALL_PATH]);
   const [sizes, setSizes] = useState([
     { width: BIG_WIDTH, height: BIG_HEIGHT },
@@ -297,14 +297,14 @@ function RestResult() {
           style={{ position: 'relative', overflow: 'hidden', height: BIG_HEIGHT }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: GAP }}>
-            {backgrounds.map((_, i) => (
-              <div key={i} style={{ flex: `0 0 ${SMALL_WIDTH}px`, height: BIG_HEIGHT }} />
+            {backgrounds.map((bg, _i) => (
+              <div key={bg} style={{ flex: `0 0 ${SMALL_WIDTH}px`, height: BIG_HEIGHT }} />
             ))}
           </div>
           <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
             {backgrounds.map((bg, i) => (
               <Card
-                key={i}
+                key={bg}
                 imageSrc={bg || '/images/feed-image.svg'}
                 num={i === 0 ? 31 : i}
                 path={paths[i]}
@@ -341,21 +341,25 @@ function RestResult() {
         </div>
         <CtaButton className={styles.ctaButtonStyle} onClick={() => navigate('/rest/activity')} />
       </div>
-      <NavigationBar active="rest" className={styles.navStyle} onItemSelect={(item) => {
-        switch(item) {
-          case 'rest':
-            break;
-          case 'feed':
-            navigate('/feed');
-            break;
-          case 'archive':
-            navigate('/archive');
-            break;
-          case 'mypage':
-            navigate('/mypage');
-            break;
-        }
-      }}/>
+      <NavigationBar
+        active="rest"
+        className={styles.navStyle}
+        onItemSelect={(item) => {
+          switch (item) {
+            case 'rest':
+              break;
+            case 'feed':
+              navigate('/feed');
+              break;
+            case 'archive':
+              navigate('/archive');
+              break;
+            case 'mypage':
+              navigate('/mypage');
+              break;
+          }
+        }}
+      />
     </div>
   );
 }

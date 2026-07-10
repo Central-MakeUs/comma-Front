@@ -41,14 +41,6 @@ export const subTitle = style({
   marginBottom: 30
 });
 
-export const embiaSlide = style({
-  flex: '0 0 280px',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  marginRight: -20
-});
-
 export const imageUploadStyle = style({
   selectors: {
     '&::after': {

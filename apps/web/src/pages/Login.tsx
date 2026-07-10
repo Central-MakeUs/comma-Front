@@ -21,6 +21,7 @@ interface IGoogleWait {
 }
 
 const waitForGoogleLogin = (): Promise<IGoogleWait> => {
+  console.log('GOOGLE login waiting');
   return new Promise((resolve) => {
     const handler = (event: MessageEvent) => {
       const message = JSON.parse(event.data);

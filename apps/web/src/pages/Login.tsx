@@ -15,14 +15,19 @@ interface IAppleRes {
   };
 }
 
-const waitForGoogleCode = (): Promise<string> => {
+interface IGoogleWait {
+  code: string,
+  redirectUri: string,
+}
+
+const waitForGoogleLogin = (): Promise<IGoogleWait> => {
   return new Promise((resolve) => {
     const handler = (event: MessageEvent) => {
       const message = JSON.parse(event.data);
 
       if (message.type === 'GOOGLE_LOGIN_SUCCESS') {
         window.removeEventListener('message', handler);
-        resolve(message.code);
+        resolve({code: message.code, redirectUri: message.redirectUri});
       }
     };
 
@@ -52,7 +57,7 @@ function Login() {
           type: 'GOOGLE_LOGIN'
         })
       );
-      const code = await waitForGoogleCode();
+      const {code, redirectUri} = await waitForGoogleLogin();
       const res = await (
         await fetch(`${import.meta.env.VITE_BASE_URL}/api/auth/login/GOOGLE`, {
           method: 'POST',
@@ -61,7 +66,7 @@ function Login() {
           },
           body: JSON.stringify({
             code,
-            redirectUri: import.meta.env.VITE_GOOGLE_REDIRECT_URI
+            redirectUri,
           })
         })
       ).json();

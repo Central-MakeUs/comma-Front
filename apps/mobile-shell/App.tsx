@@ -1,9 +1,10 @@
 import { POST_MESSAGE_EVENT } from '@comma/bridge';
+import type { BridgeWebView } from '@webview-bridge/react-native';
 import Constants from 'expo-constants';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import * as WebBrowser from 'expo-web-browser';
-import { type ComponentRef, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { Platform, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import type { WebViewErrorEvent, WebViewMessageEvent } from 'react-native-webview/lib/WebViewTypes';
@@ -72,7 +73,7 @@ const params = new URLSearchParams({
 
 export default function App() {
   const { error, url: webUrl } = getWebUrlConfig();
-  const webViewRef = useRef<ComponentRef<typeof WebView>>(null);
+  const webViewRef = useRef<BridgeWebView>(null);
   const handleMessage = async (event: WebViewMessageEvent) => {
     try {
       const message = JSON.parse(event.nativeEvent.data);

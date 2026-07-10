@@ -89,7 +89,7 @@ export default function App() {
               JSON.stringify({
                 type: 'GOOGLE_LOGIN_SUCCESS',
                 code,
-                redirectUri: process.env.EXPO_PUBLIC_GOOGLE_REDIRECT_URI,
+                redirectUri: process.env.EXPO_PUBLIC_GOOGLE_REDIRECT_URI
               })
             );
           } else throw new Error('구글 로그인 중 에러가 발생했습니다.');

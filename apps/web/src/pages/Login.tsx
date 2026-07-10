@@ -16,8 +16,8 @@ interface IAppleRes {
 }
 
 interface IGoogleWait {
-  code: string,
-  redirectUri: string,
+  code: string;
+  redirectUri: string;
 }
 
 const waitForGoogleLogin = (): Promise<IGoogleWait> => {
@@ -27,7 +27,7 @@ const waitForGoogleLogin = (): Promise<IGoogleWait> => {
 
       if (message.type === 'GOOGLE_LOGIN_SUCCESS') {
         window.removeEventListener('message', handler);
-        resolve({code: message.code, redirectUri: message.redirectUri});
+        resolve({ code: message.code, redirectUri: message.redirectUri });
       }
     };
 
@@ -57,7 +57,7 @@ function Login() {
           type: 'GOOGLE_LOGIN'
         })
       );
-      const {code, redirectUri} = await waitForGoogleLogin();
+      const { code, redirectUri } = await waitForGoogleLogin();
       const res = await (
         await fetch(`${import.meta.env.VITE_BASE_URL}/api/auth/login/GOOGLE`, {
           method: 'POST',
@@ -66,7 +66,7 @@ function Login() {
           },
           body: JSON.stringify({
             code,
-            redirectUri,
+            redirectUri
           })
         })
       ).json();

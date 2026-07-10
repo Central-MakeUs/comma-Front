@@ -17,13 +17,6 @@ const SMALL_HEIGHT = 303;
 const GAP = 16;
 const CARD_COUNT = 5;
 
-/**
- * Circular version of MyPage's computeLayout: cards are positioned by cumulative
- * width + GAP (so the visible gap between edges is always exactly GAP), but the
- * left-to-right order is derived from each card's shortest signed distance to the
- * current scroll position, so the layout wraps around the loop (e.g. the last card
- * lines up immediately left of the first).
- */
 const computeLoopedLayout = (
   scrollSnaps: number[],
   scrollProgress: number,
@@ -153,6 +146,28 @@ function RestResult() {
   const [showModal, setShowModal] = useState(false);
   const [slideIdx, setSlideIdx] = useState(0);
   const backgrounds = ['/images/rest_1.svg', '/images/rest_2.svg', '', '', '/images/rest_5.svg'];
+  const infos = [
+    {
+      title: '가볍게 산책하기',
+      subTitle: '동네 산책하면서 예쁜 하늘 사진 한장 어떠세요?',
+    },
+    {
+      title: '예시 타이틀',
+      subTitle: '예시 설명',
+    },
+    {
+      title: '예시 타이틀',
+      subTitle: '예시 설명',
+    },
+    {
+      title: '예시 타이틀',
+      subTitle: '예시 설명',
+    },
+    {
+      title: '예시 타이틀',
+      subTitle: '예시 설명',
+    },
+  ]
   const [paths, setPaths] = useState([BIG_PATH, SMALL_PATH, SMALL_PATH, SMALL_PATH, SMALL_PATH]);
   const [sizes, setSizes] = useState([
     { width: BIG_WIDTH, height: BIG_HEIGHT },
@@ -271,8 +286,8 @@ function RestResult() {
             flexDirection: 'column'
           }}
         >
-          <span className={styles.title}>가볍게 산책하기</span>
-          <span className={styles.subTitle}>동네 한바퀴하면서 예쁜 하늘 사진 한장 어떠세요?</span>
+          <span className={styles.title}>{infos[slideIdx].title}</span>
+          <span className={styles.subTitle}>{infos[slideIdx].subTitle}</span>
         </div>
         <div
           ref={(node) => {
@@ -290,8 +305,8 @@ function RestResult() {
             {backgrounds.map((bg, i) => (
               <Card
                 key={i}
-                imageSrc={bg || undefined}
-                num={i === 0 ? 31 : undefined}
+                imageSrc={bg || '/images/feed-image.svg'}
+                num={i === 0 ? 31 : i}
                 path={paths[i]}
                 width={sizes[i].width}
                 height={sizes[i].height}

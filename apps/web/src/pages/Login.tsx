@@ -20,15 +20,31 @@ interface IGoogleWait {
   redirectUri: string;
 }
 
+const GOOGLE_LOGIN_TIMEOUT_MS = 60000;
+
 const waitForGoogleLogin = (): Promise<IGoogleWait> => {
-  console.log('GOOGLE login waiting');
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
+    const timeoutId = window.setTimeout(() => {
+      window.removeEventListener('message', handler);
+      reject(new Error('구글 로그인 응답 시간이 초과되었습니다.'));
+    }, GOOGLE_LOGIN_TIMEOUT_MS);
+
     const handler = (event: MessageEvent) => {
-      const message = JSON.parse(event.data);
+      let message: { type?: string; code?: string; redirectUri?: string; error?: string };
+      try {
+        message = JSON.parse(event.data);
+      } catch {
+        return;
+      }
 
       if (message.type === 'GOOGLE_LOGIN_SUCCESS') {
+        window.clearTimeout(timeoutId);
         window.removeEventListener('message', handler);
-        resolve({ code: message.code, redirectUri: message.redirectUri });
+        resolve({ code: message.code ?? '', redirectUri: message.redirectUri ?? '' });
+      } else if (message.type === 'GOOGLE_LOGIN_FAILED') {
+        window.clearTimeout(timeoutId);
+        window.removeEventListener('message', handler);
+        reject(new Error(message.error ?? '구글 로그인 중 에러가 발생했습니다.'));
       }
     };
 
@@ -58,21 +74,26 @@ function Login() {
           type: 'GOOGLE_LOGIN'
         })
       );
-      const { code, redirectUri } = await waitForGoogleLogin();
-      const res = await (
-        await fetch(`${import.meta.env.VITE_BASE_URL}/api/auth/login/GOOGLE`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            code,
-            redirectUri
+      try {
+        const { code, redirectUri } = await waitForGoogleLogin();
+        const res = await (
+          await fetch(`${import.meta.env.VITE_BASE_URL}/api/auth/login/GOOGLE`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              code,
+              redirectUri
+            })
           })
-        })
-      ).json();
-      if (res.success) navigate('/nickname');
-      else alert('구글 로그인 중 에러 발생');
+        ).json();
+        if (res.success) navigate('/nickname');
+        else alert('구글 로그인 중 에러 발생');
+      } catch (err) {
+        console.log(err);
+        alert(err instanceof Error ? err.message : '구글 로그인 중 에러 발생');
+      }
       return;
     } else {
       const params = new URLSearchParams({

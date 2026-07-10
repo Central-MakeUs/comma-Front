@@ -75,10 +75,17 @@ export default function App() {
   const { error, url: webUrl } = getWebUrlConfig();
   const webViewRef = useRef<BridgeWebView>(null);
   const handleMessage = async (event: WebViewMessageEvent) => {
+    let message: { type?: string } | undefined;
     try {
-      const message = JSON.parse(event.nativeEvent.data);
-      switch (message.type) {
-        case 'GOOGLE_LOGIN': {
+      message = JSON.parse(event.nativeEvent.data);
+    } catch (error) {
+      console.log(error);
+      return;
+    }
+
+    switch (message?.type) {
+      case 'GOOGLE_LOGIN': {
+        try {
           const googleRes = await WebBrowser.openAuthSessionAsync(
             `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`,
             process.env.EXPO_PUBLIC_GOOGLE_REDIRECT_URI
@@ -93,14 +100,21 @@ export default function App() {
                 redirectUri: process.env.EXPO_PUBLIC_GOOGLE_REDIRECT_URI
               })
             );
-          } else throw new Error('구글 로그인 중 에러가 발생했습니다.');
-          break;
+          } else {
+            throw new Error('구글 로그인 중 에러가 발생했습니다.');
+          }
+        } catch (error) {
+          console.log(error);
+          webViewRef.current?.postMessage(
+            JSON.stringify({
+              type: 'GOOGLE_LOGIN_FAILED',
+              error: error instanceof Error ? error.message : '구글 로그인 중 에러가 발생했습니다.'
+            })
+          );
+          alert('로그인 중 에러가 발생했습니다.');
         }
+        break;
       }
-    } catch (error) {
-      console.log(error);
-      alert('로그인 중 에러가 발생했습니다.');
-      return;
     }
   };
 

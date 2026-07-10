@@ -15,6 +15,26 @@ interface IAppleRes {
   };
 }
 
+interface IGoogleWait {
+  code: string;
+  redirectUri: string;
+}
+
+const waitForGoogleLogin = (): Promise<IGoogleWait> => {
+  return new Promise((resolve) => {
+    const handler = (event: MessageEvent) => {
+      const message = JSON.parse(event.data);
+
+      if (message.type === 'GOOGLE_LOGIN_SUCCESS') {
+        window.removeEventListener('message', handler);
+        resolve({ code: message.code, redirectUri: message.redirectUri });
+      }
+    };
+
+    window.addEventListener('message', handler);
+  });
+};
+
 function Login() {
   const navigate = useNavigate();
 
@@ -27,18 +47,44 @@ function Login() {
       `&redirect_uri=${encodeURIComponent(KAKAO_REDIRECT_URI)}`;
   };
 
-  const onGoogleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const onGoogleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    const params = new URLSearchParams({
-      client_id: GOOGLE_CLIENT_ID,
-      redirect_uri: GOOGLE_REDIRECT_URI,
-      response_type: 'code',
-      scope: [
-        'https://www.googleapis.com/auth/userinfo.email',
-        'https://www.googleapis.com/auth/userinfo.profile'
-      ].join(' ')
-    });
-    window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+    const isMobileWebView =
+      typeof window !== 'undefined' && window.ReactNativeWebView !== undefined;
+    if (isMobileWebView) {
+      window.ReactNativeWebView?.postMessage(
+        JSON.stringify({
+          type: 'GOOGLE_LOGIN'
+        })
+      );
+      const { code, redirectUri } = await waitForGoogleLogin();
+      const res = await (
+        await fetch(`${import.meta.env.VITE_BASE_URL}/api/auth/login/GOOGLE`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            code,
+            redirectUri
+          })
+        })
+      ).json();
+      if (res.success) navigate('/nickname');
+      else alert('구글 로그인 중 에러 발생');
+      return;
+    } else {
+      const params = new URLSearchParams({
+        client_id: GOOGLE_CLIENT_ID,
+        redirect_uri: GOOGLE_REDIRECT_URI,
+        response_type: 'code',
+        scope: [
+          'https://www.googleapis.com/auth/userinfo.email',
+          'https://www.googleapis.com/auth/userinfo.profile'
+        ].join(' ')
+      });
+      window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+    }
   };
 
   const onAppleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {

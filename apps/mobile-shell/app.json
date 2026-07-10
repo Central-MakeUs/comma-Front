@@ -27,7 +27,7 @@
     ],
     "ios": {
       "bundleIdentifier": "com.comma.app",
-      "buildNumber": "3",
+      "buildNumber": "4",
       "supportsTablet": true,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false

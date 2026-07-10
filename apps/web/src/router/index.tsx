@@ -4,6 +4,7 @@ import CallbackPage from '../pages/CallbackPage';
 import Feed from '../pages/Feed';
 import Loading from '../pages/Loading';
 import Login from '../pages/Login';
+import MyPage from '../pages/MyPage';
 import Nickname from '../pages/Nickname';
 import RestActivity from '../pages/RestActivity';
 import RestChecklist from '../pages/RestChecklist';
@@ -63,5 +64,9 @@ export const router = createBrowserRouter([
   {
     path: '/setting',
     Component: Setting
+  },
+  {
+    path: '/mypage',
+    Component: MyPage
   }
 ]);

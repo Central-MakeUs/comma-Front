@@ -15,6 +15,21 @@ interface IAppleRes {
   };
 }
 
+const waitForGoogleCode = (): Promise<string> => {
+  return new Promise((resolve) => {
+    const handler = (event: MessageEvent) => {
+      const message = JSON.parse(event.data);
+
+      if (message.type === 'GOOGLE_LOGIN_SUCCESS') {
+        window.removeEventListener('message', handler);
+        resolve(message.code);
+      }
+    };
+
+    window.addEventListener('message', handler);
+  });
+}
+
 function Login() {
   const navigate = useNavigate();
 
@@ -27,7 +42,7 @@ function Login() {
       `&redirect_uri=${encodeURIComponent(KAKAO_REDIRECT_URI)}`;
   };
 
-  const onGoogleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const onGoogleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     const isMobileWebView =
       typeof window !== 'undefined' && window.ReactNativeWebView !== undefined;
@@ -37,6 +52,21 @@ function Login() {
           type: 'GOOGLE_LOGIN'
         })
       );
+      const code = await waitForGoogleCode();
+      const res = await (
+        await fetch(`${import.meta.env.VITE_BASE_URL}/api/auth/login/GOOGLE`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            code,
+            redirectUri: import.meta.env.VITE_GOOGLE_REDIRECT_URI
+          })
+        })
+      ).json();
+      if(res.success) navigate('/nickname');
+      else alert('구글 로그인 중 에러 발생');
       return;
     } else {
       const params = new URLSearchParams({

@@ -3,7 +3,7 @@ import Constants from 'expo-constants';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import * as WebBrowser from 'expo-web-browser';
-import { useEffect } from 'react';
+import { useEffect, useRef, type ComponentRef } from 'react';
 import { Platform, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import type { WebViewErrorEvent, WebViewMessageEvent } from 'react-native-webview/lib/WebViewTypes';
@@ -60,20 +60,47 @@ const getWebUrlConfig = (): WebUrlConfig => {
 
 SplashScreen.preventAutoHideAsync();
 
-const handleMessage = async (event: WebViewMessageEvent) => {
-  const message = JSON.parse(event.nativeEvent.data);
-  switch (message.type) {
-    case 'GOOGLE_LOGIN':
-      await WebBrowser.openAuthSessionAsync(
-        process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID,
-        process.env.EXPO_PUBLIC_GOOGLE_REDIRECT_URI
-      );
-      break;
-  }
-};
+const params = new URLSearchParams({
+  client_id: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID,
+  redirect_uri: process.env.EXPO_PUBLIC_GOOGLE_REDIRECT_URI,
+  response_type: 'code',
+  scope: [
+    'https://www.googleapis.com/auth/userinfo.email',
+    'https://www.googleapis.com/auth/userinfo.profile'
+  ].join(' ')
+});
 
 export default function App() {
   const { error, url: webUrl } = getWebUrlConfig();
+  const webViewRef = useRef<ComponentRef<typeof WebView>>(null);
+  const handleMessage = async (event: WebViewMessageEvent) => {
+    try {
+      const message = JSON.parse(event.nativeEvent.data);
+      switch (message.type) {
+        case 'GOOGLE_LOGIN':
+          const googleRes = await WebBrowser.openAuthSessionAsync(
+            `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`,
+            process.env.EXPO_PUBLIC_GOOGLE_REDIRECT_URI
+          );
+          if(googleRes.type == 'success') {
+            const url = new URL(googleRes.url);
+            const code = url.searchParams.get('code');
+            webViewRef.current?.postMessage(
+              JSON.stringify({
+                type: 'GOOGLE_LOGIN_SUCCESS',
+                code,
+              })
+            )
+          }
+          else throw new Error('구글 로그인 중 에러가 발생했습니다.');
+          break;
+      }
+    } catch(error) {
+      console.log(error);
+      alert('로그인 중 에러가 발생했습니다.');
+      return;
+    } 
+  };
 
   useEffect(() => {
     if (error) {
@@ -100,6 +127,7 @@ export default function App() {
       <View style={styles.container}>
         <StatusBar style="auto" translucent backgroundColor="transparent" />
         <WebView
+          ref={webViewRef}
           style={styles.webView}
           source={{ uri: webUrl }}
           originWhitelist={['*']}

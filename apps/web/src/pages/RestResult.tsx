@@ -326,7 +326,21 @@ function RestResult() {
         </div>
         <CtaButton className={styles.ctaButtonStyle} onClick={() => navigate('/rest/activity')} />
       </div>
-      <NavigationBar active="rest" className={styles.navStyle} />
+      <NavigationBar active="rest" className={styles.navStyle} onItemSelect={(item) => {
+        switch(item) {
+          case 'rest':
+            break;
+          case 'feed':
+            navigate('/feed');
+            break;
+          case 'archive':
+            navigate('/archive');
+            break;
+          case 'mypage':
+            navigate('/mypage');
+            break;
+        }
+      }}/>
     </div>
   );
 }

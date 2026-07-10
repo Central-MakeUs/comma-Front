@@ -3,7 +3,7 @@ import Constants from 'expo-constants';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import * as WebBrowser from 'expo-web-browser';
-import { useEffect, useRef, type ComponentRef } from 'react';
+import { type ComponentRef, useEffect, useRef } from 'react';
 import { Platform, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import type { WebViewErrorEvent, WebViewMessageEvent } from 'react-native-webview/lib/WebViewTypes';
@@ -77,29 +77,29 @@ export default function App() {
     try {
       const message = JSON.parse(event.nativeEvent.data);
       switch (message.type) {
-        case 'GOOGLE_LOGIN':
+        case 'GOOGLE_LOGIN': {
           const googleRes = await WebBrowser.openAuthSessionAsync(
             `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`,
             process.env.EXPO_PUBLIC_GOOGLE_REDIRECT_URI
           );
-          if(googleRes.type == 'success') {
+          if (googleRes.type === 'success') {
             const url = new URL(googleRes.url);
             const code = url.searchParams.get('code');
             webViewRef.current?.postMessage(
               JSON.stringify({
                 type: 'GOOGLE_LOGIN_SUCCESS',
-                code,
+                code
               })
-            )
-          }
-          else throw new Error('구글 로그인 중 에러가 발생했습니다.');
+            );
+          } else throw new Error('구글 로그인 중 에러가 발생했습니다.');
           break;
+        }
       }
-    } catch(error) {
+    } catch (error) {
       console.log(error);
       alert('로그인 중 에러가 발생했습니다.');
       return;
-    } 
+    }
   };
 
   useEffect(() => {

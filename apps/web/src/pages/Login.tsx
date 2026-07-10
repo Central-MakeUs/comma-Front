@@ -28,7 +28,7 @@ const waitForGoogleCode = (): Promise<string> => {
 
     window.addEventListener('message', handler);
   });
-}
+};
 
 function Login() {
   const navigate = useNavigate();
@@ -65,7 +65,7 @@ function Login() {
           })
         })
       ).json();
-      if(res.success) navigate('/nickname');
+      if (res.success) navigate('/nickname');
       else alert('구글 로그인 중 에러 발생');
       return;
     } else {

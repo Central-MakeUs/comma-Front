@@ -3,6 +3,7 @@ import { useFunnel } from '@use-funnel/react-router-dom';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as styles from './RestChecklist.css';
+import { recommend } from '../utils/relax';
 
 type RestChecklistFunnel = {
   Mood: { mood?: string };
@@ -22,6 +23,35 @@ const questions = {
   },
 } as const;
 
+type convertMoodType = 'A' | 'B' | 'C';
+type convertTimeType = 'X' | 'Y' | 'Z';
+
+const convertMood = (answer: string): convertMoodType => {
+  switch (answer) {
+    case '멍하고 싶어':
+      return 'A';
+    case '기분 전환이 필요해':
+      return 'B';
+    case '가볍게 해볼 수 있어':
+      return 'C';
+    default:
+      throw new Error(`Unknown mood answer: ${answer}`);
+  }
+}
+
+const convertTime = (time: string): convertTimeType => {
+  switch (time) {
+    case '잠깐 (1시간 이내)':
+      return 'X';
+    case '여유 (1-6시간 이내)':
+      return 'Y';
+    case '넉넉 (6시간 이상)':
+      return 'Z';
+    default:
+      throw new Error(`Unknown time answer: ${time}`);
+  }
+}
+
 function useSelectedOption() {
   const [selectedKey, setSelectedKey] = useState<string>();
 
@@ -36,6 +66,9 @@ function useSelectedOption() {
 function RestChecklist() {
   const navigate = useNavigate();
   const { selectedKey, setSelectedKey, selectThenMove } = useSelectedOption();
+  const [selectedMood, setSelectedMood] = useState<string>('');
+  const [selectedTime, setSelectedTime] = useState<string>('');
+
   const funnel = useFunnel<RestChecklistFunnel>({
     id: 'rest-checklist',
     initial: {
@@ -69,11 +102,13 @@ function RestChecklist() {
                   )}
                   step={questions.Mood.step}
                   title={questions.Mood.title}
-                  onOptionSelect={(_, mood) =>
+                  onOptionSelect={(_, mood) =>{
+                    setSelectedMood(mood);
                     selectThenMove(`Mood:${mood}`, () => {
                       setSelectedKey(undefined);
                       void history.push('Time', { mood });
                     })
+                  }
                   }
                 />
               </>
@@ -93,12 +128,16 @@ function RestChecklist() {
                     setSelectedKey(undefined);
                     void history.back();
                   }}
-                  onOptionSelect={(_, time) =>
-                    selectThenMove(`Time:${time}`, () => {
-                      setSelectedKey(undefined);
-                      void history.replace('Time', { ...context, time });
-                      void navigate('/rest/loading');
-                    })
+                  onOptionSelect={(_, time) => 
+                    {
+                      setSelectedTime(time);
+                      selectThenMove(`Time:${time}`, async () => {
+                        setSelectedKey(undefined);
+                        void history.replace('Time', { ...context, time });
+                        const res = await recommend({ mood: convertMood(selectedMood), time: convertTime(selectedTime) });
+                        void navigate('/rest/loading');
+                      })
+                    }
                   }
                 />
               </>

@@ -27,11 +27,15 @@
     ],
     "ios": {
       "bundleIdentifier": "com.comma.app",
-      "buildNumber": "8",
+      "buildNumber": "9",
       "supportsTablet": true,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
-      }
+      },
+      "associatedDomains": [
+        "applinks:comma-front-web.vercel.app",
+        "webcredentials:comma-front-web.vercel.app"
+      ]
     },
     "android": {
       "edgeToEdgeEnabled": true,

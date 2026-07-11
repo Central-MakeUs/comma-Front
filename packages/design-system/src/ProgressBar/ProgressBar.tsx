@@ -5,7 +5,7 @@ import {
   progressBarSegmentTone
 } from './ProgressBar.css';
 
-export type ProgressBarStep = 1 | 2 | 3;
+export type ProgressBarStep = 1 | 2 ;
 
 export type ProgressBarProps = {
   step?: ProgressBarStep;
@@ -13,7 +13,7 @@ export type ProgressBarProps = {
   ariaLabel?: string;
 };
 
-const progressBarSteps = [1, 2, 3] satisfies ProgressBarStep[];
+const progressBarSteps = [1, 2] satisfies ProgressBarStep[];
 const progressBarPositions = ['first', 'middle', 'last'] as const;
 
 export function ProgressBar({ step = 1, className, ariaLabel = '진행 단계' }: ProgressBarProps) {
@@ -22,7 +22,7 @@ export function ProgressBar({ step = 1, className, ariaLabel = '진행 단계' }
   return (
     <div
       aria-label={ariaLabel}
-      aria-valuemax={3}
+      aria-valuemax={2}
       aria-valuemin={1}
       aria-valuenow={step}
       className={rootClassName}

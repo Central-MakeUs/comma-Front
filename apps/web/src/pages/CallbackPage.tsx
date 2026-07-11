@@ -1,6 +1,23 @@
+import { useMutation } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { type fieldType, login } from '../utils/auth';
+import * as styles from './CallbackPage.css';
+
+const getFieldByPathname = (pathname: string): fieldType | null => {
+  if (pathname === '/oauth/kakao/callback') return 'KAKAO';
+  if (pathname === '/oauth/google/callback') return 'GOOGLE';
+  if (pathname === '/oauth/apple/callback') return 'APPLE';
+
+  return null;
+};
+
+const getRedirectUri = (field: fieldType) => {
+  if (field === 'KAKAO') return import.meta.env.VITE_KAKAO_REDIRECT_URI;
+  if (field === 'GOOGLE') return import.meta.env.VITE_GOOGLE_REDIRECT_URI;
+
+  return import.meta.env.VITE_APPLE_REDIRECT_URI;
+};
 
 function CallbackPage() {
   const navigate = useNavigate();
@@ -8,39 +25,47 @@ function CallbackPage() {
   const pathname = location.pathname;
   const appleCode = location.state?.code;
   const hasRun = useRef(false);
+  const { mutateAsync: loginMutateAsync } = useMutation({
+    mutationFn: login
+  });
 
   useEffect(() => {
     if (hasRun.current) return;
     hasRun.current = true;
 
     const handleLogin = async () => {
-      let field: fieldType;
-      if (pathname === '/oauth/kakao/callback') field = 'KAKAO';
-      else if (pathname === '/oauth/google/callback') field = 'GOOGLE';
-      else if (pathname === '/oauth/apple/callback') field = 'APPLE';
-      else {
+      const field = getFieldByPathname(pathname);
+      if (!field) {
         alert('올바른 callback path를 명시해주세요.');
         return;
       }
-      let res: Awaited<ReturnType<typeof login>>;
-      if (field !== 'APPLE') res = await login(field);
-      else {
-        if (!appleCode) {
-          alert('APPLE 코드가 없습니다.');
-          return;
-        }
-        res = await login(field, appleCode);
+
+      const queryCode = new URLSearchParams(location.search).get('code');
+      const code = field === 'APPLE' ? (appleCode ?? queryCode) : queryCode;
+      if (!code) {
+        alert(
+          field === 'APPLE' ? 'APPLE 코드가 없습니다.' : '로그인 오류: 올바른 정보를 입력하세요.'
+        );
+        return;
       }
-      if (!res) {
-        alert('로그인 오류: 올바른 정보를 입력하세요.');
-      } else if (res.success) navigate('/nickname');
-      else {
-        alert(res.message);
+
+      try {
+        const res = await loginMutateAsync({
+          field,
+          code,
+          redirectUri: getRedirectUri(field)
+        });
+
+        if (res.success) navigate('/nickname');
+        else alert(res.message);
+      } catch (err) {
+        console.log(err);
+        alert(err instanceof Error ? err.message : '로그인 오류: 올바른 정보를 입력하세요.');
       }
     };
     handleLogin();
-  }, [navigate, pathname, appleCode]);
-  return <div>Callback Page</div>;
+  }, [navigate, pathname, appleCode, location.search, loginMutateAsync]);
+  return <div className={styles.container} />;
 }
 
 export default CallbackPage;

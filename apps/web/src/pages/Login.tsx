@@ -1,4 +1,6 @@
+import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
+import { login } from '../utils/auth';
 import * as styles from './Login.css';
 
 const REST_API_KEY = import.meta.env.VITE_REST_API_KEY;
@@ -54,6 +56,9 @@ const waitForGoogleLogin = (): Promise<IGoogleWait> => {
 
 function Login() {
   const navigate = useNavigate();
+  const googleLoginMutation = useMutation({
+    mutationFn: login
+  });
 
   const onKakaoClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -69,6 +74,8 @@ function Login() {
     const isMobileWebView =
       typeof window !== 'undefined' && window.ReactNativeWebView !== undefined;
     if (isMobileWebView) {
+      if (googleLoginMutation.isPending) return;
+
       window.ReactNativeWebView?.postMessage(
         JSON.stringify({
           type: 'GOOGLE_LOGIN'
@@ -76,18 +83,11 @@ function Login() {
       );
       try {
         const { code, redirectUri } = await waitForGoogleLogin();
-        const res = await (
-          await fetch(`${import.meta.env.VITE_BASE_URL}/api/auth/login/GOOGLE`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              code,
-              redirectUri
-            })
-          })
-        ).json();
+        const res = await googleLoginMutation.mutateAsync({
+          field: 'GOOGLE',
+          code,
+          redirectUri
+        });
         if (res.success) navigate('/nickname');
         else alert('구글 로그인 중 에러 발생');
       } catch (err) {
@@ -160,7 +160,12 @@ function Login() {
           <img src="/images/apple_logo.svg" alt="애플 아이콘" width={16} height={19} />
           Apple로 로그인
         </button>
-        <button className={styles.googleBtn} type="button" onClick={onGoogleClick}>
+        <button
+          className={styles.googleBtn}
+          type="button"
+          onClick={onGoogleClick}
+          disabled={googleLoginMutation.isPending}
+        >
           <img src="/images/google_logo.svg" alt="구글 아이콘" width={20} height={20} />
           Google로 로그인
         </button>

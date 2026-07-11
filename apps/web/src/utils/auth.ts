@@ -1,4 +1,4 @@
-import { apiClient } from './apiClient';
+import { publicApiClient } from './apiClient';
 
 export type fieldType = 'KAKAO' | 'GOOGLE' | 'APPLE';
 
@@ -11,11 +11,16 @@ export interface LoginRequest {
 export interface LoginResponse {
   success: boolean;
   message?: string;
+  data?: {
+    accessToken: string;
+    refreshToken: string;
+    onboardingCompleted: boolean;
+  };
   [key: string]: unknown;
 }
 
 export const login = async ({ field, code, redirectUri }: LoginRequest) => {
-  const { data } = await apiClient.post<LoginResponse>(`/api/auth/login/${field}`, {
+  const { data } = await publicApiClient.post<LoginResponse>(`/api/auth/login/${field}`, {
     code,
     redirectUri
   });

@@ -4,6 +4,7 @@
     "slug": "comma",
     "version": "1.0.0",
     "orientation": "portrait",
+    "icon": "./assets/icon.png",
     "scheme": "comma",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -27,6 +28,7 @@
     ],
     "ios": {
       "bundleIdentifier": "com.comma.app",
+      "icon": "./assets/icon.png",
       "buildNumber": "9",
       "supportsTablet": true,
       "infoPlist": {
@@ -39,6 +41,11 @@
     },
     "android": {
       "edgeToEdgeEnabled": true,
+      "icon": "./assets/icon.png",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon-foreground.png",
+        "backgroundColor": "#303030"
+      },
       "package": "com.anonymous.comma"
     },
     "extra": {

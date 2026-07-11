@@ -10,11 +10,11 @@ import MyPageCard from './MyPageCard';
 import MyPageNicknameModal from './MyPageNicknameModal';
 
 const backgrounds = [
-  '/images/rest_1.svg',
-  '/images/rest_5.svg',
+  '/images/rest_1.png',
+  '/images/rest_5.png',
   '/images/feed-image.svg',
   '/images/feed-image.svg',
-  '/images/rest_2.svg'
+  '/images/rest_2.png'
 ];
 
 const BIG_PATH =
@@ -198,7 +198,7 @@ function MyPage() {
         </div>
         <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
           <MyPageCard
-            backgroundUrl="/images/rest_1.svg"
+            backgroundUrl="/images/rest_1.png"
             num={1}
             count={13}
             title="가볍게 산책하기"
@@ -208,7 +208,7 @@ function MyPage() {
             x={xs[0]}
           />
           <MyPageCard
-            backgroundUrl="/images/rest_5.svg"
+            backgroundUrl="/images/rest_5.png"
             num={2}
             count={5}
             title="가볍게 산책하기"
@@ -236,7 +236,7 @@ function MyPage() {
             x={xs[3]}
           />
           <MyPageCard
-            backgroundUrl="/images/rest_2.svg"
+            backgroundUrl="/images/rest_2.png"
             num={5}
             count={2}
             title="가볍게 산책하기"

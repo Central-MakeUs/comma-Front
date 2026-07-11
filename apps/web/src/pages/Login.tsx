@@ -1,4 +1,6 @@
+import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
+import { login } from '../utils/auth';
 import * as styles from './Login.css';
 
 const REST_API_KEY = import.meta.env.VITE_REST_API_KEY;
@@ -20,15 +22,31 @@ interface IGoogleWait {
   redirectUri: string;
 }
 
+const GOOGLE_LOGIN_TIMEOUT_MS = 60000;
+
 const waitForGoogleLogin = (): Promise<IGoogleWait> => {
-  console.log('GOOGLE login waiting');
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
+    const timeoutId = window.setTimeout(() => {
+      window.removeEventListener('message', handler);
+      reject(new Error('구글 로그인 응답 시간이 초과되었습니다.'));
+    }, GOOGLE_LOGIN_TIMEOUT_MS);
+
     const handler = (event: MessageEvent) => {
-      const message = JSON.parse(event.data);
+      let message: { type?: string; code?: string; redirectUri?: string; error?: string };
+      try {
+        message = JSON.parse(event.data);
+      } catch {
+        return;
+      }
 
       if (message.type === 'GOOGLE_LOGIN_SUCCESS') {
+        window.clearTimeout(timeoutId);
         window.removeEventListener('message', handler);
-        resolve({ code: message.code, redirectUri: message.redirectUri });
+        resolve({ code: message.code ?? '', redirectUri: message.redirectUri ?? '' });
+      } else if (message.type === 'GOOGLE_LOGIN_FAILED') {
+        window.clearTimeout(timeoutId);
+        window.removeEventListener('message', handler);
+        reject(new Error(message.error ?? '구글 로그인 중 에러가 발생했습니다.'));
       }
     };
 
@@ -38,6 +56,9 @@ const waitForGoogleLogin = (): Promise<IGoogleWait> => {
 
 function Login() {
   const navigate = useNavigate();
+  const googleLoginMutation = useMutation({
+    mutationFn: login
+  });
 
   const onKakaoClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -53,26 +74,26 @@ function Login() {
     const isMobileWebView =
       typeof window !== 'undefined' && window.ReactNativeWebView !== undefined;
     if (isMobileWebView) {
+      if (googleLoginMutation.isPending) return;
+
       window.ReactNativeWebView?.postMessage(
         JSON.stringify({
           type: 'GOOGLE_LOGIN'
         })
       );
-      const { code, redirectUri } = await waitForGoogleLogin();
-      const res = await (
-        await fetch(`${import.meta.env.VITE_BASE_URL}/api/auth/login/GOOGLE`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            code,
-            redirectUri
-          })
-        })
-      ).json();
-      if (res.success) navigate('/nickname');
-      else alert('구글 로그인 중 에러 발생');
+      try {
+        const { code, redirectUri } = await waitForGoogleLogin();
+        const res = await googleLoginMutation.mutateAsync({
+          field: 'GOOGLE',
+          code,
+          redirectUri
+        });
+        if (res.success) navigate('/nickname', { replace: true });
+        else alert('구글 로그인 중 에러 발생');
+      } catch (err) {
+        console.log(err);
+        alert(err instanceof Error ? err.message : '구글 로그인 중 에러 발생');
+      }
       return;
     } else {
       const params = new URLSearchParams({
@@ -139,7 +160,12 @@ function Login() {
           <img src="/images/apple_logo.svg" alt="애플 아이콘" width={16} height={19} />
           Apple로 로그인
         </button>
-        <button className={styles.googleBtn} type="button" onClick={onGoogleClick}>
+        <button
+          className={styles.googleBtn}
+          type="button"
+          onClick={onGoogleClick}
+          disabled={googleLoginMutation.isPending}
+        >
           <img src="/images/google_logo.svg" alt="구글 아이콘" width={20} height={20} />
           Google로 로그인
         </button>

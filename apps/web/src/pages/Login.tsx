@@ -88,7 +88,7 @@ function Login() {
             })
           })
         ).json();
-        if (res.success) navigate('/nickname', {replace: true});
+        if (res.success) navigate('/nickname', { replace: true });
         else alert('구글 로그인 중 에러 발생');
       } catch (err) {
         console.log(err);

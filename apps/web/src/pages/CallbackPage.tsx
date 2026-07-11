@@ -1,8 +1,11 @@
 import { useMutation } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { type fieldType, login } from '../utils/auth';
+import { type fieldType, login } from '../apis/auth';
+import { setTokens } from '../utils/tokenStorage';
 import * as styles from './CallbackPage.css';
+
+const POST_LOGIN_REDIRECT_KEY = 'comma.postLoginRedirectTo';
 
 const getFieldByPathname = (pathname: string): fieldType | null => {
   if (pathname === '/oauth/kakao/callback') return 'KAKAO';
@@ -19,11 +22,18 @@ const getRedirectUri = (field: fieldType) => {
   return import.meta.env.VITE_APPLE_REDIRECT_URI;
 };
 
+const getPostLoginRedirect = (stateRedirectTo?: unknown) => {
+  if (typeof stateRedirectTo === 'string') return stateRedirectTo;
+
+  return window.sessionStorage.getItem(POST_LOGIN_REDIRECT_KEY) ?? undefined;
+};
+
 function CallbackPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const pathname = location.pathname;
   const appleCode = location.state?.code;
+  const redirectTo = getPostLoginRedirect(location.state?.redirectTo);
   const hasRun = useRef(false);
   const { mutateAsync: loginMutateAsync } = useMutation({
     mutationFn: login
@@ -56,15 +66,21 @@ function CallbackPage() {
           redirectUri: getRedirectUri(field)
         });
 
-        if (res.success) navigate('/nickname', { replace: true });
-        else alert(res.message);
+        if (res.success && res.data) {
+          setTokens({
+            accessToken: res.data.accessToken,
+            refreshToken: res.data.refreshToken
+          });
+          window.sessionStorage.removeItem(POST_LOGIN_REDIRECT_KEY);
+          navigate(redirectTo ?? '/nickname', { replace: true });
+        } else alert(res.message);
       } catch (err) {
         console.log(err);
         alert(err instanceof Error ? err.message : '로그인 오류: 올바른 정보를 입력하세요.');
       }
     };
     handleLogin();
-  }, [navigate, pathname, appleCode, location.search, loginMutateAsync]);
+  }, [navigate, pathname, appleCode, location.search, loginMutateAsync, redirectTo]);
   return <div className={styles.container} />;
 }
 

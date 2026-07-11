@@ -1,19 +1,55 @@
 import { CtaButton, TextInput } from '@comma/design-system';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getRandomNickname, updateNickname } from '../apis/user';
 import * as styles from './Nickname.css';
 
 function Nickname() {
   const [nickname, setNickname] = useState('');
   const navigate = useNavigate();
   const [isAccepted, setIsAccepted] = useState(false);
+  const randomNicknameQuery = useQuery({
+    queryKey: ['user', 'nickname', 'random'],
+    queryFn: getRandomNickname
+  });
+  const updateNicknameMutation = useMutation({
+    mutationFn: updateNickname
+  });
   const onChange = (val: string) => {
     setNickname(val);
   };
+
   useEffect(() => {
     if (nickname.length > 0) setIsAccepted(true);
     else setIsAccepted(false);
   }, [nickname]);
+
+  useEffect(() => {
+    const randomNickname = randomNicknameQuery.data?.data?.nickname;
+
+    if (!randomNickname || nickname.length > 0) return;
+
+    setNickname(randomNickname);
+  }, [randomNicknameQuery.data?.data?.nickname, nickname.length]);
+
+  const handleSubmit = async () => {
+    if (!isAccepted || updateNicknameMutation.isPending) return;
+
+    try {
+      const res = await updateNicknameMutation.mutateAsync({ nickname });
+
+      if (res.success && res.data?.nickname) {
+        navigate('/loading', { state: { userName: res.data.nickname } });
+        return;
+      }
+
+      alert(res.message ?? '닉네임 저장 중 에러가 발생했습니다.');
+    } catch (err) {
+      console.log(err);
+      alert(err instanceof Error ? err.message : '닉네임 저장 중 에러가 발생했습니다.');
+    }
+  };
 
   return (
     <div className={styles.container}>
@@ -48,6 +84,7 @@ function Nickname() {
             value={nickname}
             onChange={(s) => onChange(s)}
             maxLength={10}
+            disabled={randomNicknameQuery.isLoading || updateNicknameMutation.isPending}
           />
           {nickname.length > 0 ? (
             <div
@@ -83,11 +120,9 @@ function Nickname() {
           간주합니다
         </p>
         <CtaButton
-          state={isAccepted ? 'default' : 'disabled'}
+          state={isAccepted && !updateNicknameMutation.isPending ? 'default' : 'disabled'}
           className={isAccepted ? styles.ctaButtonStyle.default : styles.ctaButtonStyle.disabled}
-          onClick={() => {
-            if (isAccepted) navigate('/loading', { state: { userName: nickname } });
-          }}
+          onClick={handleSubmit}
         />
       </div>
     </div>

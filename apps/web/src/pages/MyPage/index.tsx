@@ -72,6 +72,7 @@ function MyPage() {
   ]);
   const [xs, setXs] = useState([0, 0, 0, 0, 0]);
   const [showModal, setShowModal] = useState(false);
+  const [nickname, setNickname] = useState('꿈꾸는 소녀');
   const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -121,7 +122,13 @@ function MyPage() {
     >
       {showModal ? (
         <div style={{ position: 'fixed', zIndex: 2, inset: 0, backgroundColor: '#1A181466' }}>
-          <MyPageNicknameModal onCancelClick={() => setShowModal(false)} />
+          <MyPageNicknameModal
+            onCancelClick={() => setShowModal(false)}
+            onSave={(nextNickname) => {
+              setNickname(nextNickname);
+              setShowModal(false);
+            }}
+          />
         </div>
       ) : null}
       <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column' }}>
@@ -173,7 +180,7 @@ function MyPage() {
         }}
       >
         <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <span className={styles.title}>꿈꾸는 소녀</span>
+          <span className={styles.title}>{nickname}</span>
           <span className={styles.desc}>마지막 쉼표 3시간 전</span>
         </div>
         <SmallButton

@@ -1,14 +1,57 @@
 import { CtaButton, TextInput } from '@comma/design-system';
-import { useState } from 'react';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { type FormEvent, useEffect, useState } from 'react';
+import { getRandomNickname, updateNickname } from '../../apis/user';
 import * as styles from './MyPageNicknameModal.css';
 
-function MyPageNicknameModal({ onCancelClick }: { onCancelClick: () => void }) {
+interface MyPageNicknameModalProps {
+  onCancelClick: () => void;
+  onSave: (nickname: string) => void;
+}
+
+function MyPageNicknameModal({ onCancelClick, onSave }: MyPageNicknameModalProps) {
   const [value, setValue] = useState('');
+  const randomNicknameQuery = useQuery({
+    queryKey: ['user', 'nickname', 'random', 'mypage'],
+    queryFn: getRandomNickname
+  });
+  const updateNicknameMutation = useMutation({
+    mutationFn: updateNickname
+  });
+
+  useEffect(() => {
+    const randomNickname = randomNicknameQuery.data?.data?.nickname;
+
+    if (!randomNickname || value.length > 0) return;
+
+    setValue(randomNickname);
+  }, [randomNicknameQuery.data?.data?.nickname, value.length]);
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (value.length === 0 || updateNicknameMutation.isPending) return;
+
+    try {
+      const res = await updateNicknameMutation.mutateAsync({ nickname: value });
+
+      if (res.success && res.data?.nickname) {
+        onSave(res.data.nickname);
+        return;
+      }
+
+      alert(res.message ?? '닉네임 저장 중 에러가 발생했습니다.');
+    } catch (err) {
+      console.log(err);
+      alert(err instanceof Error ? err.message : '닉네임 저장 중 에러가 발생했습니다.');
+    }
+  };
 
   return (
     <div className={styles.container}>
       <div className={styles.icon} />
       <form
+        onSubmit={handleSubmit}
         style={{
           width: '100%',
           flex: 1,
@@ -27,12 +70,17 @@ function MyPageNicknameModal({ onCancelClick }: { onCancelClick: () => void }) {
           showFooter={true}
           value={value}
           onChange={(val) => setValue(val)}
+          disabled={randomNicknameQuery.isLoading || updateNicknameMutation.isPending}
         />
         <div
           style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
         >
           <CtaButton label="취소" className={styles.cancelBtn} onClick={onCancelClick} />
-          <CtaButton label="저장하기" state={value.length > 0 ? 'default' : 'disabled'} />
+          <CtaButton
+            label="저장하기"
+            state={value.length > 0 && !updateNicknameMutation.isPending ? 'default' : 'disabled'}
+            type="submit"
+          />
         </div>
       </form>
     </div>

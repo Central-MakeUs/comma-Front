@@ -1,8 +1,19 @@
 import { CtaButton, colors, Icon, ImageUpload, NavigationBar } from '@comma/design-system';
 import { assignInlineVars } from '@vanilla-extract/dynamic';
 import useEmblaCarousel from 'embla-carousel-react';
-import { useEffect, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  BIG_HEIGHT,
+  BIG_PATH,
+  BIG_WIDTH,
+  CARD_COUNT,
+  GAP,
+  SMALL_HEIGHT,
+  SMALL_PATH,
+  SMALL_WIDTH
+} from '../data/cardInfo';
+import { computeLoopedLayout } from '../utils/compute_layout';
 import * as styles from './RestResult.css';
 
 function Modal({ onClose }: { onClose: () => void }) {
@@ -35,19 +46,34 @@ function Modal({ onClose }: { onClose: () => void }) {
 function Card({
   imageSrc,
   num,
-  cardStyle
+  path,
+  width,
+  height,
+  x
 }: {
   imageSrc?: string;
   num?: number;
-  cardStyle?: object;
+  path: string;
+  width: number;
+  height: number;
+  x: number;
 }) {
   return (
-    <div className={styles.embiaSlide}>
+    <div
+      style={{
+        position: 'absolute',
+        top: '50%',
+        left: 0,
+        transform: `translate(${x}px, -50%)`,
+        width,
+        height
+      }}
+    >
       <ImageUpload
         state="exist"
         imageSrc={imageSrc}
         className={styles.imageUploadStyle}
-        style={cardStyle}
+        style={{ width, height, borderRadius: 0, clipPath: `path("${path}")` }}
       />
       {num != null ? (
         <div
@@ -60,7 +86,7 @@ function Card({
             zIndex: 2
           }}
         >
-          <span className={styles.imageNumStyle}>31</span>
+          <span className={styles.imageNumStyle}>{num}</span>
           <span className={styles.imageText}> 명이 함께하는 중</span>
         </div>
       ) : null}
@@ -72,62 +98,108 @@ function RestResult() {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [slideIdx, setSlideIdx] = useState(0);
-  const [scales, setScales] = useState<number[]>([]);
-  const backgrounds = ['/images/rest_1.png', '/images/rest_2.png', '', '', '/images/rest_5.png'];
+  const backgrounds = [
+    {
+      id: 'bg-1',
+      src: '/images/rest_1.png'
+    },
+    {
+      id: 'bg-2',
+      src: '/images/rest_2.png'
+    },
+    {
+      id: 'bg-3',
+      src: ''
+    },
+    {
+      id: 'bg-4',
+      src: ''
+    },
+    {
+      id: 'bg-5',
+      src: '/images/rest_5.png'
+    }
+  ];
+  const infos = [
+    {
+      title: '가볍게 산책하기',
+      subTitle: '동네 산책하면서 예쁜 하늘 사진 한장 어떠세요?'
+    },
+    {
+      title: '예시 타이틀',
+      subTitle: '예시 설명'
+    },
+    {
+      title: '예시 타이틀',
+      subTitle: '예시 설명'
+    },
+    {
+      title: '예시 타이틀',
+      subTitle: '예시 설명'
+    },
+    {
+      title: '예시 타이틀',
+      subTitle: '예시 설명'
+    }
+  ];
+  const [paths, setPaths] = useState([BIG_PATH, SMALL_PATH, SMALL_PATH, SMALL_PATH, SMALL_PATH]);
+  const [sizes, setSizes] = useState([
+    { width: BIG_WIDTH, height: BIG_HEIGHT },
+    { width: SMALL_WIDTH, height: SMALL_HEIGHT },
+    { width: SMALL_WIDTH, height: SMALL_HEIGHT },
+    { width: SMALL_WIDTH, height: SMALL_HEIGHT },
+    { width: SMALL_WIDTH, height: SMALL_HEIGHT }
+  ]);
+  const [xs, setXs] = useState([0, 0, 0, 0, 0]);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const [embiaRef, emblaApi] = useEmblaCarousel({
     loop: true,
-    align: 'center'
+    align: 'center',
+    watchResize: false
   });
 
-  useEffect(() => {
-    if (!emblaApi) return;
+  useLayoutEffect(() => {
+    if (!containerRef.current) return;
+    const viewportWidth = containerRef.current.getBoundingClientRect().width;
+    const initialSnaps = Array.from({ length: CARD_COUNT }, (_, i) => i / CARD_COUNT);
+    const { paths, sizes, xs } = computeLoopedLayout(initialSnaps, 0, viewportWidth);
+    setPaths(paths);
+    setSizes(sizes);
+    setXs(xs);
+  }, []);
 
+  useLayoutEffect(() => {
+    if (!emblaApi) return;
+    const updateCardTransforms = () => {
+      const viewportWidth = emblaApi.rootNode().getBoundingClientRect().width;
+      const scrollSnaps = emblaApi.scrollSnapList();
+      const scrollProgress = emblaApi.scrollProgress();
+      const { paths, sizes, xs } = computeLoopedLayout(scrollSnaps, scrollProgress, viewportWidth);
+      setPaths(paths);
+      setSizes(sizes);
+      setXs(xs);
+    };
     const onSelect = () => {
       setSlideIdx(emblaApi.selectedScrollSnap());
     };
-
-    const onScroll = () => {
-      const engine = emblaApi.internalEngine();
-      const slideRegistry = engine.slideRegistry;
-      const scrollSnaps = emblaApi.scrollSnapList();
-      const scrollProgress = emblaApi.scrollProgress();
-      const newScales = slideRegistry.map((_, snapIdx) => {
-        let diff = Math.abs(scrollSnaps[snapIdx] - scrollProgress);
-        if (diff > 0.5) diff = 1 - diff;
-        return Math.max(0, 1 - diff * 8);
-      });
-
-      setScales(newScales);
-    };
-
-    emblaApi.on('select', onSelect);
-    emblaApi.on('scroll', onScroll);
-    emblaApi.on('reInit', onScroll);
-
+    updateCardTransforms();
     onSelect();
-    onScroll();
+    emblaApi.on('scroll', updateCardTransforms);
+    emblaApi.on('reInit', updateCardTransforms);
+    emblaApi.on('select', onSelect);
 
     return () => {
+      emblaApi.off('scroll', updateCardTransforms);
+      emblaApi.off('reInit', updateCardTransforms);
       emblaApi.off('select', onSelect);
-      emblaApi.off('scroll', onScroll);
-      emblaApi.off('reInit', onScroll);
     };
   }, [emblaApi]);
-
-  const getCardStyle = (idx: number) => {
-    const progress = scales[idx] ?? 0;
-    return {
-      width: Math.round(200 + progress * 80),
-      height: Math.round(253 + progress * 101),
-      borderRadius: Math.round(50 + progress * 20)
-    };
-  };
 
   return (
     <div
       className={styles.container}
       style={assignInlineVars({
-        [styles.backgroundImageVar]: `url(${backgrounds[slideIdx]}) center / cover no-repeat`
+        [styles.backgroundImageVar]: `url(${backgrounds[slideIdx].src}) center / cover no-repeat`
       })}
     >
       {showModal ? (
@@ -188,16 +260,33 @@ function RestResult() {
             flexDirection: 'column'
           }}
         >
-          <span className={styles.title}>가볍게 산책하기</span>
-          <span className={styles.subTitle}>동네 한바퀴하면서 예쁜 하늘 사진 한장 어떠세요?</span>
+          <span className={styles.title}>{infos[slideIdx].title}</span>
+          <span className={styles.subTitle}>{infos[slideIdx].subTitle}</span>
         </div>
-        <div ref={embiaRef} style={{ overflow: 'hidden', height: 354 }}>
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <Card imageSrc="/images/rest_1.png" num={31} cardStyle={getCardStyle(0)} />
-            <Card imageSrc="/images/rest_2.png" cardStyle={getCardStyle(1)} />
-            <Card cardStyle={getCardStyle(2)} />
-            <Card cardStyle={getCardStyle(3)} />
-            <Card imageSrc="/images/rest_5.png" cardStyle={getCardStyle(4)} />
+        <div
+          ref={(node) => {
+            embiaRef(node);
+            containerRef.current = node;
+          }}
+          style={{ position: 'relative', overflow: 'hidden', height: BIG_HEIGHT }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: GAP }}>
+            {backgrounds.map((bg, _i) => (
+              <div key={bg.id} style={{ flex: `0 0 ${SMALL_WIDTH}px`, height: BIG_HEIGHT }} />
+            ))}
+          </div>
+          <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+            {backgrounds.map((bg, i) => (
+              <Card
+                key={bg.id}
+                imageSrc={bg.src || '/images/feed-image.svg'}
+                num={i === 0 ? 31 : i}
+                path={paths[i]}
+                width={sizes[i].width}
+                height={sizes[i].height}
+                x={xs[i]}
+              />
+            ))}
           </div>
         </div>
         <div
@@ -226,7 +315,25 @@ function RestResult() {
         </div>
         <CtaButton className={styles.ctaButtonStyle} onClick={() => navigate('/rest/activity')} />
       </div>
-      <NavigationBar active="rest" className={styles.navStyle} />
+      <NavigationBar
+        active="rest"
+        className={styles.navStyle}
+        onItemSelect={(item) => {
+          switch (item) {
+            case 'rest':
+              break;
+            case 'feed':
+              navigate('/feed');
+              break;
+            case 'archive':
+              navigate('/archive');
+              break;
+            case 'mypage':
+              navigate('/mypage');
+              break;
+          }
+        }}
+      />
     </div>
   );
 }

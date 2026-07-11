@@ -1,4 +1,13 @@
-import { BIG_PATH, SMALL_PATH, BIG_WIDTH, BIG_HEIGHT, SMALL_WIDTH, SMALL_HEIGHT, GAP, CARD_COUNT} from '../data/cardInfo';
+import {
+  BIG_HEIGHT,
+  BIG_PATH,
+  BIG_WIDTH,
+  CARD_COUNT,
+  GAP,
+  SMALL_HEIGHT,
+  SMALL_PATH,
+  SMALL_WIDTH
+} from '../data/cardInfo';
 
 export const lerp = (a: number, b: number, t: number) => {
   return a + (b - a) * t;

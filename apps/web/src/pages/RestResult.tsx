@@ -3,9 +3,18 @@ import { assignInlineVars } from '@vanilla-extract/dynamic';
 import useEmblaCarousel from 'embla-carousel-react';
 import { useLayoutEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  BIG_HEIGHT,
+  BIG_PATH,
+  BIG_WIDTH,
+  CARD_COUNT,
+  GAP,
+  SMALL_HEIGHT,
+  SMALL_PATH,
+  SMALL_WIDTH
+} from '../data/cardInfo';
 import { computeLoopedLayout } from '../utils/compute_layout';
 import * as styles from './RestResult.css';
-import { BIG_PATH, SMALL_PATH, BIG_WIDTH, BIG_HEIGHT, SMALL_WIDTH, SMALL_HEIGHT, GAP, CARD_COUNT} from '../data/cardInfo';
 
 function Modal({ onClose }: { onClose: () => void }) {
   return (
@@ -93,19 +102,19 @@ function RestResult() {
     {
       id: 'bg-1',
       src: '/images/rest_1.svg'
-    }, 
+    },
     {
       id: 'bg-2',
       src: '/images/rest_2.svg'
-    }, 
+    },
     {
       id: 'bg-3',
       src: ''
-    }, 
+    },
     {
       id: 'bg-4',
       src: ''
-    }, 
+    },
     {
       id: 'bg-5',
       src: '/images/rest_5.svg'

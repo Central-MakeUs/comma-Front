@@ -40,7 +40,7 @@ function MyPageCard({
           backgroundImage: `linear-gradient(rgba(17, 17, 17, 0) 0%, #111111 100%), url(${backgroundUrl ? backgroundUrl : '/images/feed-image.svg'})`,
           backgroundSize: 'cover',
           backgroundRepeat: 'no-repeat',
-          backgroundPosition: 'center',
+          backgroundPosition: 'center'
         }}
       >
         <div style={{ ...typography.engNum, fontSize: 64, color: '#FCFCFC66', textAlign: 'right' }}>

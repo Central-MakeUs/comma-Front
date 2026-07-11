@@ -101,7 +101,7 @@ export default function App() {
               })
             );
           } else {
-            throw new Error('구글 로그인 중 에러가 발생했습니다.');
+            throw new Error(`구글 로그인 중 에러가 발생했습니다: ${googleRes}`);
           }
         } catch (error) {
           console.log(error);
@@ -111,7 +111,7 @@ export default function App() {
               error: error instanceof Error ? error.message : '구글 로그인 중 에러가 발생했습니다.'
             })
           );
-          alert('로그인 중 에러가 발생했습니다.');
+          alert(`로그인 중 에러가 발생했습니다: ${error}`);
         }
         break;
       }

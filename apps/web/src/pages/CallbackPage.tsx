@@ -33,14 +33,14 @@ function CallbackPage() {
       }
       if (!res) {
         alert('로그인 오류: 올바른 정보를 입력하세요.');
-      } else if (res.success) navigate('/nickname');
+      } else if (res.success) navigate('/nickname', { replace: true });
       else {
         alert(res.message);
       }
     };
     handleLogin();
   }, [navigate, pathname, appleCode]);
-  return <div>Callback Page</div>;
+  return null;
 }
 
 export default CallbackPage;

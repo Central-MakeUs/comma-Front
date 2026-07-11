@@ -3,65 +3,9 @@ import { assignInlineVars } from '@vanilla-extract/dynamic';
 import useEmblaCarousel from 'embla-carousel-react';
 import { useLayoutEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { interpolatePath, lerp } from '../utils/interpolatePath';
+import { computeLoopedLayout } from '../utils/compute_layout';
 import * as styles from './RestResult.css';
-
-const BIG_PATH =
-  'M0 94.659C0 16.7073 16.8536 0 95.488 0H224.512C303.146 0 320 16.7073 320 94.659V309.341C320 387.293 303.146 404 224.512 404H95.488C16.8536 404 0 387.293 0 309.341V94.659Z';
-const SMALL_PATH =
-  'M0 70.9943C0 12.5305 12.6402 0 71.616 0H168.384C227.36 0 240 12.5305 240 70.9943V232.006C240 290.469 227.36 303 168.384 303H71.616C12.6402 303 0 290.469 0 232.006V70.9943Z';
-const BIG_WIDTH = 320;
-const BIG_HEIGHT = 404;
-const SMALL_WIDTH = 240;
-const SMALL_HEIGHT = 303;
-const GAP = 16;
-const CARD_COUNT = 5;
-
-const computeLoopedLayout = (
-  scrollSnaps: number[],
-  scrollProgress: number,
-  viewportWidth: number
-) => {
-  const offsets = scrollSnaps.map((snap) => {
-    let diff = snap - scrollProgress;
-    if (diff > 0.5) diff -= 1;
-    if (diff < -0.5) diff += 1;
-    return diff * CARD_COUNT;
-  });
-  const scales = offsets.map((o) => Math.max(0, 1 - Math.abs(o)));
-  const widths = scales.map((s) => lerp(SMALL_WIDTH, BIG_WIDTH, s));
-  const heights = scales.map((s) => lerp(SMALL_HEIGHT, BIG_HEIGHT, s));
-
-  const order = offsets.map((_, i) => i).sort((a, b) => offsets[a] - offsets[b]);
-
-  const lefts: number[] = new Array(CARD_COUNT);
-  order.forEach((i, k) => {
-    if (k === 0) {
-      lefts[i] = 0;
-    } else {
-      const prev = order[k - 1];
-      lefts[i] = lefts[prev] + widths[prev] + GAP;
-    }
-  });
-  const centerOf = (i: number) => lefts[i] + widths[i] / 2;
-
-  let lowerIdxInOrder = 0;
-  for (let k = 0; k < order.length - 1; k++) {
-    if (offsets[order[k]] <= 0) lowerIdxInOrder = k;
-  }
-  const lowerI = order[lowerIdxInOrder];
-  const upperI = order[Math.min(lowerIdxInOrder + 1, order.length - 1)];
-  const span = offsets[upperI] - offsets[lowerI];
-  const frac = span !== 0 ? (0 - offsets[lowerI]) / span : 0;
-  const focalCenter = lerp(centerOf(lowerI), centerOf(upperI), frac);
-  const virtualScrollLeft = focalCenter - viewportWidth / 2;
-
-  return {
-    paths: scales.map((s) => interpolatePath(SMALL_PATH, BIG_PATH, s)),
-    sizes: widths.map((w, i) => ({ width: w, height: heights[i] })),
-    xs: lefts.map((l) => l - virtualScrollLeft)
-  };
-};
+import { BIG_PATH, SMALL_PATH, BIG_WIDTH, BIG_HEIGHT, SMALL_WIDTH, SMALL_HEIGHT, GAP, CARD_COUNT} from '../data/cardInfo';
 
 function Modal({ onClose }: { onClose: () => void }) {
   return (
@@ -246,7 +190,7 @@ function RestResult() {
     <div
       className={styles.container}
       style={assignInlineVars({
-        [styles.backgroundImageVar]: `url(${backgrounds[slideIdx]}) center / cover no-repeat`
+        [styles.backgroundImageVar]: `url(${backgrounds[slideIdx].src}) center / cover no-repeat`
       })}
     >
       {showModal ? (

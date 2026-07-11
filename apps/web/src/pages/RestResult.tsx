@@ -73,7 +73,7 @@ function RestResult() {
   const [showModal, setShowModal] = useState(false);
   const [slideIdx, setSlideIdx] = useState(0);
   const [scales, setScales] = useState<number[]>([]);
-  const backgrounds = ['/images/rest_1.svg', '/images/rest_2.svg', '', '', '/images/rest_5.svg'];
+  const backgrounds = ['/images/rest_1.png', '/images/rest_2.png', '', '', '/images/rest_5.png'];
   const [embiaRef, emblaApi] = useEmblaCarousel({
     loop: true,
     align: 'center'
@@ -193,11 +193,11 @@ function RestResult() {
         </div>
         <div ref={embiaRef} style={{ overflow: 'hidden', height: 354 }}>
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <Card imageSrc="/images/rest_1.svg" num={31} cardStyle={getCardStyle(0)} />
-            <Card imageSrc="/images/rest_2.svg" cardStyle={getCardStyle(1)} />
+            <Card imageSrc="/images/rest_1.png" num={31} cardStyle={getCardStyle(0)} />
+            <Card imageSrc="/images/rest_2.png" cardStyle={getCardStyle(1)} />
             <Card cardStyle={getCardStyle(2)} />
             <Card cardStyle={getCardStyle(3)} />
-            <Card imageSrc="/images/rest_5.svg" cardStyle={getCardStyle(4)} />
+            <Card imageSrc="/images/rest_5.png" cardStyle={getCardStyle(4)} />
           </div>
         </div>
         <div

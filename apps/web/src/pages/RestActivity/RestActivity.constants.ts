@@ -6,11 +6,11 @@ export const COMMENT_MAX_LENGTH = 20;
 export const TAG_MAX_LENGTH = 12;
 
 export const PHOTO_PICKER_IMAGES = [
-  { id: 'rest-1', src: '/images/rest_1.svg' },
-  { id: 'rest-2', src: '/images/rest_2.svg' },
+  { id: 'rest-1', src: '/images/rest_1.png' },
+  { id: 'rest-2', src: '/images/rest_2.png' },
   { id: 'home', src: '/images/Home.png' },
-  { id: 'rest-5', src: '/images/rest_5.svg' },
-  { id: 'rest-1-repeat', src: '/images/rest_1.svg' }
+  { id: 'rest-5', src: '/images/rest_5.png' },
+  { id: 'rest-1-repeat', src: '/images/rest_1.png' }
 ];
 
 export const EMPTY_PHOTO_TILES = ['empty-1', 'empty-2'];

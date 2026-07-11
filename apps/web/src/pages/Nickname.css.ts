@@ -2,7 +2,7 @@ import { colors, typography } from '@comma/design-system';
 import { style, styleVariants } from '@vanilla-extract/css';
 
 export const container = style({
-  backgroundImage: 'url("/images/onboardingBackground_blur.svg")',
+  backgroundImage: 'url("/images/onboardingBackground_blur.png")',
   backgroundRepeat: 'no-repeat',
   backgroundSize: 'cover',
   width: '100vw',

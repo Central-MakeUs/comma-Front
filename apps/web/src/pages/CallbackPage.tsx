@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { type fieldType, login } from '../apis/auth';
+import { type fieldType, login, type TokenResponse } from '../apis/auth';
 import { setTokens } from '../utils/tokenStorage';
 import * as styles from './CallbackPage.css';
 
@@ -26,6 +26,12 @@ const getPostLoginRedirect = (stateRedirectTo?: unknown) => {
   if (typeof stateRedirectTo === 'string') return stateRedirectTo;
 
   return window.sessionStorage.getItem(POST_LOGIN_REDIRECT_KEY) ?? undefined;
+};
+
+const getPostLoginPath = (data: TokenResponse, redirectTo?: string) => {
+  if (redirectTo) return redirectTo;
+
+  return data.onboardingCompleted ? '/feed' : '/nickname';
 };
 
 function CallbackPage() {
@@ -72,7 +78,7 @@ function CallbackPage() {
             refreshToken: res.data.refreshToken
           });
           window.sessionStorage.removeItem(POST_LOGIN_REDIRECT_KEY);
-          navigate(redirectTo ?? '/nickname', { replace: true });
+          navigate(getPostLoginPath(res.data, redirectTo), { replace: true });
         } else alert(res.message);
       } catch (err) {
         console.log(err);

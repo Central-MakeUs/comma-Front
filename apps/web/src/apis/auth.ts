@@ -13,6 +13,7 @@ export interface TokenResponse {
   accessToken: string;
   refreshToken: string;
   onboardingCompleted: boolean;
+  nickname: string;
 }
 
 export type LoginResponse = ApiResponse<TokenResponse>;

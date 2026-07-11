@@ -101,11 +101,11 @@ function RestResult() {
   const backgrounds = [
     {
       id: 'bg-1',
-      src: '/images/rest_1.svg'
+      src: '/images/rest_1.png'
     },
     {
       id: 'bg-2',
-      src: '/images/rest_2.svg'
+      src: '/images/rest_2.png'
     },
     {
       id: 'bg-3',
@@ -117,7 +117,7 @@ function RestResult() {
     },
     {
       id: 'bg-5',
-      src: '/images/rest_5.svg'
+      src: '/images/rest_5.png'
     }
   ];
   const infos = [

@@ -145,7 +145,28 @@ function RestResult() {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [slideIdx, setSlideIdx] = useState(0);
-  const backgrounds = ['/images/rest_1.svg', '/images/rest_2.svg', '', '', '/images/rest_5.svg'];
+  const backgrounds = [
+    {
+      id: 'bg-1',
+      src: '/images/rest_1.svg'
+    }, 
+    {
+      id: 'bg-2',
+      src: '/images/rest_2.svg'
+    }, 
+    {
+      id: 'bg-3',
+      src: ''
+    }, 
+    {
+      id: 'bg-4',
+      src: ''
+    }, 
+    {
+      id: 'bg-5',
+      src: '/images/rest_5.svg'
+    }
+  ];
   const infos = [
     {
       title: '가볍게 산책하기',
@@ -298,14 +319,14 @@ function RestResult() {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: GAP }}>
             {backgrounds.map((bg, _i) => (
-              <div key={bg} style={{ flex: `0 0 ${SMALL_WIDTH}px`, height: BIG_HEIGHT }} />
+              <div key={bg.id} style={{ flex: `0 0 ${SMALL_WIDTH}px`, height: BIG_HEIGHT }} />
             ))}
           </div>
           <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
             {backgrounds.map((bg, i) => (
               <Card
-                key={bg}
-                imageSrc={bg || '/images/feed-image.svg'}
+                key={bg.id}
+                imageSrc={bg.src || '/images/feed-image.svg'}
                 num={i === 0 ? 31 : i}
                 path={paths[i]}
                 width={sizes[i].width}

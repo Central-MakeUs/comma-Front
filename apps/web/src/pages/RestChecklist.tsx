@@ -128,13 +128,14 @@ function RestChecklist() {
                     setSelectedKey(undefined);
                     void history.back();
                   }}
-                  onOptionSelect={(_, time) => 
+                  onOptionSelect={async (_, time) => 
                     {
                       setSelectedTime(time);
+                      const res = await recommend({ mood: convertMood(selectedMood), time: convertTime(selectedTime) });
+                      if(!res) alert('휴식 추천 오류 발생'); 
                       selectThenMove(`Time:${time}`, async () => {
                         setSelectedKey(undefined);
                         void history.replace('Time', { ...context, time });
-                        const res = await recommend({ mood: convertMood(selectedMood), time: convertTime(selectedTime) });
                         void navigate('/rest/loading');
                       })
                     }

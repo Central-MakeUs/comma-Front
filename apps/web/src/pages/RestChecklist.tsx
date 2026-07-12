@@ -67,7 +67,6 @@ function RestChecklist() {
   const navigate = useNavigate();
   const { selectedKey, setSelectedKey, selectThenMove } = useSelectedOption();
   const [selectedMood, setSelectedMood] = useState<string>('');
-  const [selectedTime, setSelectedTime] = useState<string>('');
 
   const funnel = useFunnel<RestChecklistFunnel>({
     id: 'rest-checklist',
@@ -130,7 +129,6 @@ function RestChecklist() {
                   }}
                   onOptionSelect={async (_, time) => 
                     {
-                      setSelectedTime(time);
                       const res = await recommend({ mood: convertMood(selectedMood), time: convertTime(time) });
                       if(!res || !res.success) alert('휴식 추천 오류: 다시 선택해주세요.');
                       else {

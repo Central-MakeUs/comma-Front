@@ -7,6 +7,7 @@ function RestLoading() {
   const location = useLocation();
 
   useEffect(() => {
+    /* TODO: /relaxes/{relaxId}/active-count api 연동 */
     navigate('/rest/result', {state: {
       data: location.state.data,
     }})

@@ -15,6 +15,8 @@ import {
 } from '../data/cardInfo';
 import { computeLoopedLayout } from '../utils/compute_layout';
 import * as styles from './RestResult.css';
+import { useLocation } from 'react-router-dom';
+import type { RelaxActivity } from '../apis/relax';
 
 function Modal({ onClose }: { onClose: () => void }) {
   return (
@@ -98,6 +100,9 @@ function RestResult() {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [slideIdx, setSlideIdx] = useState(0);
+  const location = useLocation();
+  const { data } = (location.state as { data: RelaxActivity[] } | null) ?? { data: [] };
+
   const backgrounds = [
     {
       id: 'bg-1',
@@ -118,28 +123,6 @@ function RestResult() {
     {
       id: 'bg-5',
       src: '/images/rest_5.png'
-    }
-  ];
-  const infos = [
-    {
-      title: '가볍게 산책하기',
-      subTitle: '동네 산책하면서 예쁜 하늘 사진 한장 어떠세요?'
-    },
-    {
-      title: '예시 타이틀',
-      subTitle: '예시 설명'
-    },
-    {
-      title: '예시 타이틀',
-      subTitle: '예시 설명'
-    },
-    {
-      title: '예시 타이틀',
-      subTitle: '예시 설명'
-    },
-    {
-      title: '예시 타이틀',
-      subTitle: '예시 설명'
     }
   ];
   const [paths, setPaths] = useState([BIG_PATH, SMALL_PATH, SMALL_PATH, SMALL_PATH, SMALL_PATH]);
@@ -199,7 +182,7 @@ function RestResult() {
     <div
       className={styles.container}
       style={assignInlineVars({
-        [styles.backgroundImageVar]: `url(${backgrounds[slideIdx].src}) center / cover no-repeat`
+        [styles.backgroundImageVar]: `url(${data[slideIdx].imageUrl || '/images/feed-image.svg'}) center / cover no-repeat`
       })}
     >
       {showModal ? (
@@ -260,8 +243,8 @@ function RestResult() {
             flexDirection: 'column'
           }}
         >
-          <span className={styles.title}>{infos[slideIdx].title}</span>
-          <span className={styles.subTitle}>{infos[slideIdx].subTitle}</span>
+          <span className={styles.title}>{data[slideIdx].name}</span>
+          <span className={styles.subTitle}>{data[slideIdx].description}</span>
         </div>
         <div
           ref={(node) => {
@@ -271,16 +254,16 @@ function RestResult() {
           style={{ position: 'relative', overflow: 'hidden', height: BIG_HEIGHT }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: GAP }}>
-            {backgrounds.map((bg, _i) => (
-              <div key={bg.id} style={{ flex: `0 0 ${SMALL_WIDTH}px`, height: BIG_HEIGHT }} />
+            {data.map((card, _i) => (
+              <div key={card.id} style={{ flex: `0 0 ${SMALL_WIDTH}px`, height: BIG_HEIGHT }} />
             ))}
           </div>
           <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-            {backgrounds.map((bg, i) => (
+            {data.map((card, i) => (
               <Card
-                key={bg.id}
-                imageSrc={bg.src || '/images/feed-image.svg'}
-                num={i === 0 ? 31 : i}
+                key={card.id}
+                imageSrc={card.imageUrl || '/images/feed-image.svg'}
+                num={card.activeUserCount}
                 path={paths[i]}
                 width={sizes[i].width}
                 height={sizes[i].height}

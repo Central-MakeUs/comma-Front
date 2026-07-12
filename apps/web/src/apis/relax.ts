@@ -8,18 +8,19 @@ export interface recommendRequest {
     time: timeType,
 }
 
+export interface RelaxActivity {
+    id: number,
+    name: string,
+    description: string,
+    activeMessage: string,
+    imageUrl: string | null,
+    activeUserCount: number,
+}
+
 export interface recommendResponse {
     success: boolean,
     message: string,
-    data: [
-        {
-            id: number,
-            name: string,
-            description: string,
-            imageUrl: string,
-            activeUserCount: number,
-        }
-    ]
+    data: RelaxActivity[],
 }
 
 export const recommend = async ({mood, time}:recommendRequest) => {

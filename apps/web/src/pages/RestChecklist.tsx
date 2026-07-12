@@ -2,8 +2,8 @@ import { NavigationBar, ProgressBar, Question } from '@comma/design-system';
 import { useFunnel } from '@use-funnel/react-router-dom';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import * as styles from './RestChecklist.css';
 import { recommend } from '../apis/relax';
+import * as styles from './RestChecklist.css';
 
 type RestChecklistFunnel = {
   Mood: { mood?: string };
@@ -20,7 +20,7 @@ const questions = {
     step: 2,
     title: '어느 정도 시간이 있어요?',
     options: ['잠깐 (1시간 이내)', '여유 (1-6시간 이내)', '넉넉 (6시간 이상)']
-  },
+  }
 } as const;
 
 type convertMoodType = 'A' | 'B' | 'C';
@@ -37,7 +37,7 @@ const convertMood = (answer: string): convertMoodType => {
     default:
       throw new Error(`Unknown mood answer: ${answer}`);
   }
-}
+};
 
 const convertTime = (time: string): convertTimeType => {
   switch (time) {
@@ -50,7 +50,7 @@ const convertTime = (time: string): convertTimeType => {
     default:
       throw new Error(`Unknown time answer: ${time}`);
   }
-}
+};
 
 function useSelectedOption() {
   const [selectedKey, setSelectedKey] = useState<string>();
@@ -101,14 +101,13 @@ function RestChecklist() {
                   )}
                   step={questions.Mood.step}
                   title={questions.Mood.title}
-                  onOptionSelect={(_, mood) =>{
+                  onOptionSelect={(_, mood) => {
                     setSelectedMood(mood);
                     selectThenMove(`Mood:${mood}`, () => {
                       setSelectedKey(undefined);
                       void history.push('Time', { mood });
-                    })
-                  }
-                  }
+                    });
+                  }}
                 />
               </>
             )}
@@ -127,21 +126,24 @@ function RestChecklist() {
                     setSelectedKey(undefined);
                     void history.back();
                   }}
-                  onOptionSelect={async (_, time) => 
-                    {
-                      const res = await recommend({ mood: convertMood(selectedMood), time: convertTime(time) });
-                      if(!res || !res.success) alert('휴식 추천 오류: 다시 선택해주세요.');
-                      else {
-                        selectThenMove(`Time:${time}`, async () => {
-                          setSelectedKey(undefined);
-                          void history.replace('Time', { ...context, time });
-                          void navigate('/rest/loading', {state: {
-                            data: res.data,
-                          }});
-                        })
-                      }
+                  onOptionSelect={async (_, time) => {
+                    const res = await recommend({
+                      mood: convertMood(selectedMood),
+                      time: convertTime(time)
+                    });
+                    if (!res?.success) alert('휴식 추천 오류: 다시 선택해주세요.');
+                    else {
+                      selectThenMove(`Time:${time}`, async () => {
+                        setSelectedKey(undefined);
+                        void history.replace('Time', { ...context, time });
+                        void navigate('/rest/loading', {
+                          state: {
+                            data: res.data
+                          }
+                        });
+                      });
                     }
-                  }
+                  }}
                 />
               </>
             )}

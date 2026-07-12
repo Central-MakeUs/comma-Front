@@ -110,13 +110,12 @@ apiClient.interceptors.response.use(
 export const relaxApiClient = axios.create({
   baseURL: `${import.meta.env.VITE_BASE_URL}/api/relaxes`,
   headers: {
-    'Content-Type': 'application/json',
-
+    'Content-Type': 'application/json'
   }
-})
+});
 
 relaxApiClient.interceptors.request.use((config) => {
   const token = getTokens();
-  if(token?.accessToken) config.headers.Authorization = `Bearer ${token.accessToken}`;
+  if (token?.accessToken) config.headers.Authorization = `Bearer ${token.accessToken}`;
   return config;
-})
+});

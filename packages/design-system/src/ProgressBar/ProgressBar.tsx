@@ -5,7 +5,7 @@ import {
   progressBarSegmentTone
 } from './ProgressBar.css';
 
-export type ProgressBarStep = 1 | 2 ;
+export type ProgressBarStep = 1 | 2;
 
 export type ProgressBarProps = {
   step?: ProgressBarStep;

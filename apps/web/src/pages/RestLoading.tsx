@@ -1,7 +1,7 @@
-import * as styles from './RestLoading.css';
-import { useLocation, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import type { RelaxActivity } from '../apis/relax';
+import * as styles from './RestLoading.css';
 
 function RestLoading() {
   const navigate = useNavigate();
@@ -10,11 +10,13 @@ function RestLoading() {
 
   useEffect(() => {
     /* TODO: /relaxes/{relaxId}/active-count api 연동 */
-    navigate('/rest/result', {state: {
-      data,
-    }})
-  }, []);
-  
+    navigate('/rest/result', {
+      state: {
+        data
+      }
+    });
+  }, [/* TODO: /relaxes/{relaxId}/active-count api 연동 */ navigate, data]);
+
   return (
     <div className={styles.container} role="status">
       <span className={styles.title}>휴식을 찾고 있어요...</span>

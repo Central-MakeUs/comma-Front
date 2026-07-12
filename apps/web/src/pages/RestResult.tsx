@@ -2,7 +2,8 @@ import { CtaButton, colors, Icon, ImageUpload, NavigationBar } from '@comma/desi
 import { assignInlineVars } from '@vanilla-extract/dynamic';
 import useEmblaCarousel from 'embla-carousel-react';
 import { useLayoutEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import type { RelaxActivity } from '../apis/relax';
 import {
   BIG_HEIGHT,
   BIG_PATH,
@@ -15,8 +16,6 @@ import {
 } from '../data/cardInfo';
 import { computeLoopedLayout } from '../utils/compute_layout';
 import * as styles from './RestResult.css';
-import { useLocation } from 'react-router-dom';
-import type { RelaxActivity } from '../apis/relax';
 
 function Modal({ onClose }: { onClose: () => void }) {
   const navigate = useNavigate();
@@ -41,7 +40,9 @@ function Modal({ onClose }: { onClose: () => void }) {
         <CtaButton className={styles.cancleBtn} onClick={onClose}>
           취소
         </CtaButton>
-        <CtaButton className={styles.confirmBtn} onClick={() => navigate('/rest/checklist')}>확인</CtaButton>
+        <CtaButton className={styles.confirmBtn} onClick={() => navigate('/rest/checklist')}>
+          확인
+        </CtaButton>
       </div>
     </div>
   );

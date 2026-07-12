@@ -6,6 +6,7 @@ import './global.css';
 import { themeClass } from '@comma/design-system';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider } from 'react-router-dom';
+import AuthBootstrap from './components/AuthBootstrap';
 import { router } from './router/index';
 
 appBridge.addEventListener(POST_MESSAGE_EVENT.APP_READY, (message) => {
@@ -34,7 +35,9 @@ const queryClient = new QueryClient({
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      <AuthBootstrap>
+        <RouterProvider router={router} />
+      </AuthBootstrap>
     </QueryClientProvider>
   </React.StrictMode>
 );

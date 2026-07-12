@@ -1,6 +1,8 @@
 import { useMutation } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
-import { login } from '../utils/auth';
+import { useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { login, type TokenResponse } from '../apis/auth';
+import { setTokens } from '../utils/tokenStorage';
 import * as styles from './Login.css';
 
 const REST_API_KEY = import.meta.env.VITE_REST_API_KEY;
@@ -23,6 +25,38 @@ interface IGoogleWait {
 }
 
 const GOOGLE_LOGIN_TIMEOUT_MS = 60000;
+const POST_LOGIN_REDIRECT_KEY = 'comma.postLoginRedirectTo';
+
+const getRedirectTo = (state: unknown) =>
+  typeof state === 'object' &&
+  state !== null &&
+  'redirectTo' in state &&
+  typeof state.redirectTo === 'string'
+    ? state.redirectTo
+    : undefined;
+
+const getSessionReason = (state: unknown) =>
+  typeof state === 'object' &&
+  state !== null &&
+  'reason' in state &&
+  typeof state.reason === 'string'
+    ? state.reason
+    : undefined;
+
+const getPostLoginPath = (data: TokenResponse, redirectTo?: string) => {
+  if (redirectTo) return redirectTo;
+
+  return data.onboardingCompleted ? '/feed' : '/nickname';
+};
+
+const storePostLoginRedirect = (redirectTo?: string) => {
+  if (!redirectTo) {
+    window.sessionStorage.removeItem(POST_LOGIN_REDIRECT_KEY);
+    return;
+  }
+
+  window.sessionStorage.setItem(POST_LOGIN_REDIRECT_KEY, redirectTo);
+};
 
 const waitForGoogleLogin = (): Promise<IGoogleWait> => {
   return new Promise((resolve, reject) => {
@@ -56,12 +90,22 @@ const waitForGoogleLogin = (): Promise<IGoogleWait> => {
 
 function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const redirectTo = getRedirectTo(location.state);
   const googleLoginMutation = useMutation({
     mutationFn: login
   });
 
+  useEffect(() => {
+    if (getSessionReason(location.state) !== 'SESSION_EXPIRED') return;
+
+    alert('로그인이 만료되었어요. 다시 로그인해 주세요.');
+    navigate('.', { replace: true, state: { redirectTo } });
+  }, [location.state, navigate, redirectTo]);
+
   const onKakaoClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
+    storePostLoginRedirect(redirectTo);
     window.location.href =
       `https://kauth.kakao.com/oauth/authorize` +
       `?response_type=code` +
@@ -88,14 +132,20 @@ function Login() {
           code,
           redirectUri
         });
-        if (res.success) navigate('/nickname', { replace: true });
-        else alert('구글 로그인 중 에러 발생');
+        if (res.success && res.data) {
+          setTokens({
+            accessToken: res.data.accessToken,
+            refreshToken: res.data.refreshToken
+          });
+          navigate(getPostLoginPath(res.data, redirectTo), { replace: true });
+        } else alert('구글 로그인 중 에러 발생');
       } catch (err) {
         console.log(err);
         alert(err instanceof Error ? err.message : '구글 로그인 중 에러 발생');
       }
       return;
     } else {
+      storePostLoginRedirect(redirectTo);
       const params = new URLSearchParams({
         client_id: GOOGLE_CLIENT_ID,
         redirect_uri: GOOGLE_REDIRECT_URI,
@@ -122,7 +172,7 @@ function Login() {
     try {
       const res = (await window.AppleID?.auth.signIn()) as IAppleRes;
       console.log(res);
-      navigate('/oauth/apple/callback', { state: { code: res.authorization.code } });
+      navigate('/oauth/apple/callback', { state: { code: res.authorization.code, redirectTo } });
     } catch (err) {
       console.log(err);
       alert('애플 로그인 중 에러 발생');

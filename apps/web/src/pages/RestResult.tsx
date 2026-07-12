@@ -102,29 +102,6 @@ function RestResult() {
   const [slideIdx, setSlideIdx] = useState(0);
   const location = useLocation();
   const { data } = (location.state as { data: RelaxActivity[] } | null) ?? { data: [] };
-
-  const backgrounds = [
-    {
-      id: 'bg-1',
-      src: '/images/rest_1.png'
-    },
-    {
-      id: 'bg-2',
-      src: '/images/rest_2.png'
-    },
-    {
-      id: 'bg-3',
-      src: ''
-    },
-    {
-      id: 'bg-4',
-      src: ''
-    },
-    {
-      id: 'bg-5',
-      src: '/images/rest_5.png'
-    }
-  ];
   const [paths, setPaths] = useState([BIG_PATH, SMALL_PATH, SMALL_PATH, SMALL_PATH, SMALL_PATH]);
   const [sizes, setSizes] = useState([
     { width: BIG_WIDTH, height: BIG_HEIGHT },

@@ -3,7 +3,7 @@ import { useFunnel } from '@use-funnel/react-router-dom';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as styles from './RestChecklist.css';
-import { recommend } from '../utils/relax';
+import { recommend } from '../apis/relax';
 
 type RestChecklistFunnel = {
   Mood: { mood?: string };
@@ -131,7 +131,7 @@ function RestChecklist() {
                   onOptionSelect={async (_, time) => 
                     {
                       setSelectedTime(time);
-                      const res = await recommend({ mood: convertMood(selectedMood), time: convertTime(selectedTime) });
+                      const res = await recommend({ mood: convertMood(selectedMood), time: convertTime(time) });
                       if(!res) alert('휴식 추천 오류 발생'); 
                       selectThenMove(`Time:${time}`, async () => {
                         setSelectedKey(undefined);

@@ -1,4 +1,4 @@
-import { relaxApiClient } from "./apiClient"
+import { relaxApiClient } from "./client"
 
 export type moodType = 'A' | 'B' | 'C';
 export type timeType = 'X' | 'Y' | 'Z'; 

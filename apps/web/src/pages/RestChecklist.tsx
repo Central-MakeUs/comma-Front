@@ -132,12 +132,16 @@ function RestChecklist() {
                     {
                       setSelectedTime(time);
                       const res = await recommend({ mood: convertMood(selectedMood), time: convertTime(time) });
-                      if(!res) alert('휴식 추천 오류 발생'); 
-                      selectThenMove(`Time:${time}`, async () => {
-                        setSelectedKey(undefined);
-                        void history.replace('Time', { ...context, time });
-                        void navigate('/rest/loading');
-                      })
+                      if(!res || !res.success) alert('휴식 추천 오류: 다시 선택해주세요.');
+                      else {
+                        selectThenMove(`Time:${time}`, async () => {
+                          setSelectedKey(undefined);
+                          void history.replace('Time', { ...context, time });
+                          void navigate('/rest/loading', {state: {
+                            data: res.data,
+                          }});
+                        })
+                      }
                     }
                   }
                 />

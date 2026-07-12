@@ -19,6 +19,8 @@ import { useLocation } from 'react-router-dom';
 import type { RelaxActivity } from '../apis/relax';
 
 function Modal({ onClose }: { onClose: () => void }) {
+  const navigate = useNavigate();
+
   return (
     <div
       className={styles.modalContainer}
@@ -39,7 +41,7 @@ function Modal({ onClose }: { onClose: () => void }) {
         <CtaButton className={styles.cancleBtn} onClick={onClose}>
           취소
         </CtaButton>
-        <CtaButton className={styles.confirmBtn}>확인</CtaButton>
+        <CtaButton className={styles.confirmBtn} onClick={() => navigate('/rest/checklist')}>확인</CtaButton>
       </div>
     </div>
   );

@@ -113,9 +113,3 @@ export const relaxApiClient = axios.create({
     'Content-Type': 'application/json'
   }
 });
-
-relaxApiClient.interceptors.request.use((config) => {
-  const token = getTokens();
-  if (token?.accessToken) config.headers.Authorization = `Bearer ${token.accessToken}`;
-  return config;
-});

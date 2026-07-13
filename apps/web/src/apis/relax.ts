@@ -1,4 +1,4 @@
-import { relaxApiClient } from './client';
+import { apiClient } from './client';
 
 export type moodType = 'A' | 'B' | 'C';
 export type timeType = 'X' | 'Y' | 'Z';
@@ -25,7 +25,7 @@ export interface recommendResponse {
 
 export const recommend = async ({ mood, time }: recommendRequest) => {
   console.log(`recommend start: ${mood}, ${time}`);
-  const { data } = await relaxApiClient.get<recommendResponse>('/recommendations', {
+  const { data } = await apiClient.get<recommendResponse>('/recommendations', {
     params: {
       mood,
       time

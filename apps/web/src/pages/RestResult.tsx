@@ -1,7 +1,7 @@
 import { CtaButton, colors, Icon, ImageUpload, NavigationBar } from '@comma/design-system';
 import { assignInlineVars } from '@vanilla-extract/dynamic';
 import useEmblaCarousel from 'embla-carousel-react';
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import type { RelaxActivity } from '../apis/relax';
 import {
@@ -103,8 +103,9 @@ function RestResult() {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [slideIdx, setSlideIdx] = useState(0);
+  const [data, setData] = useState<RelaxActivity[] | null>(null);
   const location = useLocation();
-  const { data } = (location.state as { data: RelaxActivity[] } | null) ?? { data: [] };
+  
   const [paths, setPaths] = useState([BIG_PATH, SMALL_PATH, SMALL_PATH, SMALL_PATH, SMALL_PATH]);
   const [sizes, setSizes] = useState([
     { width: BIG_WIDTH, height: BIG_HEIGHT },
@@ -120,6 +121,14 @@ function RestResult() {
     align: 'center',
     watchResize: false
   });
+
+  useEffect(() => {
+    setData(location.state.data);
+    if(!data) {
+      alert('휴식 추천 중 오류가 발생했습니다. 다시 선택해주세요');
+      navigate('/rest/checklist');
+    }
+  }, [])
 
   useLayoutEffect(() => {
     if (!containerRef.current) return;
@@ -157,6 +166,8 @@ function RestResult() {
       emblaApi.off('select', onSelect);
     };
   }, [emblaApi]);
+
+  if (!data) return null;
 
   return (
     <div

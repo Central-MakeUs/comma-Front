@@ -8,7 +8,6 @@ import {
   BIG_HEIGHT,
   BIG_PATH,
   BIG_WIDTH,
-  CARD_COUNT,
   GAP,
   SMALL_HEIGHT,
   SMALL_PATH,
@@ -103,8 +102,8 @@ function RestResult() {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [slideIdx, setSlideIdx] = useState(0);
-  const [data, setData] = useState<RelaxActivity[] | null>(null);
   const location = useLocation();
+  const [data, setData] = useState<RelaxActivity[] | null>(location.state.data || null);
   
   const [paths, setPaths] = useState([BIG_PATH, SMALL_PATH, SMALL_PATH, SMALL_PATH, SMALL_PATH]);
   const [sizes, setSizes] = useState([
@@ -121,6 +120,7 @@ function RestResult() {
     align: 'center',
     watchResize: false
   });
+  const cardCount = data?.length ?? 5;
 
   useEffect(() => {
     setData(location.state.data);
@@ -133,12 +133,12 @@ function RestResult() {
   useLayoutEffect(() => {
     if (!containerRef.current) return;
     const viewportWidth = containerRef.current.getBoundingClientRect().width;
-    const initialSnaps = Array.from({ length: CARD_COUNT }, (_, i) => i / CARD_COUNT);
-    const { paths, sizes, xs } = computeLoopedLayout(initialSnaps, 0, viewportWidth);
+    const initialSnaps = Array.from({ length: cardCount }, (_, i) => i / cardCount);
+    const { paths, sizes, xs } = computeLoopedLayout(initialSnaps, 0, viewportWidth, cardCount);
     setPaths(paths);
     setSizes(sizes);
     setXs(xs);
-  }, []);
+  }, [cardCount]);
 
   useLayoutEffect(() => {
     if (!emblaApi) return;
@@ -146,7 +146,12 @@ function RestResult() {
       const viewportWidth = emblaApi.rootNode().getBoundingClientRect().width;
       const scrollSnaps = emblaApi.scrollSnapList();
       const scrollProgress = emblaApi.scrollProgress();
-      const { paths, sizes, xs } = computeLoopedLayout(scrollSnaps, scrollProgress, viewportWidth);
+      const { paths, sizes, xs } = computeLoopedLayout(
+        scrollSnaps,
+        scrollProgress,
+        viewportWidth,
+        cardCount
+      );
       setPaths(paths);
       setSizes(sizes);
       setXs(xs);
@@ -165,7 +170,7 @@ function RestResult() {
       emblaApi.off('reInit', updateCardTransforms);
       emblaApi.off('select', onSelect);
     };
-  }, [emblaApi]);
+  }, [emblaApi, cardCount]);
 
   if (!data) return null;
 
@@ -276,7 +281,7 @@ function RestResult() {
             marginBottom: 32
           }}
         >
-          {[1, 2, 3, 4, 5].map((i) => (
+          {Array.from({ length: data.length }, (_, idx) => idx + 1).map((i) => (
             <div
               key={i}
               className={styles.dot}

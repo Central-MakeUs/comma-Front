@@ -106,10 +106,3 @@ apiClient.interceptors.response.use(
     }
   }
 );
-
-export const relaxApiClient = axios.create({
-  baseURL: `${import.meta.env.VITE_BASE_URL}/api/relaxes`,
-  headers: {
-    'Content-Type': 'application/json'
-  }
-});

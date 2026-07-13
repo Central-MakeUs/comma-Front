@@ -125,21 +125,29 @@ function RestChecklist() {
                     void history.back();
                   }}
                   onOptionSelect={async (_, time) => {
-                    const res = await recommend({
-                      mood: convertMood(context.mood),
-                      time: convertTime(time)
-                    });
-                    if (!res?.success) alert('휴식 추천 오류: 다시 선택해주세요.');
-                    else {
-                      selectThenMove(`Time:${time}`, async () => {
-                        setSelectedKey(undefined);
-                        void history.replace('Time', { ...context, time });
-                        void navigate('/rest/loading', {
-                          state: {
-                            data: res.data
-                          }
-                        });
+                    try {
+                      const res = await recommend({
+                        mood: convertMood(context.mood),
+                        time: convertTime(time)
                       });
+                      if (!res?.success) {
+                        alert('휴식 추천 오류: 다시 선택해주세요.');
+                        throw new Error(`${res.message}`);
+                      }
+                      else {
+                        selectThenMove(`Time:${time}`, async () => {
+                          setSelectedKey(undefined);
+                          void history.replace('Time', { ...context, time });
+                          void navigate('/rest/loading', {
+                            state: {
+                              data: res.data
+                            }
+                          });
+                        });
+                      }
+                    } catch(error) {
+                      console.log(error);
+                      alert('휴식 추천 중 오류 발생');
                     }
                   }}
                 />

@@ -66,7 +66,6 @@ function useSelectedOption() {
 function RestChecklist() {
   const navigate = useNavigate();
   const { selectedKey, setSelectedKey, selectThenMove } = useSelectedOption();
-  const [selectedMood, setSelectedMood] = useState<string>('');
 
   const funnel = useFunnel<RestChecklistFunnel>({
     id: 'rest-checklist',
@@ -102,7 +101,6 @@ function RestChecklist() {
                   step={questions.Mood.step}
                   title={questions.Mood.title}
                   onOptionSelect={(_, mood) => {
-                    setSelectedMood(mood);
                     selectThenMove(`Mood:${mood}`, () => {
                       setSelectedKey(undefined);
                       void history.push('Time', { mood });
@@ -128,7 +126,7 @@ function RestChecklist() {
                   }}
                   onOptionSelect={async (_, time) => {
                     const res = await recommend({
-                      mood: convertMood(selectedMood),
+                      mood: convertMood(context.mood),
                       time: convertTime(time)
                     });
                     if (!res?.success) alert('휴식 추천 오류: 다시 선택해주세요.');

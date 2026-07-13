@@ -1,7 +1,7 @@
 import { CtaButton, colors, Icon, ImageUpload, NavigationBar } from '@comma/design-system';
 import { assignInlineVars } from '@vanilla-extract/dynamic';
 import useEmblaCarousel from 'embla-carousel-react';
-import { useLayoutEffect, useRef, useState, useEffect } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import type { RelaxActivity } from '../apis/relax';
 import {
@@ -106,7 +106,7 @@ function RestResult() {
   const [data, setData] = useState<RelaxActivity[] | null>(
     location.state?.data?.length ? location.state.data : null
   );
-  
+
   const [paths, setPaths] = useState([BIG_PATH, SMALL_PATH, SMALL_PATH, SMALL_PATH, SMALL_PATH]);
   const [sizes, setSizes] = useState([
     { width: BIG_WIDTH, height: BIG_HEIGHT },
@@ -132,7 +132,7 @@ function RestResult() {
       return;
     }
     setData(nextData);
-  }, [location.state, navigate])
+  }, [location.state, navigate]);
 
   useLayoutEffect(() => {
     if (!containerRef.current) return;

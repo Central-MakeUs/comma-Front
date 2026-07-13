@@ -133,8 +133,7 @@ function RestChecklist() {
                       if (!res?.success) {
                         alert('휴식 추천 오류: 다시 선택해주세요.');
                         throw new Error(`${res.message}`);
-                      }
-                      else {
+                      } else {
                         selectThenMove(`Time:${time}`, async () => {
                           setSelectedKey(undefined);
                           void history.replace('Time', { ...context, time });
@@ -145,7 +144,7 @@ function RestChecklist() {
                           });
                         });
                       }
-                    } catch(error) {
+                    } catch (error) {
                       console.log(error);
                       alert('휴식 추천 중 오류 발생');
                     }

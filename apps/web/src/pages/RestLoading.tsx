@@ -6,7 +6,7 @@ import * as styles from './RestLoading.css';
 function RestLoading() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { data } = (location.state as { data: RelaxActivity[] } | null) ?? { data: [] };
+  const data = (location.state as { data?: RelaxActivity[] } | null)?.data ?? [];
 
   useEffect(() => {
     /* TODO: /relaxes/{relaxId}/active-count api 연동 */

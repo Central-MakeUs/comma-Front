@@ -103,7 +103,9 @@ function RestResult() {
   const [showModal, setShowModal] = useState(false);
   const [slideIdx, setSlideIdx] = useState(0);
   const location = useLocation();
-  const [data, setData] = useState<RelaxActivity[] | null>(location.state.data || null);
+  const [data, setData] = useState<RelaxActivity[] | null>(
+    location.state?.data?.length ? location.state.data : null
+  );
   
   const [paths, setPaths] = useState([BIG_PATH, SMALL_PATH, SMALL_PATH, SMALL_PATH, SMALL_PATH]);
   const [sizes, setSizes] = useState([
@@ -123,12 +125,14 @@ function RestResult() {
   const cardCount = data?.length ?? 5;
 
   useEffect(() => {
-    setData(location.state.data);
-    if(!data) {
+    const nextData = location.state?.data;
+    if (!nextData || nextData.length === 0) {
       alert('휴식 추천 중 오류가 발생했습니다. 다시 선택해주세요');
-      navigate('/rest/checklist');
+      navigate('/rest/checklist', { replace: true });
+      return;
     }
-  }, [])
+    setData(nextData);
+  }, [location.state, navigate])
 
   useLayoutEffect(() => {
     if (!containerRef.current) return;
@@ -172,7 +176,7 @@ function RestResult() {
     };
   }, [emblaApi, cardCount]);
 
-  if (!data) return null;
+  if (!data || data.length === 0) return null;
 
   return (
     <div

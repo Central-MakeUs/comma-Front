@@ -1,1 +1,1 @@
-export { apiClient, authApiClient, publicApiClient, relaxApiClient } from '../apis/client';
+export { apiClient, authApiClient, publicApiClient } from '../apis/client';

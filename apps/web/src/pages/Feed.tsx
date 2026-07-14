@@ -148,7 +148,7 @@ function Feed() {
         onItemSelect={(item) => {
           switch (item) {
             case 'rest':
-              navigate('/rest/result');
+              navigate('/rest/checklist');
               break;
             case 'feed':
               navigate('/feed');

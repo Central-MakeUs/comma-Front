@@ -24,7 +24,6 @@ export interface recommendResponse {
 }
 
 export const recommend = async ({ mood, time }: recommendRequest) => {
-  console.log(`recommend start: ${mood}, ${time}`);
   const { data } = await apiClient.get<recommendResponse>('/api/relaxes/recommendations', {
     params: {
       mood,
@@ -32,6 +31,5 @@ export const recommend = async ({ mood, time }: recommendRequest) => {
     }
   });
 
-  console.log(data);
   return data;
 };

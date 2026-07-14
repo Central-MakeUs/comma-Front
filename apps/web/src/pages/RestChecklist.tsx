@@ -66,6 +66,7 @@ function useSelectedOption() {
 function RestChecklist() {
   const navigate = useNavigate();
   const { selectedKey, setSelectedKey, selectThenMove } = useSelectedOption();
+  const [recommendLoading, setRecommendLoading] = useState(false);
 
   const funnel = useFunnel<RestChecklistFunnel>({
     id: 'rest-checklist',
@@ -125,6 +126,8 @@ function RestChecklist() {
                     void history.back();
                   }}
                   onOptionSelect={async (_, time) => {
+                    if(recommendLoading) return;
+                    setRecommendLoading(true);
                     try {
                       const res = await recommend({
                         mood: convertMood(context.mood),
@@ -147,6 +150,8 @@ function RestChecklist() {
                     } catch (error) {
                       console.log(error);
                       alert('휴식 추천 중 오류 발생');
+                    } finally {
+                      setRecommendLoading(false);
                     }
                   }}
                 />

@@ -4,15 +4,7 @@ import useEmblaCarousel from 'embla-carousel-react';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import type { RelaxActivity } from '../apis/relax';
-import {
-  BIG_HEIGHT,
-  BIG_PATH,
-  BIG_WIDTH,
-  GAP,
-  SMALL_HEIGHT,
-  SMALL_PATH,
-  SMALL_WIDTH
-} from '../data/cardInfo';
+import { BIG_HEIGHT, GAP, SMALL_WIDTH } from '../data/cardInfo';
 import { computeLoopedLayout } from '../utils/compute_layout';
 import * as styles from './RestResult.css';
 
@@ -107,22 +99,21 @@ function RestResult() {
     location.state?.data?.length ? location.state.data : null
   );
 
-  const [paths, setPaths] = useState([BIG_PATH, SMALL_PATH, SMALL_PATH, SMALL_PATH, SMALL_PATH]);
-  const [sizes, setSizes] = useState([
-    { width: BIG_WIDTH, height: BIG_HEIGHT },
-    { width: SMALL_WIDTH, height: SMALL_HEIGHT },
-    { width: SMALL_WIDTH, height: SMALL_HEIGHT },
-    { width: SMALL_WIDTH, height: SMALL_HEIGHT },
-    { width: SMALL_WIDTH, height: SMALL_HEIGHT }
-  ]);
-  const [xs, setXs] = useState([0, 0, 0, 0, 0]);
+  const [paths, setPaths] = useState<string[]>([]);
+  const [sizes, setSizes] = useState<{ width: number; height: number }[]>([]);
+  const [xs, setXs] = useState<number[]>([]);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [embiaRef, emblaApi] = useEmblaCarousel({
     loop: true,
     align: 'center',
     watchResize: false
   });
-  const cardCount = data?.length ?? 5;
+  const cardCount = data?.length ?? 0;
+  const layoutReady =
+    cardCount > 0 &&
+    paths.length === cardCount &&
+    sizes.length === cardCount &&
+    xs.length === cardCount;
 
   useEffect(() => {
     const nextData = location.state?.data;
@@ -135,7 +126,7 @@ function RestResult() {
   }, [location.state, navigate]);
 
   useLayoutEffect(() => {
-    if (!containerRef.current) return;
+    if (!containerRef.current || cardCount === 0) return;
     const viewportWidth = containerRef.current.getBoundingClientRect().width;
     const initialSnaps = Array.from({ length: cardCount }, (_, i) => i / cardCount);
     const { paths, sizes, xs } = computeLoopedLayout(initialSnaps, 0, viewportWidth, cardCount);
@@ -259,17 +250,19 @@ function RestResult() {
             ))}
           </div>
           <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-            {data.map((card, i) => (
-              <Card
-                key={card.id}
-                imageSrc={card.imageUrl || '/images/feed-image.svg'}
-                num={card.activeUserCount}
-                path={paths[i]}
-                width={sizes[i].width}
-                height={sizes[i].height}
-                x={xs[i]}
-              />
-            ))}
+            {layoutReady
+              ? data.map((card, i) => (
+                  <Card
+                    key={card.id}
+                    imageSrc={card.imageUrl || '/images/feed-image.svg'}
+                    num={card.activeUserCount}
+                    path={paths[i]}
+                    width={sizes[i].width}
+                    height={sizes[i].height}
+                    x={xs[i]}
+                  />
+                ))
+              : null}
           </div>
         </div>
         <div

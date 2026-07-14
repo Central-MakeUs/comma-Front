@@ -126,7 +126,7 @@ function RestChecklist() {
                     void history.back();
                   }}
                   onOptionSelect={async (_, time) => {
-                    if(recommendLoading) return;
+                    if (recommendLoading) return;
                     setRecommendLoading(true);
                     try {
                       const res = await recommend({

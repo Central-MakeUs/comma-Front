@@ -12,7 +12,7 @@ type ProgressBarStoryArgs = {
   ariaLabel: string;
 };
 
-const progressBarSteps = [1, 2, 3] satisfies ProgressBarStep[];
+const progressBarSteps = [1, 2] satisfies ProgressBarStep[];
 
 const meta = {
   title: 'Design System/ProgressBar',

@@ -1,22 +1,16 @@
 import { CtaButton, colors, Icon, ImageUpload, NavigationBar } from '@comma/design-system';
 import { assignInlineVars } from '@vanilla-extract/dynamic';
 import useEmblaCarousel from 'embla-carousel-react';
-import { useLayoutEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import {
-  BIG_HEIGHT,
-  BIG_PATH,
-  BIG_WIDTH,
-  CARD_COUNT,
-  GAP,
-  SMALL_HEIGHT,
-  SMALL_PATH,
-  SMALL_WIDTH
-} from '../data/cardInfo';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import type { RelaxActivity } from '../apis/relax';
+import { BIG_HEIGHT, GAP, SMALL_WIDTH } from '../data/cardInfo';
 import { computeLoopedLayout } from '../utils/compute_layout';
 import * as styles from './RestResult.css';
 
 function Modal({ onClose }: { onClose: () => void }) {
+  const navigate = useNavigate();
+
   return (
     <div
       className={styles.modalContainer}
@@ -37,7 +31,9 @@ function Modal({ onClose }: { onClose: () => void }) {
         <CtaButton className={styles.cancleBtn} onClick={onClose}>
           취소
         </CtaButton>
-        <CtaButton className={styles.confirmBtn}>확인</CtaButton>
+        <CtaButton className={styles.confirmBtn} onClick={() => navigate('/rest/checklist')}>
+          확인
+        </CtaButton>
       </div>
     </div>
   );
@@ -98,75 +94,46 @@ function RestResult() {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [slideIdx, setSlideIdx] = useState(0);
-  const backgrounds = [
-    {
-      id: 'bg-1',
-      src: '/images/rest_1.png'
-    },
-    {
-      id: 'bg-2',
-      src: '/images/rest_2.png'
-    },
-    {
-      id: 'bg-3',
-      src: ''
-    },
-    {
-      id: 'bg-4',
-      src: ''
-    },
-    {
-      id: 'bg-5',
-      src: '/images/rest_5.png'
-    }
-  ];
-  const infos = [
-    {
-      title: '가볍게 산책하기',
-      subTitle: '동네 산책하면서 예쁜 하늘 사진 한장 어떠세요?'
-    },
-    {
-      title: '예시 타이틀',
-      subTitle: '예시 설명'
-    },
-    {
-      title: '예시 타이틀',
-      subTitle: '예시 설명'
-    },
-    {
-      title: '예시 타이틀',
-      subTitle: '예시 설명'
-    },
-    {
-      title: '예시 타이틀',
-      subTitle: '예시 설명'
-    }
-  ];
-  const [paths, setPaths] = useState([BIG_PATH, SMALL_PATH, SMALL_PATH, SMALL_PATH, SMALL_PATH]);
-  const [sizes, setSizes] = useState([
-    { width: BIG_WIDTH, height: BIG_HEIGHT },
-    { width: SMALL_WIDTH, height: SMALL_HEIGHT },
-    { width: SMALL_WIDTH, height: SMALL_HEIGHT },
-    { width: SMALL_WIDTH, height: SMALL_HEIGHT },
-    { width: SMALL_WIDTH, height: SMALL_HEIGHT }
-  ]);
-  const [xs, setXs] = useState([0, 0, 0, 0, 0]);
+  const location = useLocation();
+  const [data, setData] = useState<RelaxActivity[] | null>(
+    location.state?.data?.length ? location.state.data : null
+  );
+
+  const [paths, setPaths] = useState<string[]>([]);
+  const [sizes, setSizes] = useState<{ width: number; height: number }[]>([]);
+  const [xs, setXs] = useState<number[]>([]);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [embiaRef, emblaApi] = useEmblaCarousel({
     loop: true,
     align: 'center',
     watchResize: false
   });
+  const cardCount = data?.length ?? 0;
+  const layoutReady =
+    cardCount > 0 &&
+    paths.length === cardCount &&
+    sizes.length === cardCount &&
+    xs.length === cardCount;
+
+  useEffect(() => {
+    const nextData = location.state?.data;
+    if (!nextData || nextData.length === 0) {
+      alert('휴식 추천 중 오류가 발생했습니다. 다시 선택해주세요');
+      navigate('/rest/checklist', { replace: true });
+      return;
+    }
+    setData(nextData);
+  }, [location.state, navigate]);
 
   useLayoutEffect(() => {
-    if (!containerRef.current) return;
+    if (!containerRef.current || cardCount === 0) return;
     const viewportWidth = containerRef.current.getBoundingClientRect().width;
-    const initialSnaps = Array.from({ length: CARD_COUNT }, (_, i) => i / CARD_COUNT);
-    const { paths, sizes, xs } = computeLoopedLayout(initialSnaps, 0, viewportWidth);
+    const initialSnaps = Array.from({ length: cardCount }, (_, i) => i / cardCount);
+    const { paths, sizes, xs } = computeLoopedLayout(initialSnaps, 0, viewportWidth, cardCount);
     setPaths(paths);
     setSizes(sizes);
     setXs(xs);
-  }, []);
+  }, [cardCount]);
 
   useLayoutEffect(() => {
     if (!emblaApi) return;
@@ -174,7 +141,12 @@ function RestResult() {
       const viewportWidth = emblaApi.rootNode().getBoundingClientRect().width;
       const scrollSnaps = emblaApi.scrollSnapList();
       const scrollProgress = emblaApi.scrollProgress();
-      const { paths, sizes, xs } = computeLoopedLayout(scrollSnaps, scrollProgress, viewportWidth);
+      const { paths, sizes, xs } = computeLoopedLayout(
+        scrollSnaps,
+        scrollProgress,
+        viewportWidth,
+        cardCount
+      );
       setPaths(paths);
       setSizes(sizes);
       setXs(xs);
@@ -193,13 +165,15 @@ function RestResult() {
       emblaApi.off('reInit', updateCardTransforms);
       emblaApi.off('select', onSelect);
     };
-  }, [emblaApi]);
+  }, [emblaApi, cardCount]);
+
+  if (!data || data.length === 0) return null;
 
   return (
     <div
       className={styles.container}
       style={assignInlineVars({
-        [styles.backgroundImageVar]: `url(${backgrounds[slideIdx].src}) center / cover no-repeat`
+        [styles.backgroundImageVar]: `url(${data[slideIdx].imageUrl || '/images/feed-image.svg'}) center / cover no-repeat`
       })}
     >
       {showModal ? (
@@ -260,8 +234,8 @@ function RestResult() {
             flexDirection: 'column'
           }}
         >
-          <span className={styles.title}>{infos[slideIdx].title}</span>
-          <span className={styles.subTitle}>{infos[slideIdx].subTitle}</span>
+          <span className={styles.title}>{data[slideIdx].name}</span>
+          <span className={styles.subTitle}>{data[slideIdx].description}</span>
         </div>
         <div
           ref={(node) => {
@@ -271,22 +245,24 @@ function RestResult() {
           style={{ position: 'relative', overflow: 'hidden', height: BIG_HEIGHT }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: GAP }}>
-            {backgrounds.map((bg, _i) => (
-              <div key={bg.id} style={{ flex: `0 0 ${SMALL_WIDTH}px`, height: BIG_HEIGHT }} />
+            {data.map((card, _i) => (
+              <div key={card.id} style={{ flex: `0 0 ${SMALL_WIDTH}px`, height: BIG_HEIGHT }} />
             ))}
           </div>
           <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-            {backgrounds.map((bg, i) => (
-              <Card
-                key={bg.id}
-                imageSrc={bg.src || '/images/feed-image.svg'}
-                num={i === 0 ? 31 : i}
-                path={paths[i]}
-                width={sizes[i].width}
-                height={sizes[i].height}
-                x={xs[i]}
-              />
-            ))}
+            {layoutReady
+              ? data.map((card, i) => (
+                  <Card
+                    key={card.id}
+                    imageSrc={card.imageUrl || '/images/feed-image.svg'}
+                    num={card.activeUserCount}
+                    path={paths[i]}
+                    width={sizes[i].width}
+                    height={sizes[i].height}
+                    x={xs[i]}
+                  />
+                ))
+              : null}
           </div>
         </div>
         <div
@@ -302,7 +278,7 @@ function RestResult() {
             marginBottom: 32
           }}
         >
-          {[1, 2, 3, 4, 5].map((i) => (
+          {Array.from({ length: data.length }, (_, idx) => idx + 1).map((i) => (
             <div
               key={i}
               className={styles.dot}

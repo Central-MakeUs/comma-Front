@@ -2,7 +2,6 @@ import {
   BIG_HEIGHT,
   BIG_PATH,
   BIG_WIDTH,
-  CARD_COUNT,
   GAP,
   SMALL_HEIGHT,
   SMALL_PATH,
@@ -33,13 +32,14 @@ export const interpolatePath = (smallPath: string, bigPath: string, progress: nu
 export const computeLoopedLayout = (
   scrollSnaps: number[],
   scrollProgress: number,
-  viewportWidth: number
+  viewportWidth: number,
+  cardCount: number
 ) => {
   const offsets = scrollSnaps.map((snap) => {
     let diff = snap - scrollProgress;
     if (diff > 0.5) diff -= 1;
     if (diff < -0.5) diff += 1;
-    return diff * CARD_COUNT;
+    return diff * cardCount;
   });
   const scales = offsets.map((o) => Math.max(0, 1 - Math.abs(o)));
   const widths = scales.map((s) => lerp(SMALL_WIDTH, BIG_WIDTH, s));
@@ -47,7 +47,7 @@ export const computeLoopedLayout = (
 
   const order = offsets.map((_, i) => i).sort((a, b) => offsets[a] - offsets[b]);
 
-  const lefts: number[] = new Array(CARD_COUNT);
+  const lefts: number[] = new Array(cardCount);
   order.forEach((i, k) => {
     if (k === 0) {
       lefts[i] = 0;

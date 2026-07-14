@@ -7,4 +7,3 @@ export const BIG_HEIGHT = 404;
 export const SMALL_WIDTH = 240;
 export const SMALL_HEIGHT = 303;
 export const GAP = 16;
-export const CARD_COUNT = 5;

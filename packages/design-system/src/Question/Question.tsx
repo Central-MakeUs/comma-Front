@@ -30,7 +30,7 @@ export type QuestionProps = {
 export function Question({
   backButton: showBackButton = true,
   step = 2,
-  totalSteps = 3,
+  totalSteps = 2,
   title = '몸은 얼마나 지쳐 있어요?',
   options = defaultOptions,
   selectedIndex,

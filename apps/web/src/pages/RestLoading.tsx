@@ -7,12 +7,12 @@ import * as styles from './RestLoading.css';
 function RestLoading() {
   const navigate = useNavigate();
   const location = useLocation();
-  const data = (location.state as { data?: RelaxActivity[] } | null)?.data ?? [];
   const [count, setCount] = useState<number | null>(null);
 
   useEffect(() => {
     let timeoutId: ReturnType<typeof setTimeout>;
     let canceled = false;
+    const data = (location.state as { data?: RelaxActivity[] } | null)?.data ?? [];
 
     const handleInit = async () => {
       try {
@@ -38,7 +38,7 @@ function RestLoading() {
       canceled = true;
       clearTimeout(timeoutId);
     };
-  }, [navigate, data]);
+  }, [navigate]);
 
   return (
     <div className={styles.container} role="status">

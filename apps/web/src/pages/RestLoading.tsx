@@ -16,13 +16,11 @@ function RestLoading() {
 
     const handleInit = async () => {
       try {
-        if(!canceled) {
+        if (!canceled) {
           const res = await onlineCount();
           setCount(res.data.count);
         }
-
-      } catch(error) {
-        
+      } catch (_error) {
       } finally {
         timeoutId = setTimeout(() => {
           navigate('/rest/result', {
@@ -38,7 +36,7 @@ function RestLoading() {
     return () => {
       canceled = true;
       clearTimeout(timeoutId);
-    }
+    };
   }, [navigate, data]);
 
   return (

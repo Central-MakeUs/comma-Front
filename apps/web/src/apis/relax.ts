@@ -33,3 +33,16 @@ export const recommend = async ({ mood, time }: recommendRequest) => {
 
   return data;
 };
+
+export interface OnlineResponse {
+  success: boolean;
+  message: string;
+  data: {
+    count: number;
+  };
+}
+
+export const onlineCount = async () => {
+  const { data } = await apiClient.get<OnlineResponse>('/api/relaxes/online-count');
+  return data;
+};

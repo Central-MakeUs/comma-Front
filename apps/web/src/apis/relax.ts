@@ -44,6 +44,5 @@ export interface onlineResponse {
 
 export const onlineCount = async () => {
   const { data } = await apiClient.get<onlineResponse>('/api/relaxes/online-count');
-  console.log(data);
   return data;
 }

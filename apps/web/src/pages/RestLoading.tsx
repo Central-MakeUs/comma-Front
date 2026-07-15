@@ -1,27 +1,35 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import type { RelaxActivity } from '../apis/relax';
 import * as styles from './RestLoading.css';
+import { onlineCount } from '../apis/relax';
 
 function RestLoading() {
   const navigate = useNavigate();
   const location = useLocation();
   const data = (location.state as { data?: RelaxActivity[] } | null)?.data ?? [];
+  const [count, setCount] = useState<number | null>(null);
 
   useEffect(() => {
-    /* TODO: /relaxes/{relaxId}/active-count api 연동 */
-    navigate('/rest/result', {
-      state: {
-        data
-      }
-    });
-  }, [/* TODO: /relaxes/{relaxId}/active-count api 연동 */ navigate, data]);
+    const handleInit = async () => {
+      const res = await onlineCount();
+      setCount(res.data.count);
+      setTimeout(() => {
+        navigate('/rest/result', {
+          state: {
+            data
+          }
+        });
+      }, 5000);
+    }
+    handleInit();
+  }, [navigate, data]);
 
   return (
     <div className={styles.container} role="status">
       <span className={styles.title}>휴식을 찾고 있어요...</span>
       <div style={{ marginTop: 24 }}>
-        <span className={styles.num}>173</span>
+        <span className={styles.num}>{count}</span>
         <span className={styles.desc}>명이 함께하는 중</span>
       </div>
     </div>

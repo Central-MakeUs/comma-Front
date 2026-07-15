@@ -23,7 +23,7 @@ function RestLoading() {
         }
         if (!canceled) {
           const res = await onlineCount();
-          if(!canceled) setCount(res.data.count);
+          if (!canceled) setCount(res.data.count);
         }
       } catch (_error) {
       } finally {

@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import type { RelaxActivity } from '../apis/relax';
-import * as styles from './RestLoading.css';
 import { onlineCount } from '../apis/relax';
+import * as styles from './RestLoading.css';
 
 function RestLoading() {
   const navigate = useNavigate();
@@ -21,7 +21,7 @@ function RestLoading() {
           }
         });
       }, 5000);
-    }
+    };
     handleInit();
   }, [navigate, data]);
 

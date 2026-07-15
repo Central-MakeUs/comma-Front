@@ -16,6 +16,11 @@ function RestLoading() {
 
     const handleInit = async () => {
       try {
+        if(!data || !data.length) {
+          alert('휴식 추천 중 오류가 발생했습니다. 다시 선택해주세요.');
+          navigate('/rest/checklist');
+          return;
+        }
         if (!canceled) {
           const res = await onlineCount();
           setCount(res.data.count);

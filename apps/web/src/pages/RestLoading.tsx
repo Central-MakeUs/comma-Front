@@ -27,14 +27,15 @@ function RestLoading() {
         }
       } catch (_error) {
       } finally {
-        if (canceled) return;
-        timeoutId = setTimeout(() => {
-          navigate('/rest/result', {
-            state: {
-              data
-            }
-          });
-        }, 5000);
+        if (!canceled) {
+          timeoutId = setTimeout(() => {
+            navigate('/rest/result', {
+              state: {
+                data
+              }
+            });
+          }, 5000);
+        }
       }
     };
     handleInit();

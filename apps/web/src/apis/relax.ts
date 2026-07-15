@@ -36,3 +36,11 @@ export const getRelaxOnlineCount = async () => {
 
   return data;
 };
+
+export const getRelaxActiveCount = async (relaxId: number) => {
+  const { data } = await apiClient.get<ApiResponse<CountResponse>>(
+    `/api/relaxes/${relaxId}/active-count`
+  );
+
+  return data;
+};

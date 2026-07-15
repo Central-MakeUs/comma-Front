@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { getRelaxOnlineCount, startRelax } from '../../apis/relax';
-import type { RestLoadingLocationState } from '../../types/relax';
+import { getRelaxActiveCount, getRelaxOnlineCount, startRelax } from '../../apis/relax';
+import type { RelaxActivity, RestLoadingLocationState } from '../../types/relax';
 import * as styles from './RestLoading.css';
 
+const LOADING_DURATION_MS = 5000;
 const getFallbackOnlineCount = () => 0;
+const getFallbackActiveCount = (selectedRelax?: RelaxActivity) =>
+  selectedRelax?.activeUserCount ?? 0;
 
 function RestLoading() {
   const navigate = useNavigate();
@@ -12,9 +15,20 @@ function RestLoading() {
   const { data = [], selectedRelax } = (location.state as RestLoadingLocationState | null) ?? {};
   const [onlineCount, setOnlineCount] = useState(getFallbackOnlineCount());
   const hasStartedRef = useRef(false);
+  const isCanceledRef = useRef(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    if (hasStartedRef.current) return;
+    isCanceledRef.current = false;
+
+    const cleanup = () => {
+      isCanceledRef.current = true;
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+
+    if (hasStartedRef.current) return cleanup;
     hasStartedRef.current = true;
 
     if (!selectedRelax?.id) {
@@ -25,33 +39,57 @@ function RestLoading() {
 
     const runStartFlow = async () => {
       let onlineCount = getFallbackOnlineCount();
+      let activeCount = getFallbackActiveCount(selectedRelax);
 
       try {
-        try {
-          await startRelax(selectedRelax.id);
-        } catch (error) {
-          console.error('Failed to start relax.', error);
-        }
+        await startRelax(selectedRelax.id);
+      } catch (error) {
+        console.error('Failed to start relax.', error);
+      }
 
+      try {
         const onlineCountResponse = await getRelaxOnlineCount();
         onlineCount =
           typeof onlineCountResponse.data?.count === 'number'
             ? onlineCountResponse.data.count
             : onlineCount;
-        setOnlineCount(onlineCount);
+        if (!isCanceledRef.current) {
+          setOnlineCount(onlineCount);
+        }
       } catch (error) {
         console.error('Failed to load relax online count.', error);
-      } finally {
+      }
+
+      try {
+        const activeCountResponse = await getRelaxActiveCount(selectedRelax.id);
+        activeCount =
+          typeof activeCountResponse.data?.count === 'number'
+            ? activeCountResponse.data.count
+            : activeCount;
+      } catch (error) {
+        console.error('Failed to load relax active count.', error);
+      }
+
+      if (isCanceledRef.current) return;
+
+      timeoutRef.current = setTimeout(() => {
+        if (isCanceledRef.current) return;
+
         navigate('/rest/activity', {
           state: {
             data,
-            selectedRelax
+            selectedRelax: {
+              ...selectedRelax,
+              activeUserCount: activeCount
+            }
           }
         });
-      }
+      }, LOADING_DURATION_MS);
     };
 
     void runStartFlow();
+
+    return cleanup;
   }, [data, navigate, selectedRelax]);
 
   return (

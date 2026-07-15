@@ -27,7 +27,7 @@ function RestLoading() {
         }
       } catch (_error) {
       } finally {
-        if (!canceled) {
+        if (!canceled || data.length) {
           timeoutId = setTimeout(() => {
             navigate('/rest/result', {
               state: {

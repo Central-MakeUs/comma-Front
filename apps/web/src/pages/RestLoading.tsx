@@ -23,11 +23,11 @@ function RestLoading() {
         }
         if (!canceled) {
           const res = await onlineCount();
-          setCount(res.data.count);
+          if(!canceled) setCount(res.data.count);
         }
       } catch (_error) {
       } finally {
-        if (!canceled || data.length) {
+        if (!canceled && data.length > 0) {
           timeoutId = setTimeout(() => {
             navigate('/rest/result', {
               state: {

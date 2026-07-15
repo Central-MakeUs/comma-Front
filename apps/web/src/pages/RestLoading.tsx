@@ -12,10 +12,14 @@ function RestLoading() {
 
   useEffect(() => {
     let timeoutId: ReturnType<typeof setTimeout>;
+    let canceled = false;
+
     const handleInit = async () => {
       try {
-        const res = await onlineCount();
-        setCount(res.data.count);
+        if(!canceled) {
+          const res = await onlineCount();
+          setCount(res.data.count);
+        }
 
       } catch(error) {
         
@@ -31,7 +35,10 @@ function RestLoading() {
     };
     handleInit();
 
-    return () => clearTimeout(timeoutId);
+    return () => {
+      canceled = true;
+      clearTimeout(timeoutId);
+    }
   }, [navigate, data]);
 
   return (

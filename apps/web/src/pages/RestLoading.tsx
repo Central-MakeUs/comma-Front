@@ -11,18 +11,27 @@ function RestLoading() {
   const [count, setCount] = useState<number | null>(null);
 
   useEffect(() => {
+    let timeoutId: ReturnType<typeof setTimeout>;
     const handleInit = async () => {
-      const res = await onlineCount();
-      setCount(res.data.count);
-      setTimeout(() => {
-        navigate('/rest/result', {
-          state: {
-            data
-          }
-        });
-      }, 5000);
+      try {
+        const res = await onlineCount();
+        setCount(res.data.count);
+
+      } catch(error) {
+        
+      } finally {
+        timeoutId = setTimeout(() => {
+          navigate('/rest/result', {
+            state: {
+              data
+            }
+          });
+        }, 5000);
+      }
     };
     handleInit();
+
+    return () => clearTimeout(timeoutId);
   }, [navigate, data]);
 
   return (

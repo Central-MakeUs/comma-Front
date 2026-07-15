@@ -16,7 +16,7 @@ function RestLoading() {
 
     const handleInit = async () => {
       try {
-        if(!data || !data.length) {
+        if (!data?.length) {
           alert('휴식 추천 중 오류가 발생했습니다. 다시 선택해주세요.');
           navigate('/rest/checklist');
           return;
@@ -27,7 +27,7 @@ function RestLoading() {
         }
       } catch (_error) {
       } finally {
-        if(canceled) return;
+        if (canceled) return;
         timeoutId = setTimeout(() => {
           navigate('/rest/result', {
             state: {
@@ -43,7 +43,7 @@ function RestLoading() {
       canceled = true;
       clearTimeout(timeoutId);
     };
-  }, [navigate]);
+  }, [navigate, (location.state as { data?: RelaxActivity[] } | null)?.data]);
 
   return (
     <div className={styles.container} role="status">

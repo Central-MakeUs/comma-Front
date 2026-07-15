@@ -3,8 +3,8 @@ import { assignInlineVars } from '@vanilla-extract/dynamic';
 import useEmblaCarousel from 'embla-carousel-react';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import type { RelaxActivity } from '../apis/relax';
 import { BIG_HEIGHT, GAP, SMALL_WIDTH } from '../data/cardInfo';
+import type { RelaxActivity, RestResultLocationState } from '../types/relax';
 import { computeLoopedLayout } from '../utils/compute_layout';
 import * as styles from './RestResult.css';
 
@@ -95,8 +95,9 @@ function RestResult() {
   const [showModal, setShowModal] = useState(false);
   const [slideIdx, setSlideIdx] = useState(0);
   const location = useLocation();
+  const locationState = location.state as RestResultLocationState | null;
   const [data, setData] = useState<RelaxActivity[] | null>(
-    location.state?.data?.length ? location.state.data : null
+    locationState?.data?.length ? locationState.data : null
   );
 
   const [paths, setPaths] = useState<string[]>([]);
@@ -114,16 +115,32 @@ function RestResult() {
     paths.length === cardCount &&
     sizes.length === cardCount &&
     xs.length === cardCount;
+  const selectedRelax = data?.[slideIdx];
 
   useEffect(() => {
-    const nextData = location.state?.data;
+    const nextData = locationState?.data;
     if (!nextData || nextData.length === 0) {
       alert('휴식 추천 중 오류가 발생했습니다. 다시 선택해주세요');
       navigate('/rest/checklist', { replace: true });
       return;
     }
     setData(nextData);
-  }, [location.state, navigate]);
+  }, [locationState, navigate]);
+
+  const handleStartClick = () => {
+    if (!data?.length || !selectedRelax) {
+      alert('휴식 추천 중 오류가 발생했습니다. 다시 선택해주세요');
+      navigate('/rest/checklist', { replace: true });
+      return;
+    }
+
+    navigate('/rest/loading', {
+      state: {
+        data,
+        selectedRelax
+      }
+    });
+  };
 
   useLayoutEffect(() => {
     if (!containerRef.current || cardCount === 0) return;
@@ -289,7 +306,7 @@ function RestResult() {
             />
           ))}
         </div>
-        <CtaButton className={styles.ctaButtonStyle} onClick={() => navigate('/rest/activity')} />
+        <CtaButton className={styles.ctaButtonStyle} onClick={handleStartClick} />
       </div>
       <NavigationBar
         active="rest"

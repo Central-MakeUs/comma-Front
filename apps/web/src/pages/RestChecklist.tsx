@@ -137,7 +137,7 @@ function RestChecklist() {
                         selectThenMove(`Time:${time}`, async () => {
                           setSelectedKey(undefined);
                           void history.replace('Time', { ...context, time });
-                          void navigate('/rest/result', {
+                          void navigate('/rest/loading', {
                             state: {
                               data: res.data
                             }

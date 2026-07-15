@@ -3,6 +3,7 @@ import { assignInlineVars } from '@vanilla-extract/dynamic';
 import useEmblaCarousel from 'embla-carousel-react';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { getRelaxActiveCount, startRelax } from '../apis/relax';
 import { BIG_HEIGHT, GAP, SMALL_WIDTH } from '../data/cardInfo';
 import type { RelaxActivity, RestResultLocationState } from '../types/relax';
 import { computeLoopedLayout } from '../utils/compute_layout';
@@ -124,22 +125,60 @@ function RestResult() {
       navigate('/rest/checklist', { replace: true });
       return;
     }
+
+    let canceled = false;
     setData(nextData);
+
+    const loadActiveCounts = async () => {
+      const nextActiveCountData = await Promise.all(
+        nextData.map(async (relax) => {
+          try {
+            const response = await getRelaxActiveCount(relax.id);
+            return {
+              ...relax,
+              activeUserCount:
+                typeof response.data?.count === 'number'
+                  ? response.data.count
+                  : relax.activeUserCount
+            };
+          } catch (error) {
+            console.error('Failed to load relax active count.', error);
+            return relax;
+          }
+        })
+      );
+
+      if (!canceled) {
+        setData(nextActiveCountData);
+      }
+    };
+
+    void loadActiveCounts();
+
+    return () => {
+      canceled = true;
+    };
   }, [locationState, navigate]);
 
-  const handleStartClick = () => {
+  const handleStartClick = async () => {
     if (!data?.length || !selectedRelax) {
       alert('휴식 추천 중 오류가 발생했습니다. 다시 선택해주세요');
       navigate('/rest/checklist', { replace: true });
       return;
     }
 
-    navigate('/rest/loading', {
-      state: {
-        data,
-        selectedRelax
-      }
-    });
+    try {
+      await startRelax(selectedRelax.id);
+    } catch (error) {
+      console.error('Failed to start relax.', error);
+    } finally {
+      navigate('/rest/activity', {
+        state: {
+          data,
+          selectedRelax
+        }
+      });
+    }
   };
 
   useLayoutEffect(() => {

@@ -1,17 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { getRelaxActiveCount, startRelax } from '../../apis/relax';
-import type { RelaxActivity, RestLoadingLocationState } from '../../types/relax';
+import { getRelaxOnlineCount, startRelax } from '../../apis/relax';
+import type { RestLoadingLocationState } from '../../types/relax';
 import * as styles from './RestLoading.css';
 
-const getFallbackActiveCount = (selectedRelax?: RelaxActivity) =>
-  selectedRelax?.activeUserCount ?? 0;
+const getFallbackOnlineCount = () => 0;
 
 function RestLoading() {
   const navigate = useNavigate();
   const location = useLocation();
   const { data = [], selectedRelax } = (location.state as RestLoadingLocationState | null) ?? {};
-  const [activeCount, setActiveCount] = useState(getFallbackActiveCount(selectedRelax));
+  const [onlineCount, setOnlineCount] = useState(getFallbackOnlineCount());
   const hasStartedRef = useRef(false);
 
   useEffect(() => {
@@ -25,7 +24,7 @@ function RestLoading() {
     }
 
     const runStartFlow = async () => {
-      let activeCount = getFallbackActiveCount(selectedRelax);
+      let onlineCount = getFallbackOnlineCount();
 
       try {
         try {
@@ -34,22 +33,19 @@ function RestLoading() {
           console.error('Failed to start relax.', error);
         }
 
-        const activeCountResponse = await getRelaxActiveCount(selectedRelax.id);
-        activeCount =
-          typeof activeCountResponse.data?.count === 'number'
-            ? activeCountResponse.data.count
-            : activeCount;
-        setActiveCount(activeCount);
+        const onlineCountResponse = await getRelaxOnlineCount();
+        onlineCount =
+          typeof onlineCountResponse.data?.count === 'number'
+            ? onlineCountResponse.data.count
+            : onlineCount;
+        setOnlineCount(onlineCount);
       } catch (error) {
-        console.error('Failed to load relax active count.', error);
+        console.error('Failed to load relax online count.', error);
       } finally {
         navigate('/rest/activity', {
           state: {
             data,
-            selectedRelax: {
-              ...selectedRelax,
-              activeUserCount: activeCount
-            }
+            selectedRelax
           }
         });
       }
@@ -62,7 +58,7 @@ function RestLoading() {
     <div className={styles.container} role="status">
       <span className={styles.title}>휴식을 찾고 있어요...</span>
       <div style={{ marginTop: 24 }}>
-        <span className={styles.num}>{activeCount}</span>
+        <span className={styles.num}>{onlineCount}</span>
         <span className={styles.desc}>명이 함께하는 중</span>
       </div>
     </div>

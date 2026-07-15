@@ -7,7 +7,7 @@ interface RecommendRequest {
   time: TimeType;
 }
 
-interface RelaxActiveCount {
+interface CountResponse {
   count: number;
 }
 
@@ -31,10 +31,8 @@ export const startRelax = async (relaxId: number) => {
   return data;
 };
 
-export const getRelaxActiveCount = async (relaxId: number) => {
-  const { data } = await apiClient.get<ApiResponse<RelaxActiveCount>>(
-    `/api/relaxes/${relaxId}/active-count`
-  );
+export const getRelaxOnlineCount = async () => {
+  const { data } = await apiClient.get<ApiResponse<CountResponse>>('/api/relaxes/online-count');
 
   return data;
 };

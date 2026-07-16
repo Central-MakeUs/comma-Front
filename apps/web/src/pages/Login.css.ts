@@ -2,11 +2,16 @@ import { colors, typography } from '@comma/design-system';
 import { style } from '@vanilla-extract/css';
 
 export const container = style({
+  position: 'fixed',
+  inset: 0,
+  backgroundColor: '#1A1814',
   backgroundImage: 'url("/images/onboardingBackground_blur.png")',
   backgroundRepeat: 'no-repeat',
   backgroundSize: 'cover',
-  width: '100%',
-  height: '100vh',
+  width: '100vw',
+  height: '100dvh',
+  minHeight: '100vh',
+  overflow: 'hidden',
   backgroundPosition: 'center',
   display: 'flex',
   flexDirection: 'column',

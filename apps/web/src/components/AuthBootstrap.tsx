@@ -22,10 +22,16 @@ const redirectToLoginForExpiredSession = () => {
   });
 };
 
-const redirectRootToLoading = () => {
+const redirectRootAfterAuth = () => {
   if (window.location.pathname !== '/') return;
 
   router.navigate(getOnboardingCompleted() === false ? '/nickname' : '/loading', { replace: true });
+};
+
+const refreshOnboardingStateForRoot = async () => {
+  if (window.location.pathname !== '/' || getOnboardingCompleted() !== null) return;
+
+  await refreshStoredTokens();
 };
 
 function AuthBootstrap({ children }: AuthBootstrapProps) {
@@ -53,14 +59,21 @@ function AuthBootstrap({ children }: AuthBootstrapProps) {
       }
 
       if (isAccessTokenValid(tokens.accessToken)) {
-        redirectRootToLoading();
-        setIsReady(true);
+        try {
+          await refreshOnboardingStateForRoot();
+          redirectRootAfterAuth();
+          setIsReady(true);
+        } catch {
+          clearTokens();
+          redirectToLoginForExpiredSession();
+          setIsReady(true);
+        }
         return;
       }
 
       try {
         await refreshStoredTokens();
-        redirectRootToLoading();
+        redirectRootAfterAuth();
       } catch {
         clearTokens();
         redirectToLoginForExpiredSession();

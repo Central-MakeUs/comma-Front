@@ -3,6 +3,7 @@ import { useFunnel } from '@use-funnel/react-router-dom';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { recommend } from '../apis/relax';
+import type { MoodType, TimeType } from '../types/relax';
 import * as styles from './RestChecklist.css';
 
 type RestChecklistFunnel = {
@@ -23,10 +24,7 @@ const questions = {
   }
 } as const;
 
-type convertMoodType = 'A' | 'B' | 'C';
-type convertTimeType = 'X' | 'Y' | 'Z';
-
-const convertMood = (answer: string): convertMoodType => {
+const convertMood = (answer: string): MoodType => {
   switch (answer) {
     case '멍하고 싶어':
       return 'A';
@@ -39,7 +37,7 @@ const convertMood = (answer: string): convertMoodType => {
   }
 };
 
-const convertTime = (time: string): convertTimeType => {
+const convertTime = (time: string): TimeType => {
   switch (time) {
     case '잠깐 (1시간 이내)':
       return 'X';
@@ -133,8 +131,8 @@ function RestChecklist() {
                         mood: convertMood(context.mood),
                         time: convertTime(time)
                       });
-                      if (!res?.success) {
-                        throw new Error(`${res.message}`);
+                      if (!res?.success || !res.data?.length) {
+                        throw new Error(res.message ?? 'No recommendations found.');
                       } else {
                         selectThenMove(`Time:${time}`, async () => {
                           setSelectedKey(undefined);

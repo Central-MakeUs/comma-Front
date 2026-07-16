@@ -1,35 +1,42 @@
+import type { ApiResponse } from '../types/api';
+import type { MoodType, RelaxActivity, TimeType } from '../types/relax';
 import { apiClient } from './client';
 
-export type moodType = 'A' | 'B' | 'C';
-export type timeType = 'X' | 'Y' | 'Z';
+export type { RelaxActivity } from '../types/relax';
 
-export interface recommendRequest {
-  mood: moodType;
-  time: timeType;
+interface RecommendRequest {
+  mood: MoodType;
+  time: TimeType;
 }
 
-export interface RelaxActivity {
-  id: number;
-  name: string;
-  description: string;
-  activeMessage: string;
-  imageUrl: string | null;
-  activeUserCount: number;
+interface CountResponse {
+  count: number;
 }
 
-export interface recommendResponse {
-  success: boolean;
-  message: string;
-  data: RelaxActivity[];
-}
-
-export const recommend = async ({ mood, time }: recommendRequest) => {
-  const { data } = await apiClient.get<recommendResponse>('/api/relaxes/recommendations', {
-    params: {
-      mood,
-      time
+export const recommend = async ({ mood, time }: RecommendRequest) => {
+  const { data } = await apiClient.get<ApiResponse<RelaxActivity[]>>(
+    '/api/relaxes/recommendations',
+    {
+      params: {
+        mood,
+        time
+      }
     }
-  });
+  );
+
+  return data;
+};
+
+export const startRelax = async (relaxId: number) => {
+  const { data } = await apiClient.post<ApiResponse>(`/api/relaxes/${relaxId}/start`);
+
+  return data;
+};
+
+export const getRelaxActiveCount = async (relaxId: number) => {
+  const { data } = await apiClient.get<ApiResponse<CountResponse>>(
+    `/api/relaxes/${relaxId}/active-count`
+  );
 
   return data;
 };

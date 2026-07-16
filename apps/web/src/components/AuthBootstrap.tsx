@@ -2,20 +2,22 @@ import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
 import { refreshStoredTokens, SESSION_EXPIRED_EVENT } from '../apis/client';
 import { router } from '../router';
-import { clearTokens, getTokens, isAccessTokenValid } from '../utils/tokenStorage';
+import {
+  clearTokens,
+  getOnboardingCompleted,
+  getTokens,
+  isAccessTokenValid
+} from '../utils/tokenStorage';
 
 interface AuthBootstrapProps {
   children: ReactNode;
 }
 
 const redirectToLoginForExpiredSession = () => {
-  const redirectTo = `${window.location.pathname}${window.location.search}`;
-
   router.navigate('/', {
     replace: true,
     state: {
-      reason: 'SESSION_EXPIRED',
-      redirectTo: redirectTo === '/' ? undefined : redirectTo
+      reason: 'SESSION_EXPIRED'
     }
   });
 };
@@ -23,7 +25,7 @@ const redirectToLoginForExpiredSession = () => {
 const redirectRootToLoading = () => {
   if (window.location.pathname !== '/') return;
 
-  router.navigate('/loading', { replace: true });
+  router.navigate(getOnboardingCompleted() === false ? '/nickname' : '/loading', { replace: true });
 };
 
 function AuthBootstrap({ children }: AuthBootstrapProps) {

@@ -8,6 +8,12 @@ const navigationPaths: Record<NavigationBarItem, string> = {
   mypage: '/mypage'
 };
 
-export const navigateToNavigationItem = (navigate: NavigateFunction, item: NavigationBarItem) => {
+export const navigateToNavigationItem = (
+  navigate: NavigateFunction,
+  item: NavigationBarItem,
+  active?: NavigationBarItem
+) => {
+  if (item === active) return;
+
   void navigate(navigationPaths[item]);
 };

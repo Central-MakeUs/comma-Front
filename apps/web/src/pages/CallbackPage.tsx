@@ -2,10 +2,8 @@ import { useMutation } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { type fieldType, login, type TokenResponse } from '../apis/auth';
-import { setTokens } from '../utils/tokenStorage';
+import { setOnboardingCompleted, setTokens } from '../utils/tokenStorage';
 import * as styles from './CallbackPage.css';
-
-const POST_LOGIN_REDIRECT_KEY = 'comma.postLoginRedirectTo';
 
 const getFieldByPathname = (pathname: string): fieldType | null => {
   if (pathname === '/oauth/kakao/callback') return 'KAKAO';
@@ -67,7 +65,7 @@ function CallbackPage() {
             accessToken: res.data.accessToken,
             refreshToken: res.data.refreshToken
           });
-          window.sessionStorage.removeItem(POST_LOGIN_REDIRECT_KEY);
+          setOnboardingCompleted(res.data.onboardingCompleted);
           navigate(getPostLoginPath(res.data), { replace: true });
         } else alert(res.message);
       } catch (err) {

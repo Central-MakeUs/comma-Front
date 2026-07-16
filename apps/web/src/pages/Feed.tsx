@@ -146,7 +146,7 @@ function Feed() {
       <NavigationBar
         active="feed"
         className={styles.navBarStyle}
-        onItemSelect={(item) => navigateToNavigationItem(navigate, item)}
+        onItemSelect={(item) => navigateToNavigationItem(navigate, item, 'feed')}
       />
     </div>
   );

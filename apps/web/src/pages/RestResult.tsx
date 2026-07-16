@@ -295,7 +295,7 @@ function RestResult() {
       <NavigationBar
         active="rest"
         className={styles.navStyle}
-        onItemSelect={(item) => navigateToNavigationItem(navigate, item)}
+        onItemSelect={(item) => navigateToNavigationItem(navigate, item, 'rest')}
       />
     </div>
   );

@@ -284,7 +284,7 @@ function MyPage() {
       <NavigationBar
         active="mypage"
         className={styles.navStyle}
-        onItemSelect={(item) => navigateToNavigationItem(navigate, item)}
+        onItemSelect={(item) => navigateToNavigationItem(navigate, item, 'mypage')}
       />
     </div>
   );

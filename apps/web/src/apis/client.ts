@@ -1,10 +1,11 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import type { ApiResponse } from '../types/api';
-import { clearTokens, getTokens, setTokens } from '../utils/tokenStorage';
+import { clearTokens, getTokens, setOnboardingCompleted, setTokens } from '../utils/tokenStorage';
 
 interface RefreshTokenData {
   accessToken: string;
   refreshToken?: string;
+  onboardingCompleted?: boolean;
 }
 
 type RetriableRequestConfig = InternalAxiosRequestConfig & {
@@ -60,6 +61,9 @@ export const refreshStoredTokens = async () => {
   };
 
   setTokens(nextTokens);
+  if (typeof data.data.onboardingCompleted === 'boolean') {
+    setOnboardingCompleted(data.data.onboardingCompleted);
+  }
 
   return nextTokens.accessToken;
 };

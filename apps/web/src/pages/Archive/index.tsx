@@ -24,7 +24,7 @@ function Archive() {
         <NavigationBar
           active="archive"
           className={styles.navigation}
-          onItemSelect={(item) => navigateToNavigationItem(navigate, item)}
+          onItemSelect={(item) => navigateToNavigationItem(navigate, item, 'archive')}
         />
       </div>
     </main>

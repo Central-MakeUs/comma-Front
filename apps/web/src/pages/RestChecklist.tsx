@@ -163,7 +163,7 @@ function RestChecklist() {
         <NavigationBar
           active="rest"
           className={styles.navigation}
-          onItemSelect={(item) => navigateToNavigationItem(navigate, item)}
+          onItemSelect={(item) => navigateToNavigationItem(navigate, item, 'rest')}
         />
       </div>
     </main>

@@ -42,14 +42,12 @@ function Modal({ onClose }: { onClose: () => void }) {
 
 function Card({
   imageSrc,
-  num,
   path,
   width,
   height,
   x
 }: {
   imageSrc?: string;
-  num?: number;
   path: string;
   width: number;
   height: number;
@@ -72,21 +70,6 @@ function Card({
         className={styles.imageUploadStyle}
         style={{ width, height, borderRadius: 0, clipPath: `path("${path}")` }}
       />
-      {num != null ? (
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 32,
-            left: 40,
-            width: 'calc(100% - 64px)',
-            textAlign: 'left',
-            zIndex: 2
-          }}
-        >
-          <span className={styles.imageNumStyle}>{num}</span>
-          <span className={styles.imageText}> 명이 함께하는 중</span>
-        </div>
-      ) : null}
     </div>
   );
 }
@@ -126,38 +109,7 @@ function RestResult() {
       return;
     }
 
-    let canceled = false;
     setData(nextData);
-
-    const loadActiveCounts = async () => {
-      const nextActiveCountData = await Promise.all(
-        nextData.map(async (relax) => {
-          try {
-            const response = await getRelaxActiveCount(relax.id);
-            return {
-              ...relax,
-              activeUserCount:
-                typeof response.data?.count === 'number'
-                  ? response.data.count
-                  : relax.activeUserCount
-            };
-          } catch (error) {
-            console.error('Failed to load relax active count.', error);
-            return relax;
-          }
-        })
-      );
-
-      if (!canceled) {
-        setData(nextActiveCountData);
-      }
-    };
-
-    void loadActiveCounts();
-
-    return () => {
-      canceled = true;
-    };
   }, [locationState, navigate]);
 
   const handleStartClick = async () => {
@@ -167,15 +119,25 @@ function RestResult() {
       return;
     }
 
+    let nextSelectedRelax = selectedRelax;
+
     try {
       await startRelax(selectedRelax.id);
+      const response = await getRelaxActiveCount(selectedRelax.id);
+      nextSelectedRelax = {
+        ...selectedRelax,
+        activeUserCount:
+          typeof response.data?.count === 'number'
+            ? response.data.count
+            : selectedRelax.activeUserCount
+      };
     } catch (error) {
-      console.error('Failed to start relax.', error);
+      console.error('Failed to start relax or load active count.', error);
     } finally {
       navigate('/rest/activity', {
         state: {
           data,
-          selectedRelax
+          selectedRelax: nextSelectedRelax
         }
       });
     }
@@ -311,7 +273,6 @@ function RestResult() {
                   <Card
                     key={card.id}
                     imageSrc={card.imageUrl || '/images/feed-image.svg'}
-                    num={card.activeUserCount}
                     path={paths[i]}
                     width={sizes[i].width}
                     height={sizes[i].height}

@@ -1,15 +1,12 @@
 import { CtaButton, colors, Icon } from '@comma/design-system';
 import { assignInlineVars } from '@vanilla-extract/dynamic';
-import {
-  ACTIVITY_PROGRESS_COUNT,
-  ACTIVITY_PROGRESS_TITLE,
-  REST_DESCRIPTION
-} from './RestActivity.constants';
+import { ACTIVITY_PROGRESS_TITLE, REST_DESCRIPTION } from './RestActivity.constants';
 import * as sharedStyles from './RestActivity.shared.css';
 import * as styles from './RestActivityProgress.css';
 import { RestActivityReselectModal } from './RestActivityReselectModal';
 
 type RestActivityProgressProps = {
+  participantCount: number | string;
   showReselectModal: boolean;
   onOpenReselectModal: () => void;
   onCancelReselect: () => void;
@@ -18,6 +15,7 @@ type RestActivityProgressProps = {
 };
 
 export function RestActivityProgress({
+  participantCount,
   showReselectModal,
   onOpenReselectModal,
   onCancelReselect,
@@ -59,7 +57,7 @@ export function RestActivityProgress({
           </div>
 
           <div className={styles.participantRow}>
-            <span className={styles.participantCount}>{ACTIVITY_PROGRESS_COUNT}</span>
+            <span className={styles.participantCount}>{participantCount}</span>
             <span className={styles.participantLabel}>명이 함께하는 중</span>
           </div>
         </section>

@@ -6,6 +6,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import type { RelaxActivity } from '../apis/relax';
 import { BIG_HEIGHT, GAP, SMALL_WIDTH } from '../data/cardInfo';
 import { computeLoopedLayout } from '../utils/compute_layout';
+import { navigateToNavigationItem } from '../utils/navigation';
 import * as styles from './RestResult.css';
 
 function Modal({ onClose }: { onClose: () => void }) {
@@ -294,21 +295,7 @@ function RestResult() {
       <NavigationBar
         active="rest"
         className={styles.navStyle}
-        onItemSelect={(item) => {
-          switch (item) {
-            case 'rest':
-              break;
-            case 'feed':
-              navigate('/feed');
-              break;
-            case 'archive':
-              navigate('/archive');
-              break;
-            case 'mypage':
-              navigate('/mypage');
-              break;
-          }
-        }}
+        onItemSelect={(item) => navigateToNavigationItem(navigate, item)}
       />
     </div>
   );

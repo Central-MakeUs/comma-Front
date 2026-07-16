@@ -1,6 +1,7 @@
-import { NavigationBar, type NavigationBarItem } from '@comma/design-system';
+import { NavigationBar } from '@comma/design-system';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { navigateToNavigationItem } from '../../utils/navigation';
 import { ARCHIVE_ITEMS, type ArchiveViewMode } from './Archive.constants';
 import * as styles from './Archive.css';
 import { ArchiveFeedGrid } from './ArchiveFeedGrid';
@@ -10,17 +11,6 @@ import { ArchiveHeader } from './ArchiveHeader';
 function Archive() {
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState<ArchiveViewMode>('list');
-
-  const handleNavigationSelect = (item: NavigationBarItem) => {
-    if (item === 'rest') {
-      void navigate('/rest/checklist');
-      return;
-    }
-
-    if (item === 'archive') {
-      void navigate('/archive');
-    }
-  };
 
   return (
     <main className={styles.page}>
@@ -34,7 +24,7 @@ function Archive() {
         <NavigationBar
           active="archive"
           className={styles.navigation}
-          onItemSelect={handleNavigationSelect}
+          onItemSelect={(item) => navigateToNavigationItem(navigate, item)}
         />
       </div>
     </main>

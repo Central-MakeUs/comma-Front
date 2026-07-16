@@ -4,6 +4,7 @@ import useEmblaCarousel from 'embla-carousel-react';
 import { useLayoutEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { interpolatePath, lerp } from '../../utils/compute_layout';
+import { navigateToNavigationItem } from '../../utils/navigation';
 import * as styles from './MyPage.css';
 import MyPageAnswerContainer from './MyPageAnswerContainer';
 import MyPageCard from './MyPageCard';
@@ -283,21 +284,7 @@ function MyPage() {
       <NavigationBar
         active="mypage"
         className={styles.navStyle}
-        onItemSelect={(item) => {
-          switch (item) {
-            case 'rest':
-              navigate('/rest/checklist');
-              break;
-            case 'feed':
-              navigate('/feed');
-              break;
-            case 'archive':
-              navigate('/archive');
-              break;
-            case 'mypage':
-              break;
-          }
-        }}
+        onItemSelect={(item) => navigateToNavigationItem(navigate, item)}
       />
     </div>
   );

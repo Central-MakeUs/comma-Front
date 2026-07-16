@@ -20,6 +20,12 @@ const redirectToLoginForExpiredSession = () => {
   });
 };
 
+const redirectRootToLoading = () => {
+  if (window.location.pathname !== '/') return;
+
+  router.navigate('/loading', { replace: true });
+};
+
 function AuthBootstrap({ children }: AuthBootstrapProps) {
   const [isReady, setIsReady] = useState(false);
 
@@ -45,12 +51,14 @@ function AuthBootstrap({ children }: AuthBootstrapProps) {
       }
 
       if (isAccessTokenValid(tokens.accessToken)) {
+        redirectRootToLoading();
         setIsReady(true);
         return;
       }
 
       try {
         await refreshStoredTokens();
+        redirectRootToLoading();
       } catch {
         clearTokens();
         redirectToLoginForExpiredSession();

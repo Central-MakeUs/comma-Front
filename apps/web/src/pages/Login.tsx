@@ -43,11 +43,8 @@ const getSessionReason = (state: unknown) =>
     ? state.reason
     : undefined;
 
-const getPostLoginPath = (data: TokenResponse, redirectTo?: string) => {
-  if (redirectTo) return redirectTo;
-
-  return data.onboardingCompleted ? '/feed' : '/nickname';
-};
+const getPostLoginPath = (data: TokenResponse) =>
+  data.onboardingCompleted ? '/loading' : '/nickname';
 
 const storePostLoginRedirect = (redirectTo?: string) => {
   if (!redirectTo) {
@@ -137,7 +134,7 @@ function Login() {
             accessToken: res.data.accessToken,
             refreshToken: res.data.refreshToken
           });
-          navigate(getPostLoginPath(res.data, redirectTo), { replace: true });
+          navigate(getPostLoginPath(res.data), { replace: true });
         } else alert('구글 로그인 중 에러 발생');
       } catch (err) {
         console.log(err);

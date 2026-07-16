@@ -1,9 +1,23 @@
-import { useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import * as styles from './Loading.css';
 
+const CHECKLIST_REDIRECT_DELAY_MS = 1500;
+
 function Loading() {
+  const navigate = useNavigate();
   const location = useLocation();
   const userName = (location.state as { userName?: string } | null)?.userName ?? '콤마';
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      navigate('/rest/checklist', { replace: true });
+    }, CHECKLIST_REDIRECT_DELAY_MS);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [navigate]);
 
   return (
     <div className={styles.container}>

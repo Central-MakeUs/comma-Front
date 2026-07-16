@@ -22,24 +22,14 @@ const getRedirectUri = (field: fieldType) => {
   return import.meta.env.VITE_APPLE_REDIRECT_URI;
 };
 
-const getPostLoginRedirect = (stateRedirectTo?: unknown) => {
-  if (typeof stateRedirectTo === 'string') return stateRedirectTo;
-
-  return window.sessionStorage.getItem(POST_LOGIN_REDIRECT_KEY) ?? undefined;
-};
-
-const getPostLoginPath = (data: TokenResponse, redirectTo?: string) => {
-  if (redirectTo) return redirectTo;
-
-  return data.onboardingCompleted ? '/feed' : '/nickname';
-};
+const getPostLoginPath = (data: TokenResponse) =>
+  data.onboardingCompleted ? '/loading' : '/nickname';
 
 function CallbackPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const pathname = location.pathname;
   const appleCode = location.state?.code;
-  const redirectTo = getPostLoginRedirect(location.state?.redirectTo);
   const hasRun = useRef(false);
   const { mutateAsync: loginMutateAsync } = useMutation({
     mutationFn: login
@@ -78,7 +68,7 @@ function CallbackPage() {
             refreshToken: res.data.refreshToken
           });
           window.sessionStorage.removeItem(POST_LOGIN_REDIRECT_KEY);
-          navigate(getPostLoginPath(res.data, redirectTo), { replace: true });
+          navigate(getPostLoginPath(res.data), { replace: true });
         } else alert(res.message);
       } catch (err) {
         console.log(err);
@@ -86,7 +76,7 @@ function CallbackPage() {
       }
     };
     handleLogin();
-  }, [navigate, pathname, appleCode, location.search, loginMutateAsync, redirectTo]);
+  }, [navigate, pathname, appleCode, location.search, loginMutateAsync]);
   return <div className={styles.container} />;
 }
 

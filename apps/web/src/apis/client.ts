@@ -44,7 +44,7 @@ export const refreshStoredTokens = async () => {
     throw new Error('No refresh token found.');
   }
 
-  const { data } = await authApiClient.post<ApiResponse<RefreshTokenData>>('/api/auth/refresh', {
+  const { data } = await authApiClient.post<ApiResponse<RefreshTokenData>>('/api/auth/reissue', {
     refreshToken: tokens.refreshToken
   });
 

@@ -1,6 +1,7 @@
 import { Chip, FeedCard, Icon, NavigationBar } from '@comma/design-system';
 import { useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { navigateToNavigationItem } from '../utils/navigation';
 import * as styles from './Feed.css';
 
 const feelCat = ['전체', '멍하고 싶어', '기분 전환이 필요해', '가볍게 해볼 수 있어'];
@@ -145,22 +146,7 @@ function Feed() {
       <NavigationBar
         active="feed"
         className={styles.navBarStyle}
-        onItemSelect={(item) => {
-          switch (item) {
-            case 'rest':
-              navigate('/rest/checklist');
-              break;
-            case 'feed':
-              navigate('/feed');
-              break;
-            case 'archive':
-              navigate('/archive');
-              break;
-            case 'mypage':
-              navigate('/mypage');
-              break;
-          }
-        }}
+        onItemSelect={(item) => navigateToNavigationItem(navigate, item, 'feed')}
       />
     </div>
   );

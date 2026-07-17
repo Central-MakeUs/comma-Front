@@ -24,30 +24,23 @@ export const dimOverlay = style({
   position: 'absolute',
   inset: 0,
   zIndex: 0,
-  background: 'rgb(17 17 17 / 42%)',
-  backdropFilter: 'blur(8px)',
-  WebkitBackdropFilter: 'blur(8px)'
+  background: 'rgb(26 24 20 / 50%)',
+  backdropFilter: 'blur(5px)',
+  WebkitBackdropFilter: 'blur(5px)'
 });
 
 export const topGradient = style({
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  right: 0,
-  zIndex: 1,
-  height: 188,
-  background: 'linear-gradient(180deg, rgb(17 17 17 / 72%) 0%, rgb(17 17 17 / 0%) 100%)',
-  pointerEvents: 'none'
+  display: 'none'
 });
 
 export const bottomGradient = style({
   position: 'absolute',
+  top: 254,
   left: 0,
   right: 0,
-  bottom: 0,
+  bottom: -2,
   zIndex: 1,
-  height: 472,
-  background: 'linear-gradient(0deg, rgb(17 17 17 / 82%) 0%, rgb(17 17 17 / 0%) 100%)',
+  background: 'linear-gradient(0deg, rgb(17 17 17 / 66%) 0%, rgb(17 17 17 / 0%) 100%)',
   pointerEvents: 'none'
 });
 

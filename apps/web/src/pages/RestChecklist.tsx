@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { recommend } from '../apis/relax';
 import type { MoodType, TimeType } from '../types/relax';
+import { navigateToNavigationItem } from '../utils/navigation';
 import * as styles from './RestChecklist.css';
 
 type RestChecklistFunnel = {
@@ -157,7 +158,11 @@ function RestChecklist() {
           />
         </div>
 
-        <NavigationBar active="rest" className={styles.navigation} />
+        <NavigationBar
+          active="rest"
+          className={styles.navigation}
+          onItemSelect={(item) => navigateToNavigationItem(navigate, item, 'rest')}
+        />
       </div>
     </main>
   );

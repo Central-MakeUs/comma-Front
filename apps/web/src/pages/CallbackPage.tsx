@@ -2,10 +2,8 @@ import { useMutation } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { type fieldType, login, type TokenResponse } from '../apis/auth';
-import { setTokens } from '../utils/tokenStorage';
+import { setOnboardingCompleted, setTokens } from '../utils/tokenStorage';
 import * as styles from './CallbackPage.css';
-
-const POST_LOGIN_REDIRECT_KEY = 'comma.postLoginRedirectTo';
 
 const getFieldByPathname = (pathname: string): fieldType | null => {
   if (pathname === '/oauth/kakao/callback') return 'KAKAO';
@@ -22,24 +20,14 @@ const getRedirectUri = (field: fieldType) => {
   return import.meta.env.VITE_APPLE_REDIRECT_URI;
 };
 
-const getPostLoginRedirect = (stateRedirectTo?: unknown) => {
-  if (typeof stateRedirectTo === 'string') return stateRedirectTo;
-
-  return window.sessionStorage.getItem(POST_LOGIN_REDIRECT_KEY) ?? undefined;
-};
-
-const getPostLoginPath = (data: TokenResponse, redirectTo?: string) => {
-  if (redirectTo) return redirectTo;
-
-  return data.onboardingCompleted ? '/feed' : '/nickname';
-};
+const getPostLoginPath = (data: TokenResponse) =>
+  data.onboardingCompleted ? '/loading' : '/nickname';
 
 function CallbackPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const pathname = location.pathname;
   const appleCode = location.state?.code;
-  const redirectTo = getPostLoginRedirect(location.state?.redirectTo);
   const hasRun = useRef(false);
   const { mutateAsync: loginMutateAsync } = useMutation({
     mutationFn: login
@@ -77,8 +65,8 @@ function CallbackPage() {
             accessToken: res.data.accessToken,
             refreshToken: res.data.refreshToken
           });
-          window.sessionStorage.removeItem(POST_LOGIN_REDIRECT_KEY);
-          navigate(getPostLoginPath(res.data, redirectTo), { replace: true });
+          setOnboardingCompleted(res.data.onboardingCompleted);
+          navigate(getPostLoginPath(res.data), { replace: true });
         } else alert(res.message);
       } catch (err) {
         console.log(err);
@@ -86,7 +74,7 @@ function CallbackPage() {
       }
     };
     handleLogin();
-  }, [navigate, pathname, appleCode, location.search, loginMutateAsync, redirectTo]);
+  }, [navigate, pathname, appleCode, location.search, loginMutateAsync]);
   return <div className={styles.container} />;
 }
 

@@ -1,12 +1,14 @@
 import { CtaButton, TextInput } from '@comma/design-system';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getRandomNickname, updateNickname } from '../apis/user';
+import { setOnboardingCompleted } from '../utils/tokenStorage';
 import * as styles from './Nickname.css';
 
 function Nickname() {
   const [nickname, setNickname] = useState('');
+  const hasUserEditedNicknameRef = useRef(false);
   const navigate = useNavigate();
   const [isAccepted, setIsAccepted] = useState(false);
   const randomNicknameQuery = useQuery({
@@ -17,6 +19,7 @@ function Nickname() {
     mutationFn: updateNickname
   });
   const onChange = (val: string) => {
+    hasUserEditedNicknameRef.current = true;
     setNickname(val);
   };
 
@@ -28,7 +31,7 @@ function Nickname() {
   useEffect(() => {
     const randomNickname = randomNicknameQuery.data?.data?.nickname;
 
-    if (!randomNickname || nickname.length > 0) return;
+    if (!randomNickname || hasUserEditedNicknameRef.current || nickname.length > 0) return;
 
     setNickname(randomNickname);
   }, [randomNicknameQuery.data?.data?.nickname, nickname.length]);
@@ -40,6 +43,7 @@ function Nickname() {
       const res = await updateNicknameMutation.mutateAsync({ nickname });
 
       if (res.success && res.data?.nickname) {
+        setOnboardingCompleted(true);
         navigate('/loading', { state: { userName: res.data.nickname } });
         return;
       }

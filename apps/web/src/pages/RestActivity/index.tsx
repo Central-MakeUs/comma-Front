@@ -51,6 +51,9 @@ function RestActivity() {
         onComplete={() => setIsWritingStarted(true)}
         onConfirmReselect={handleConfirmReselect}
         onOpenReselectModal={() => setShowReselectModal(true)}
+        title={locationState?.selectedRelax?.name}
+        desc={locationState?.selectedRelax?.description}
+        imageSrc={locationState?.selectedRelax?.imageUrl}
       />
     );
   }

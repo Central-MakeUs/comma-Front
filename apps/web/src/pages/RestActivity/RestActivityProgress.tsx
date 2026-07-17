@@ -12,6 +12,9 @@ type RestActivityProgressProps = {
   onCancelReselect: () => void;
   onConfirmReselect: () => void;
   onComplete: () => void;
+  title?: string,
+  imageSrc?: string | null,
+  desc?: string,
 };
 
 export function RestActivityProgress({
@@ -20,14 +23,17 @@ export function RestActivityProgress({
   onOpenReselectModal,
   onCancelReselect,
   onConfirmReselect,
-  onComplete
+  onComplete,
+  title,
+  imageSrc,
+  desc,
 }: RestActivityProgressProps) {
   return (
     <main className={sharedStyles.page}>
       <div
         className={sharedStyles.screen}
         style={assignInlineVars({
-          [sharedStyles.backgroundImageVar]: 'url(/images/rest_activity_progress.jpg)'
+          [sharedStyles.backgroundImageVar]: `url(${imageSrc || '/images/feed-image.svg'}`
         })}
       >
         <div
@@ -51,9 +57,9 @@ export function RestActivityProgress({
         <section className={styles.content} aria-labelledby="rest-activity-progress-title">
           <div className={styles.heroText}>
             <h1 className={sharedStyles.title} id="rest-activity-progress-title">
-              {ACTIVITY_PROGRESS_TITLE}
+              {title}
             </h1>
-            <p className={sharedStyles.description}>{REST_DESCRIPTION}</p>
+            <p className={sharedStyles.description}>{desc}</p>
           </div>
 
           <div className={styles.participantRow}>

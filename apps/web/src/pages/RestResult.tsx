@@ -116,7 +116,7 @@ function RestResult() {
   const handleStartClick = async () => {
     if (!data?.length || !selectedRelax) {
       alert('휴식 추천 중 오류가 발생했습니다. 다시 선택해주세요');
-      navigate('/rest/checklist', { replace: true });
+      navigate('/rest/checklist', {replace: true});
       return;
     }
 

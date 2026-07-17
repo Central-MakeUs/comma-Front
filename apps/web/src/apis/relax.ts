@@ -5,8 +5,8 @@ import { apiClient } from './client';
 export type { RelaxActivity } from '../types/relax';
 
 interface RecommendRequest {
-  mood: MoodType;
-  time: TimeType;
+  mood: string;
+  time: string;
 }
 
 interface CountResponse {

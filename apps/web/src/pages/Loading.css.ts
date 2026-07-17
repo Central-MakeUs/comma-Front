@@ -2,6 +2,7 @@ import { colors, typography } from '@comma/design-system';
 import { style } from '@vanilla-extract/css';
 
 export const container = style({
+  backgroundColor: '#1A1814',
   backgroundImage: 'url(/images/loading_background.png)',
   width: '100vw',
   height: '100vh',

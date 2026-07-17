@@ -5,6 +5,7 @@ export interface StoredTokens {
 
 const ACCESS_TOKEN_KEY = 'comma.accessToken';
 const REFRESH_TOKEN_KEY = 'comma.refreshToken';
+const ONBOARDING_COMPLETED_KEY = 'comma.onboardingCompleted';
 const TOKEN_EXPIRY_BUFFER_MS = 60 * 1000;
 
 const canUseLocalStorage = () => typeof window !== 'undefined' && Boolean(window.localStorage);
@@ -32,6 +33,23 @@ export const clearTokens = () => {
 
   window.localStorage.removeItem(ACCESS_TOKEN_KEY);
   window.localStorage.removeItem(REFRESH_TOKEN_KEY);
+  window.localStorage.removeItem(ONBOARDING_COMPLETED_KEY);
+};
+
+export const getOnboardingCompleted = () => {
+  if (!canUseLocalStorage()) return null;
+
+  const value = window.localStorage.getItem(ONBOARDING_COMPLETED_KEY);
+
+  if (value === null) return null;
+
+  return value === 'true';
+};
+
+export const setOnboardingCompleted = (onboardingCompleted: boolean) => {
+  if (!canUseLocalStorage()) return;
+
+  window.localStorage.setItem(ONBOARDING_COMPLETED_KEY, String(onboardingCompleted));
 };
 
 const decodeBase64Url = (value: string) => {

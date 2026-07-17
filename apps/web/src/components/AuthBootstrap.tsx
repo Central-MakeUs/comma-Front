@@ -2,22 +2,36 @@ import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
 import { refreshStoredTokens, SESSION_EXPIRED_EVENT } from '../apis/client';
 import { router } from '../router';
-import { clearTokens, getTokens, isAccessTokenValid } from '../utils/tokenStorage';
+import {
+  clearTokens,
+  getOnboardingCompleted,
+  getTokens,
+  isAccessTokenValid
+} from '../utils/tokenStorage';
 
 interface AuthBootstrapProps {
   children: ReactNode;
 }
 
 const redirectToLoginForExpiredSession = () => {
-  const redirectTo = `${window.location.pathname}${window.location.search}`;
-
   router.navigate('/', {
     replace: true,
     state: {
-      reason: 'SESSION_EXPIRED',
-      redirectTo: redirectTo === '/' ? undefined : redirectTo
+      reason: 'SESSION_EXPIRED'
     }
   });
+};
+
+const redirectRootAfterAuth = () => {
+  if (window.location.pathname !== '/') return;
+
+  router.navigate(getOnboardingCompleted() === false ? '/nickname' : '/loading', { replace: true });
+};
+
+const refreshOnboardingStateForRoot = async () => {
+  if (window.location.pathname !== '/' || getOnboardingCompleted() !== null) return;
+
+  await refreshStoredTokens();
 };
 
 function AuthBootstrap({ children }: AuthBootstrapProps) {
@@ -45,12 +59,21 @@ function AuthBootstrap({ children }: AuthBootstrapProps) {
       }
 
       if (isAccessTokenValid(tokens.accessToken)) {
-        setIsReady(true);
+        try {
+          await refreshOnboardingStateForRoot();
+          redirectRootAfterAuth();
+          setIsReady(true);
+        } catch {
+          clearTokens();
+          redirectToLoginForExpiredSession();
+          setIsReady(true);
+        }
         return;
       }
 
       try {
         await refreshStoredTokens();
+        redirectRootAfterAuth();
       } catch {
         clearTokens();
         redirectToLoginForExpiredSession();

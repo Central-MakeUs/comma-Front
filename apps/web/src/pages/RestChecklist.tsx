@@ -3,7 +3,6 @@ import { useFunnel } from '@use-funnel/react-router-dom';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { recommend } from '../apis/relax';
-import type { MoodType, TimeType } from '../types/relax';
 import * as styles from './RestChecklist.css';
 import { getChecklists } from '../apis/checklist';
 import { questionInfo } from '../types/checklist';

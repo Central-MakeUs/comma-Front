@@ -1,5 +1,5 @@
 import type { ApiResponse } from '../types/api';
-import type { MoodType, RelaxActivity, TimeType } from '../types/relax';
+import type { RelaxActivity } from '../types/relax';
 import { apiClient } from './client';
 
 export type { RelaxActivity } from '../types/relax';

@@ -8,6 +8,6 @@ interface checklistResponse {
 
 export const getChecklists = async () => {
     const { data } = await apiClient.get<ApiResponse<checklistResponse>>('/api/checklists');
-    console.log(data);
+    
     return data;
 }

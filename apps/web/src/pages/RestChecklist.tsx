@@ -1,10 +1,9 @@
-import { NavigationBar, ProgressBar, Question } from '@comma/design-system';
+import { ProgressBar, Question } from '@comma/design-system';
 import { useFunnel } from '@use-funnel/react-router-dom';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { recommend } from '../apis/relax';
 import type { MoodType, TimeType } from '../types/relax';
-import { navigateToNavigationItem } from '../utils/navigation';
 import * as styles from './RestChecklist.css';
 
 type RestChecklistFunnel = {

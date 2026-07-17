@@ -5,10 +5,14 @@ export const answerNum = style({
   ...typography.engNum,
   color: colors.textPrimary,
   fontSize: 24,
+  lineHeight: '24px',
   marginRight: 6
 });
 
 export const answerContainer = style({
   ...typography.labelNormalR,
-  color: colors.textPrimary
+  color: colors.textPrimary,
+  display: 'flex',
+  flexDirection: 'row',
+  alignItems: 'baseline'
 });

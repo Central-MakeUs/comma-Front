@@ -7,6 +7,7 @@ export const container = style({
   width: '100vw',
   minHeight: '100dvh',
   position: 'relative',
+  isolation: 'isolate',
   selectors: {
     '&::before': {
       content: '',

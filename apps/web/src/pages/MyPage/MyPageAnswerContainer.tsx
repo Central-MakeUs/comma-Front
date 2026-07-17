@@ -18,11 +18,13 @@ function MyPageAnswerContainer({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: 0
+        padding: 0,
+        marginBottom: 16
       }}
     >
       <div className={styles.answerContainer}>
-        <span className={styles.answerNum}>#{num}</span> {text}
+        <span className={styles.answerNum}>#{num}</span> 
+        <span>{text}</span>
       </div>
       <MyPageGaugeBar percent={percent} />
     </div>

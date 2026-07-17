@@ -20,7 +20,7 @@ export const container = style({
       position: 'absolute',
       inset: 0,
       backdropFilter: 'blur(40px)',
-      zIndex: -1,
+      zIndex: -3,
       backgroundColor: '#1A181450'
     }
   }
@@ -34,7 +34,7 @@ export const header = style({
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
-  position: 'relative'
+  position: 'relative',
 });
 
 export const headerIconContainer = style({

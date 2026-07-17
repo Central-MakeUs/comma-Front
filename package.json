@@ -31,5 +31,11 @@
     "onlyBuiltDependencies": [
       "esbuild"
     ]
-  }
+  },
+  "version": "1.0.0",
+  "description": "React web app을 Expo React Native shell의 WebView 안에서 실행하는 Turborepo입니다.",
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }

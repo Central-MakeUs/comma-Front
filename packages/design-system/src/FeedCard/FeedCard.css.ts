@@ -5,6 +5,7 @@ export const feedCard = style({
   width: 393,
   maxWidth: '100%',
   display: 'grid',
+  gridTemplateColumns: 'minmax(0, 1fr)',
   background: vars.color.backgroundPrimary,
   color: vars.color.textPrimary
 });

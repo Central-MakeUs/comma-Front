@@ -63,7 +63,7 @@ function Nickname() {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          marginTop: 68
+          paddingTop: 20
         }}
       >
         <img

@@ -293,7 +293,7 @@ function RestResult() {
             justifyContent: 'space-between',
             margin: '0 auto',
             marginTop: 16,
-            marginBottom: 32
+            marginBottom: 24
           }}
         >
           {Array.from({ length: data.length }, (_, idx) => idx + 1).map((i) => (

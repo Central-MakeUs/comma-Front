@@ -9,6 +9,7 @@ import { Platform, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import type { WebViewErrorEvent, WebViewMessageEvent } from 'react-native-webview/lib/WebViewTypes';
 import { postMessage, WebView } from './src/bridge';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type WebUrlConfig = {
   error?: string;
@@ -73,6 +74,7 @@ const params = new URLSearchParams({
 
 export default function App() {
   const { error, url: webUrl } = getWebUrlConfig();
+  const insets = useSafeAreaInsets();
   const webViewRef = useRef<BridgeWebView>(null);
   const handleMessage = async (event: WebViewMessageEvent) => {
     let message: { type?: string } | undefined;
@@ -129,7 +131,7 @@ export default function App() {
   if (error || !webUrl) {
     return (
       <SafeAreaProvider>
-        <View style={styles.container}>
+        <View style={{...styles.container, paddingTop: insets.top}}>
           <StatusBar style="auto" translucent backgroundColor="transparent" />
           <View style={styles.errorState}>
             <Text style={styles.errorTitle}>Unable to load Comma</Text>
@@ -142,7 +144,7 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <View style={styles.container}>
+      <View style={{...styles.container, paddingTop: insets.top}}>
         <StatusBar style="auto" translucent backgroundColor="transparent" />
         <WebView
           ref={webViewRef}

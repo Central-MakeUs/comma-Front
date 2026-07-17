@@ -26,5 +26,5 @@ export const num = style({
 
 export const desc = style({
   ...typography.headlineR,
-  color: colors.textTertiary,
+  color: colors.textTertiary
 });

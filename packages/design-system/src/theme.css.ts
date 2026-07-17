@@ -122,7 +122,7 @@ globalFontFace('Outfit', {
 globalFontFace('Kepler Std', {
   src: `url(${keplerCondensedDisplay}) format("opentype")`,
   fontWeight: '700',
-  fontStyle: 'normal',
+  fontStyle: 'normal'
 });
 
 export const typography = {

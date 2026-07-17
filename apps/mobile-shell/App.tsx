@@ -6,10 +6,9 @@ import { StatusBar } from 'expo-status-bar';
 import * as WebBrowser from 'expo-web-browser';
 import { useEffect, useRef } from 'react';
 import { Platform, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { WebViewErrorEvent, WebViewMessageEvent } from 'react-native-webview/lib/WebViewTypes';
 import { postMessage, WebView } from './src/bridge';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type WebUrlConfig = {
   error?: string;
@@ -131,7 +130,7 @@ export default function App() {
   if (error || !webUrl) {
     return (
       <SafeAreaProvider>
-        <View style={{...styles.container, paddingTop: insets.top}}>
+        <View style={{ ...styles.container, paddingTop: insets.top }}>
           <StatusBar style="auto" translucent backgroundColor="transparent" />
           <View style={styles.errorState}>
             <Text style={styles.errorTitle}>Unable to load Comma</Text>
@@ -144,7 +143,7 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <View style={{...styles.container, paddingTop: insets.top}}>
+      <View style={{ ...styles.container, paddingTop: insets.top }}>
         <StatusBar style="auto" translucent backgroundColor="transparent" />
         <WebView
           ref={webViewRef}

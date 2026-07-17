@@ -23,7 +23,7 @@ function MyPageAnswerContainer({
       }}
     >
       <div className={styles.answerContainer}>
-        <span className={styles.answerNum}>#{num}</span> 
+        <span className={styles.answerNum}>#{num}</span>
         <span>{text}</span>
       </div>
       <MyPageGaugeBar percent={percent} />

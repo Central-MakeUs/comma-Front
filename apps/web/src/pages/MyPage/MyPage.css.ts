@@ -35,7 +35,7 @@ export const header = style({
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
-  position: 'relative',
+  position: 'relative'
 });
 
 export const headerIconContainer = style({

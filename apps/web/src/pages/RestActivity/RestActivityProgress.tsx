@@ -1,6 +1,5 @@
 import { CtaButton, colors, Icon } from '@comma/design-system';
 import { assignInlineVars } from '@vanilla-extract/dynamic';
-import { ACTIVITY_PROGRESS_TITLE, REST_DESCRIPTION } from './RestActivity.constants';
 import * as sharedStyles from './RestActivity.shared.css';
 import * as styles from './RestActivityProgress.css';
 import { RestActivityReselectModal } from './RestActivityReselectModal';
@@ -12,9 +11,9 @@ type RestActivityProgressProps = {
   onCancelReselect: () => void;
   onConfirmReselect: () => void;
   onComplete: () => void;
-  title?: string,
-  imageSrc?: string | null,
-  desc?: string,
+  title?: string;
+  imageSrc?: string | null;
+  desc?: string;
 };
 
 export function RestActivityProgress({
@@ -26,7 +25,7 @@ export function RestActivityProgress({
   onComplete,
   title,
   imageSrc,
-  desc,
+  desc
 }: RestActivityProgressProps) {
   return (
     <main className={sharedStyles.page}>

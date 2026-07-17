@@ -156,7 +156,6 @@ function RestChecklist() {
             )}
           />
         </div>
-
       </div>
     </main>
   );

@@ -10,7 +10,7 @@ export const container = style({
   backgroundSize: 'cover',
   width: '100vw',
   height: '100dvh',
-  minHeight: '100vh',
+  minHeight: '100dvh',
   overflow: 'hidden',
   backgroundPosition: 'center',
   display: 'flex',

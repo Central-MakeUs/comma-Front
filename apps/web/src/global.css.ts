@@ -6,8 +6,7 @@ globalStyle('*', {
 
 globalStyle('html, body, #root', {
   minHeight: '100%',
-  margin: 0,
-  backgroundColor: '#1A1814'
+  margin: 0
 });
 
 globalStyle('html, body', {

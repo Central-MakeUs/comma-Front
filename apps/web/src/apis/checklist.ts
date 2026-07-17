@@ -1,13 +1,13 @@
-import { apiClient } from './client';
 import type { ApiResponse } from '../types/api';
-import { questionInfo } from '../types/checklist';
+import type { questionInfo } from '../types/checklist';
+import { apiClient } from './client';
 
 interface checklistResponse {
-    questions: questionInfo[]
+  questions: questionInfo[];
 }
 
 export const getChecklists = async () => {
-    const { data } = await apiClient.get<ApiResponse<checklistResponse>>('/api/checklists');
-    
-    return data;
-}
+  const { data } = await apiClient.get<ApiResponse<checklistResponse>>('/api/checklists');
+
+  return data;
+};

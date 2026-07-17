@@ -1,11 +1,11 @@
 import { NavigationBar, ProgressBar, Question } from '@comma/design-system';
 import { useFunnel } from '@use-funnel/react-router-dom';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { recommend } from '../apis/relax';
-import * as styles from './RestChecklist.css';
 import { getChecklists } from '../apis/checklist';
-import { questionInfo } from '../types/checklist';
+import { recommend } from '../apis/relax';
+import type { questionInfo } from '../types/checklist';
+import * as styles from './RestChecklist.css';
 
 type RestChecklistFunnel = {
   Mood: { mood?: string };
@@ -40,21 +40,21 @@ function RestChecklist() {
 
   useEffect(() => {
     const handleInit = async () => {
-      let res;
+      let res: Awaited<ReturnType<typeof getChecklists>> | undefined;
       try {
         res = await getChecklists();
-        if(!res || !res.success) throw new Error;
-      } catch(error) {
+        if (!res?.success) throw new Error();
+      } catch (error) {
         alert('체크리스트를 불러오는 중 오류가 발생했습니다.');
         console.error(error);
       } finally {
         setQuestionInfo([...(res?.data?.questions ?? [])]);
         setLoading(false);
       }
-    }
+    };
 
     handleInit();
-  }, [])
+  }, []);
 
   return (
     <main className={styles.page}>
@@ -68,79 +68,80 @@ function RestChecklist() {
             <img alt="comma" className={styles.logo} src="/images/logo_glass.svg" />
           </header>
 
-          {
-            loading? null : (
-              <funnel.Render
-                Mood={({ history }) => (
-                  <>
-                    <ProgressBar className={styles.progress} step={1} />
-                    <Question
-                      backButton={false}
-                      className={styles.question}
-                      options={[...questionInfo[0].options.map((o) => o.label)]}
-                      selectedIndex={questionInfo[0].options.map((o) => o.label).findIndex(
-                        (option) => selectedKey === `Mood:${option}`
-                      )}
-                      step={questionInfo[0].order}
-                      title={questionInfo[0].title}
-                      onOptionSelect={(_, mood) => {
-                        selectThenMove(`Mood:${mood}`, () => {
-                          setSelectedKey(undefined);
-                          void history.push('Time', { mood });
-                        });
-                      }}
-                    />
-                  </>
-                )}
-                Time={({ context, history }) => (
-                  <>
-                    <ProgressBar className={styles.progress} step={2} />
-                    <Question
-                      className={styles.question}
-                      options={[...questionInfo[1].options.map((o) => `${o.label} (${o.description})`)]}
-                      selectedIndex={questionInfo[1].options.map((o) => `${o.label} (${o.description})`).findIndex(
-                        (option) => selectedKey === `Time:${option}`
-                      )}
-                      step={questionInfo[1].order}
-                      title={questionInfo[1].title}
-                      onBackClick={() => {
+          {loading ? null : (
+            <funnel.Render
+              Mood={({ history }) => (
+                <>
+                  <ProgressBar className={styles.progress} step={1} />
+                  <Question
+                    backButton={false}
+                    className={styles.question}
+                    options={[...questionInfo[0].options.map((o) => o.label)]}
+                    selectedIndex={questionInfo[0].options
+                      .map((o) => o.label)
+                      .findIndex((option) => selectedKey === `Mood:${option}`)}
+                    step={questionInfo[0].order}
+                    title={questionInfo[0].title}
+                    onOptionSelect={(_, mood) => {
+                      selectThenMove(`Mood:${mood}`, () => {
                         setSelectedKey(undefined);
-                        void history.back();
-                      }}
-                      onOptionSelect={async (index, time) => {
-                        if (recommendLoading) return;
-                        setRecommendLoading(true);
-                        try {
-                          const res = await recommend({
-                            mood: questionInfo[0].options.filter(o => context.mood == o.label)[0].code,
-                            time: questionInfo[1].options[index].code
-                          });
-                          if (!res?.success || !res.data?.length) {
-                            throw new Error(res.message ?? 'No recommendations found.');
-                          } else {
-                            selectThenMove(`Time:${time}`, async () => {
-                              setSelectedKey(undefined);
-                              void history.replace('Time', { ...context, time });
-                              void navigate('/rest/loading', {
-                                state: {
-                                  data: res.data
-                                }
-                              });
+                        void history.push('Time', { mood });
+                      });
+                    }}
+                  />
+                </>
+              )}
+              Time={({ context, history }) => (
+                <>
+                  <ProgressBar className={styles.progress} step={2} />
+                  <Question
+                    className={styles.question}
+                    options={[
+                      ...questionInfo[1].options.map((o) => `${o.label} (${o.description})`)
+                    ]}
+                    selectedIndex={questionInfo[1].options
+                      .map((o) => `${o.label} (${o.description})`)
+                      .findIndex((option) => selectedKey === `Time:${option}`)}
+                    step={questionInfo[1].order}
+                    title={questionInfo[1].title}
+                    onBackClick={() => {
+                      setSelectedKey(undefined);
+                      void history.back();
+                    }}
+                    onOptionSelect={async (index, time) => {
+                      if (recommendLoading) return;
+                      setRecommendLoading(true);
+                      try {
+                        const res = await recommend({
+                          mood: questionInfo[0].options.filter((o) => context.mood === o.label)[0]
+                            .code,
+                          time: questionInfo[1].options[index].code
+                        });
+                        if (!res?.success || !res.data?.length) {
+                          throw new Error(res.message ?? 'No recommendations found.');
+                        } else {
+                          selectThenMove(`Time:${time}`, async () => {
+                            setSelectedKey(undefined);
+                            void history.replace('Time', { ...context, time });
+                            void navigate('/rest/loading', {
+                              state: {
+                                data: res.data
+                              }
                             });
-                          }
-                        } catch (error) {
-                          console.log(error);
-                          alert('휴식 추천 오류: 다시 선택해주세요.');
-                        } finally {
-                          setRecommendLoading(false);
+                          });
                         }
-                      }}
-                    />
-                  </>
-                )}
-              />
-            )
-          }
+                      } catch (error) {
+                        console.log(error);
+                        alert('휴식 추천 오류: 다시 선택해주세요.');
+                      } finally {
+                        setRecommendLoading(false);
+                      }
+                    }}
+                  />
+                </>
+              )}
+            />
+          )}
         </div>
 
         <NavigationBar active="rest" className={styles.navigation} />

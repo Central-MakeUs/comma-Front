@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import type { RestLoadingLocationState } from '../../types/relax';
+import { ACTIVITY_PROGRESS_COUNT } from './RestActivity.constants';
 import { RestActivityForm } from './RestActivityForm';
 import { RestActivityPhotoPicker } from './RestActivityPhotoPicker';
 import { RestActivityProgress } from './RestActivityProgress';
@@ -10,6 +12,9 @@ function isObjectUrl(value?: string) {
 
 function RestActivity() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const locationState = location.state as RestLoadingLocationState | null;
+  const participantCount = locationState?.selectedRelax?.activeUserCount ?? ACTIVITY_PROGRESS_COUNT;
   const [showReselectModal, setShowReselectModal] = useState(false);
   const [showPhotoPicker, setShowPhotoPicker] = useState(false);
   const [isWritingStarted, setIsWritingStarted] = useState(false);
@@ -40,6 +45,7 @@ function RestActivity() {
   if (!isWritingStarted) {
     return (
       <RestActivityProgress
+        participantCount={participantCount}
         showReselectModal={showReselectModal}
         onCancelReselect={() => setShowReselectModal(false)}
         onComplete={() => setIsWritingStarted(true)}

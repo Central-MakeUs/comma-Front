@@ -3,8 +3,9 @@ import { assignInlineVars } from '@vanilla-extract/dynamic';
 import useEmblaCarousel from 'embla-carousel-react';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import type { RelaxActivity } from '../apis/relax';
+import { getRelaxActiveCount, startRelax } from '../apis/relax';
 import { BIG_HEIGHT, GAP, SMALL_WIDTH } from '../data/cardInfo';
+import type { RelaxActivity, RestResultLocationState } from '../types/relax';
 import { computeLoopedLayout } from '../utils/compute_layout';
 import { navigateToNavigationItem } from '../utils/navigation';
 import * as styles from './RestResult.css';
@@ -42,14 +43,12 @@ function Modal({ onClose }: { onClose: () => void }) {
 
 function Card({
   imageSrc,
-  num,
   path,
   width,
   height,
   x
 }: {
   imageSrc?: string;
-  num?: number;
   path: string;
   width: number;
   height: number;
@@ -72,21 +71,6 @@ function Card({
         className={styles.imageUploadStyle}
         style={{ width, height, borderRadius: 0, clipPath: `path("${path}")` }}
       />
-      {num != null ? (
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 32,
-            left: 40,
-            width: 'calc(100% - 64px)',
-            textAlign: 'left',
-            zIndex: 2
-          }}
-        >
-          <span className={styles.imageNumStyle}>{num}</span>
-          <span className={styles.imageText}> 명이 함께하는 중</span>
-        </div>
-      ) : null}
     </div>
   );
 }
@@ -96,8 +80,9 @@ function RestResult() {
   const [showModal, setShowModal] = useState(false);
   const [slideIdx, setSlideIdx] = useState(0);
   const location = useLocation();
+  const locationState = location.state as RestResultLocationState | null;
   const [data, setData] = useState<RelaxActivity[] | null>(
-    location.state?.data?.length ? location.state.data : null
+    locationState?.data?.length ? locationState.data : null
   );
 
   const [paths, setPaths] = useState<string[]>([]);
@@ -115,16 +100,49 @@ function RestResult() {
     paths.length === cardCount &&
     sizes.length === cardCount &&
     xs.length === cardCount;
+  const selectedRelax = data?.[slideIdx];
 
   useEffect(() => {
-    const nextData = location.state?.data;
+    const nextData = locationState?.data;
     if (!nextData || nextData.length === 0) {
       alert('휴식 추천 중 오류가 발생했습니다. 다시 선택해주세요');
       navigate('/rest/checklist', { replace: true });
       return;
     }
+
     setData(nextData);
-  }, [location.state, navigate]);
+  }, [locationState, navigate]);
+
+  const handleStartClick = async () => {
+    if (!data?.length || !selectedRelax) {
+      alert('휴식 추천 중 오류가 발생했습니다. 다시 선택해주세요');
+      navigate('/rest/checklist', { replace: true });
+      return;
+    }
+
+    let nextSelectedRelax = selectedRelax;
+
+    try {
+      await startRelax(selectedRelax.id);
+      const response = await getRelaxActiveCount(selectedRelax.id);
+      nextSelectedRelax = {
+        ...selectedRelax,
+        activeUserCount:
+          typeof response.data?.count === 'number'
+            ? response.data.count
+            : selectedRelax.activeUserCount
+      };
+    } catch (error) {
+      console.error('Failed to start relax or load active count.', error);
+    } finally {
+      navigate('/rest/activity', {
+        state: {
+          data,
+          selectedRelax: nextSelectedRelax
+        }
+      });
+    }
+  };
 
   useLayoutEffect(() => {
     if (!containerRef.current || cardCount === 0) return;
@@ -256,7 +274,6 @@ function RestResult() {
                   <Card
                     key={card.id}
                     imageSrc={card.imageUrl || '/images/feed-image.svg'}
-                    num={card.activeUserCount}
                     path={paths[i]}
                     width={sizes[i].width}
                     height={sizes[i].height}
@@ -290,7 +307,7 @@ function RestResult() {
             />
           ))}
         </div>
-        <CtaButton className={styles.ctaButtonStyle} onClick={() => navigate('/rest/activity')} />
+        <CtaButton className={styles.ctaButtonStyle} onClick={handleStartClick} />
       </div>
       <NavigationBar
         active="rest"

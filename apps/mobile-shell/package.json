@@ -2,7 +2,7 @@
   "name": "@comma/mobile-shell",
   "private": true,
   "version": "0.0.0",
-  "main": "index.ts",
+  "main": "index.tsx",
   "scripts": {
     "dev": "expo start",
     "dev:device": "expo start --go --lan",

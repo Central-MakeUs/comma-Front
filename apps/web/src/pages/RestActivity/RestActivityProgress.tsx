@@ -1,5 +1,11 @@
 import { CtaButton, colors, Icon } from '@comma/design-system';
 import { assignInlineVars } from '@vanilla-extract/dynamic';
+import {
+  ACTIVITY_PROGRESS_COUNT,
+  ACTIVITY_PROGRESS_TITLE,
+  REST_DESCRIPTION,
+  REST_TITLE
+} from './RestActivity.constants';
 import * as sharedStyles from './RestActivity.shared.css';
 import * as styles from './RestActivityProgress.css';
 import { RestActivityReselectModal } from './RestActivityReselectModal';
@@ -17,22 +23,22 @@ type RestActivityProgressProps = {
 };
 
 export function RestActivityProgress({
-  participantCount,
+  participantCount = ACTIVITY_PROGRESS_COUNT,
   showReselectModal,
   onOpenReselectModal,
   onCancelReselect,
   onConfirmReselect,
   onComplete,
-  title,
+  title = ACTIVITY_PROGRESS_TITLE,
   imageSrc,
-  desc
+  desc = REST_DESCRIPTION
 }: RestActivityProgressProps) {
   return (
     <main className={sharedStyles.page}>
       <div
         className={sharedStyles.screen}
         style={assignInlineVars({
-          [sharedStyles.backgroundImageVar]: `url(${imageSrc || '/images/feed-image.svg'}`
+          [sharedStyles.backgroundImageVar]: `url(${imageSrc || '/images/feed-image.svg)'}`
         })}
       >
         <div

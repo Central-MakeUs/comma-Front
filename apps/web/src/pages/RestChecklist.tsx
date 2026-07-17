@@ -44,10 +44,16 @@ function RestChecklist() {
       let res: Awaited<ReturnType<typeof getChecklists>> | undefined;
       try {
         res = await getChecklists();
-        if (!res?.success) throw new Error();
+        if (
+          !res?.success ||
+          (res.data?.questions?.length ?? 0) < 2 ||
+          res.data?.questions?.some((q) => (q.options?.length ?? 0) < 2)
+        )
+          throw new Error();
       } catch (error) {
         alert('체크리스트를 불러오는 중 오류가 발생했습니다.');
         console.error(error);
+        navigate(-1);
       } finally {
         setQuestionInfo([...(res?.data?.questions ?? [])]);
         setLoading(false);
@@ -113,9 +119,10 @@ function RestChecklist() {
                       if (recommendLoading) return;
                       setRecommendLoading(true);
                       try {
+                        const selectedMoodCode = questionInfo[0].options.filter((o) => context.mood === o.label)[0].code;
+                        if(!selectedMoodCode) throw new Error;
                         const res = await recommend({
-                          mood: questionInfo[0].options.filter((o) => context.mood === o.label)[0]
-                            .code,
+                          mood: selectedMoodCode,
                           time: questionInfo[1].options[index].code
                         });
                         if (!res?.success || !res.data?.length) {

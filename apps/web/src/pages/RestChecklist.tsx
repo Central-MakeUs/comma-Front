@@ -61,7 +61,7 @@ function RestChecklist() {
     };
 
     handleInit();
-  }, []);
+  }, [navigate]);
 
   return (
     <main className={styles.page}>
@@ -119,8 +119,10 @@ function RestChecklist() {
                       if (recommendLoading) return;
                       setRecommendLoading(true);
                       try {
-                        const selectedMoodCode = questionInfo[0].options.filter((o) => context.mood === o.label)[0].code;
-                        if(!selectedMoodCode) throw new Error;
+                        const selectedMoodCode = questionInfo[0].options.filter(
+                          (o) => context.mood === o.label
+                        )[0].code;
+                        if (!selectedMoodCode) throw new Error();
                         const res = await recommend({
                           mood: selectedMoodCode,
                           time: questionInfo[1].options[index].code

@@ -1,6 +1,3 @@
-export type MoodType = 'A' | 'B' | 'C';
-export type TimeType = 'X' | 'Y' | 'Z';
-
 export interface RelaxActivity {
   id: number;
   name: string;

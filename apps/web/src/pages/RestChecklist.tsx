@@ -55,8 +55,10 @@ function RestChecklist() {
         console.error(error);
         navigate(-1);
       } finally {
-        setQuestionInfo([...(res?.data?.questions ?? [])]);
-        setLoading(false);
+        if(res && res.success) {
+          setQuestionInfo([...(res?.data?.questions ?? [])]);
+          setLoading(false);
+        }
       }
     };
 

@@ -15,7 +15,7 @@ export const container = style({
   backgroundPosition: 'center',
   paddingLeft: 32,
   paddingRight: 32,
-  boxSizing: 'border-box',
+  boxSizing: 'border-box'
 });
 
 export const title = style({

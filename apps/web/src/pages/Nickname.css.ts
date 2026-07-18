@@ -15,7 +15,7 @@ export const container = style({
   justifyContent: 'space-between',
   paddingLeft: 32,
   paddingRight: 32,
-  boxSizing: 'border-box',
+  boxSizing: 'border-box'
 });
 
 export const title = style({

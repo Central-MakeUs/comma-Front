@@ -55,7 +55,7 @@ function RestChecklist() {
         console.error(error);
         navigate(-1);
       } finally {
-        if(res && res.success) {
+        if (res?.success) {
           setQuestionInfo([...(res?.data?.questions ?? [])]);
           setLoading(false);
         }

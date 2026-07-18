@@ -5,5 +5,5 @@ export interface questionInfo {
     code: string;
     label: string;
     description: string;
-  } [];
+  }[];
 }

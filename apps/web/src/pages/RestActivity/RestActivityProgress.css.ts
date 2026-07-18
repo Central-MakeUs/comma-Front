@@ -9,7 +9,7 @@ export const header = style({
   display: 'flex',
   justifyContent: 'flex-end',
   alignItems: 'flex-start',
-  padding: '68px 32px 20px'
+  padding: '20px 32px 20px'
 });
 
 export const content = style({

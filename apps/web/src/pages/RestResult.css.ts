@@ -8,7 +8,6 @@ export const container = style({
   height: '100dvh',
   overflow: 'hidden',
   boxSizing: 'border-box',
-  paddingTop: 48,
   position: 'relative',
   selectors: {
     '&::before': {

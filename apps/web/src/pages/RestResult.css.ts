@@ -66,14 +66,14 @@ export const ctaButtonStyle = style({
   margin: '0 auto',
   color: colors.textPrimary,
   position: 'absolute',
-  bottom: 40,
+  bottom: 'max(40px, var(--safe-area-bottom))',
   left: '50%',
   transform: 'translateX(-50%)'
 });
 
 export const navStyle = style({
   position: 'absolute',
-  bottom: 40,
+  bottom: 'max(40px, var(--safe-area-bottom))',
   left: '50%',
   transform: 'translateX(-50%)',
   borderRadius: radii.pill,

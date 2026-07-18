@@ -3,7 +3,7 @@ import { style, styleVariants } from '@vanilla-extract/css';
 
 export const page = style({
   width: '100vw',
-  minHeight: '100vh',
+  minHeight: '100dvh',
   overflowX: 'hidden',
   background: colors.backgroundPrimary
 });
@@ -15,7 +15,7 @@ export const screen = style({
   overflowX: 'hidden',
   color: colors.textPrimary,
   background: colors.backgroundPrimary,
-  paddingBottom: 140
+  paddingBottom: 'calc(140px + var(--safe-area-bottom))'
 });
 
 export const header = style({
@@ -23,11 +23,11 @@ export const header = style({
   top: 0,
   zIndex: 2,
   width: '100%',
-  height: 60,
+  height: 'calc(60px + var(--safe-area-top))',
   display: 'grid',
   gridTemplateColumns: '1fr auto 1fr',
   alignItems: 'center',
-  padding: '0 32px',
+  padding: 'var(--safe-area-top) 32px 0',
   background: colors.backgroundPrimary
 });
 
@@ -107,7 +107,7 @@ export const grid = style({
 export const navigation = style({
   position: 'fixed',
   left: '50%',
-  bottom: 40,
+  bottom: 'max(40px, var(--safe-area-bottom))',
   zIndex: 3,
   transform: 'translateX(-50%)'
 });

@@ -55,7 +55,7 @@ function MyPageNicknameModal({ onCancelClick, onSave }: MyPageNicknameModalProps
         style={{
           width: '100%',
           flex: 1,
-          paddingBottom: 40,
+          paddingBottom: 'max(40px, var(--safe-area-bottom))',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',

@@ -31,7 +31,7 @@ export const header = style({
   width: '100%',
   color: colors.textPrimary,
   ...typography.headlineB,
-  padding: 16,
+  padding: 'calc(16px + var(--safe-area-top)) 16px 16px',
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
@@ -81,7 +81,7 @@ export const navStyle = style({
   position: 'fixed',
   left: '50%',
   transform: 'translateX(-50%)',
-  bottom: 40,
+  bottom: 'max(40px, var(--safe-area-bottom))',
   backdropFilter: 'blur(10px)',
   WebkitBackdropFilter: 'blur(10px)',
   backgroundColor: '#1A181310'

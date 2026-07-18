@@ -225,7 +225,8 @@ function RestResult() {
           display: 'flex',
           justifyContent: 'flex-end',
           boxSizing: 'border-box',
-          padding: '20px 32px'
+          padding:
+            'calc(20px + var(--safe-area-top)) calc(32px + var(--safe-area-right)) 20px calc(32px + var(--safe-area-left))'
         }}
       >
         <Icon name="x" color={colors.iconPrimary} onClick={() => setShowModal(true)} />

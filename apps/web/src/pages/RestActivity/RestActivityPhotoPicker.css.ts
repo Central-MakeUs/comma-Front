@@ -16,7 +16,7 @@ export const header = style({
   width: '100%',
   display: 'flex',
   justifyContent: 'flex-start',
-  padding: '20px 32px'
+  padding: 'calc(20px + var(--safe-area-top)) calc(32px + var(--safe-area-right)) 20px calc(32px + var(--safe-area-left))'
 });
 
 export const content = style({
@@ -37,7 +37,7 @@ export const photoGrid = style({
   gridAutoRows: 'calc((100vw - 6px) / 3)',
   gap: 3,
   marginTop: 28,
-  paddingBottom: 40
+  paddingBottom: 'max(40px, var(--safe-area-bottom))'
 });
 
 export const cameraTile = style({

@@ -7,7 +7,8 @@ export const container = style({
   overflow: 'hidden',
   backgroundColor: colors.backgroundPrimary,
   display: 'flex',
-  flexDirection: 'column'
+  flexDirection: 'column',
+  paddingTop: 'var(--safe-area-top)'
 });
 
 export const headerContainer = style({
@@ -44,7 +45,7 @@ export const title = style({
 
 export const navBarStyle = style({
   position: 'fixed',
-  bottom: 40,
+  bottom: 'max(40px, var(--safe-area-bottom))',
   left: '50%',
   transform: 'translateX(-50%)'
 });
@@ -62,7 +63,8 @@ export const scrollContainer = style({
   overflowX: 'hidden',
   display: 'flex',
   flexDirection: 'column',
-  gap: 40
+  gap: 40,
+  paddingBottom: 'calc(104px + var(--safe-area-bottom))'
 });
 
 export const chipModal = style({

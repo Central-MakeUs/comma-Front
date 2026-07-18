@@ -17,6 +17,8 @@ export const container = style({
   flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'space-between',
+  paddingTop: 'var(--safe-area-top)',
+  paddingBottom: 'var(--safe-area-bottom)',
   paddingLeft: 32,
   paddingRight: 32,
   boxSizing: 'border-box'

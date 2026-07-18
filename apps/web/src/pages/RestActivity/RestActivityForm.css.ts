@@ -7,7 +7,7 @@ export const header = style({
   width: '100%',
   display: 'flex',
   justifyContent: 'flex-end',
-  padding: '20px 32px'
+  padding: 'calc(20px + var(--safe-area-top)) calc(32px + var(--safe-area-right)) 20px calc(32px + var(--safe-area-left))'
 });
 
 export const content = style({
@@ -98,7 +98,7 @@ export const footer = style({
   alignItems: 'center',
   gap: 24,
   justifyContent: 'center',
-  padding: '64px 32px max(32px, env(safe-area-inset-bottom))',
+  padding: '64px calc(32px + var(--safe-area-right)) max(32px, var(--safe-area-bottom)) calc(32px + var(--safe-area-left))',
   background: 'linear-gradient(to bottom, rgba(26, 24, 20, 0) 0%, #1A1814 46.767%, #1A1814 100%)',
   pointerEvents: 'none'
 });

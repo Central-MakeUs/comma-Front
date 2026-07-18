@@ -4,7 +4,7 @@ import Constants from 'expo-constants';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import * as WebBrowser from 'expo-web-browser';
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { Platform, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { WebViewErrorEvent, WebViewMessageEvent } from 'react-native-webview/lib/WebViewTypes';
@@ -71,10 +71,36 @@ const params = new URLSearchParams({
   ].join(' ')
 });
 
+const createSafeAreaScript = (insets: {
+  bottom: number;
+  left: number;
+  right: number;
+  top: number;
+}) => {
+  const safeAreaVars = {
+    '--safe-area-top': `${insets.top}px`,
+    '--safe-area-bottom': `${insets.bottom}px`,
+    '--safe-area-left': `${insets.left}px`,
+    '--safe-area-right': `${insets.right}px`
+  };
+
+  return `
+    (function () {
+      var safeAreaVars = ${JSON.stringify(safeAreaVars)};
+      var root = document.documentElement;
+      Object.keys(safeAreaVars).forEach(function (name) {
+        root.style.setProperty(name, safeAreaVars[name]);
+      });
+    })();
+    true;
+  `;
+};
+
 export default function App() {
   const { error, url: webUrl } = getWebUrlConfig();
   const insets = useSafeAreaInsets();
   const webViewRef = useRef<BridgeWebView>(null);
+  const safeAreaScript = useMemo(() => createSafeAreaScript(insets), [insets]);
   const handleMessage = async (event: WebViewMessageEvent) => {
     let message: { type?: string } | undefined;
     try {
@@ -127,9 +153,21 @@ export default function App() {
     }
   }, [error]);
 
+  useEffect(() => {
+    if (error || !webUrl) return;
+
+    webViewRef.current?.injectJavaScript(safeAreaScript);
+  }, [error, safeAreaScript, webUrl]);
+
   if (error || !webUrl) {
     return (
-      <View style={{ ...styles.container, paddingTop: insets.top }}>
+      <View
+        style={[
+          styles.container,
+          styles.errorContainer,
+          { paddingTop: insets.top, paddingBottom: insets.bottom }
+        ]}
+      >
         <StatusBar style="auto" translucent backgroundColor="transparent" />
         <View style={styles.errorState}>
           <Text style={styles.errorTitle}>Unable to load Comma</Text>
@@ -140,12 +178,13 @@ export default function App() {
   }
 
   return (
-    <View style={{ ...styles.container, paddingTop: insets.top }}>
+    <View style={styles.container}>
       <StatusBar style="auto" translucent backgroundColor="transparent" />
       <WebView
         ref={webViewRef}
         style={styles.webView}
         source={{ uri: webUrl }}
+        injectedJavaScriptBeforeContentLoaded={safeAreaScript}
         originWhitelist={['*']}
         javaScriptEnabled
         domStorageEnabled
@@ -171,6 +210,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#1A1814'
+  },
+  errorContainer: {
+    backgroundColor: '#FDFCFC'
   },
   webView: {
     flex: 1

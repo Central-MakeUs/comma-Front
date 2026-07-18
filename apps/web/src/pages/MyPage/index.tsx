@@ -261,7 +261,7 @@ function MyPage() {
         style={{
           width: '100%',
           marginTop: 48,
-          paddingBottom: 155,
+          paddingBottom: 'calc(155px + var(--safe-area-bottom))',
           paddingLeft: 32,
           paddingRight: 32
         }}

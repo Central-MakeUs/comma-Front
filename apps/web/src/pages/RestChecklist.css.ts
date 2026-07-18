@@ -2,7 +2,7 @@ import { colors } from '@comma/design-system';
 import { style } from '@vanilla-extract/css';
 
 export const page = style({
-  minHeight: '100vh',
+  minHeight: '100dvh',
   width: '100vw',
   overflow: 'hidden',
   background: colors.backgroundPrimary
@@ -11,7 +11,7 @@ export const page = style({
 export const screen = style({
   position: 'relative',
   width: '100vw',
-  minHeight: '100vh',
+  minHeight: '100dvh',
   overflow: 'hidden',
   color: colors.textPrimary,
   backgroundColor: 'lightgray',
@@ -36,12 +36,12 @@ export const bottomGradient = style({
 export const content = style({
   position: 'relative',
   zIndex: 2,
-  minHeight: '100vh',
+  minHeight: '100dvh',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  paddingTop: 48,
-  paddingBottom: 132
+  paddingTop: 'calc(48px + var(--safe-area-top))',
+  paddingBottom: 'calc(132px + var(--safe-area-bottom))'
 });
 
 export const header = style({
@@ -69,7 +69,7 @@ export const question = style({
 export const navigation = style({
   position: 'absolute',
   left: '50%',
-  bottom: 40,
+  bottom: 'max(40px, var(--safe-area-bottom))',
   zIndex: 3,
   transform: 'translateX(-50%)'
 });

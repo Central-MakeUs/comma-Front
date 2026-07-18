@@ -5,7 +5,7 @@ export const backgroundImageVar = createVar();
 
 export const page = style({
   width: '100vw',
-  minHeight: '100vh',
+  minHeight: '100dvh',
   overflowX: 'hidden',
   background: colors.backgroundPrimary
 });

@@ -4,14 +4,14 @@ import { style } from '@vanilla-extract/css';
 export const container = style({
   position: 'relative',
   width: '100vw',
-  height: '100vh',
+  height: '100dvh',
   overflow: 'hidden',
   backgroundImage: 'url(/images/Home.png)',
   backgroundRepeat: 'no-repeat',
   backgroundSize: 'cover',
   backgroundPosition: 'center',
   boxSizing: 'border-box',
-  paddingTop: 160,
+  paddingTop: 'calc(160px + var(--safe-area-top))',
   paddingLeft: 32,
   paddingRight: 32
 });

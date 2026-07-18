@@ -23,7 +23,7 @@ export const header = style({
   flexDirection: 'row',
   justifyContent: 'center',
   alignItems: 'center',
-  padding: 16,
+  padding: 'calc(16px + var(--safe-area-top)) 16px 16px',
   color: colors.textPrimary,
   ...typography.headlineB,
   position: 'relative'
@@ -95,7 +95,7 @@ export const confirmModal = style({
   paddingRight: 24,
   paddingTop: 8,
   position: 'absolute',
-  bottom: -36,
+  bottom: 'calc(-36px + var(--safe-area-bottom))',
   backdropFilter: 'blur(10px)',
   WebkitBackdropFilter: 'blur(10px)'
 });
@@ -127,5 +127,5 @@ export const cancelBtn = style({
 
 export const confirmBtn = style({
   boxShadow: 'none',
-  marginBottom: 40
+  marginBottom: 'max(40px, var(--safe-area-bottom))'
 });

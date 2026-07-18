@@ -22,15 +22,11 @@ export const num = style({
   ...typography.engNum,
   color: colors.textPrimary,
   marginRight: 4,
-  display: 'inline-flex',
-  alignItems: 'flex-end',
   textBoxTrim: 'trim-end',
   textBoxEdge: 'cap alphabetic'
 });
 
 export const desc = style({
   ...typography.headlineR,
-  color: colors.textTertiary,
-  display: 'inline-flex',
-  alignItems: 'flex-end'
+  color: colors.textTertiary
 });

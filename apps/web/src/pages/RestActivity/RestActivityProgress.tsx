@@ -3,7 +3,7 @@ import { assignInlineVars } from '@vanilla-extract/dynamic';
 import {
   ACTIVITY_PROGRESS_COUNT,
   ACTIVITY_PROGRESS_TITLE,
-  REST_DESCRIPTION,
+  REST_DESCRIPTION
 } from './RestActivity.constants';
 import * as sharedStyles from './RestActivity.shared.css';
 import * as styles from './RestActivityProgress.css';

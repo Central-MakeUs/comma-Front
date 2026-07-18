@@ -166,7 +166,7 @@ function Login() {
           alt="배경 이미지"
           width={110}
           height={24}
-          style={{ marginBottom: 68, marginTop: 68 }}
+          style={{ marginBottom: 68, marginTop: 20 }}
         />
         <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
           <span className={styles.title}>고립감 없는</span>

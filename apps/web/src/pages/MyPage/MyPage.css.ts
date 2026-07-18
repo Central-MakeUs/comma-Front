@@ -7,6 +7,7 @@ export const container = style({
   width: '100vw',
   minHeight: '100dvh',
   position: 'relative',
+  isolation: 'isolate',
   selectors: {
     '&::before': {
       content: '',
@@ -20,7 +21,7 @@ export const container = style({
       position: 'absolute',
       inset: 0,
       backdropFilter: 'blur(40px)',
-      zIndex: -1,
+      zIndex: -3,
       backgroundColor: '#1A181450'
     }
   }

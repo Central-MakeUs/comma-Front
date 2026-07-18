@@ -1,12 +1,12 @@
 import type { ApiResponse } from '../types/api';
-import type { MoodType, RelaxActivity, TimeType } from '../types/relax';
+import type { RelaxActivity } from '../types/relax';
 import { apiClient } from './client';
 
 export type { RelaxActivity } from '../types/relax';
 
 interface RecommendRequest {
-  mood: MoodType;
-  time: TimeType;
+  mood: string;
+  time: string;
 }
 
 interface CountResponse {

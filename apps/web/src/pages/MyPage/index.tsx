@@ -137,14 +137,16 @@ function MyPage() {
           style={{
             width: '100%',
             height: 447,
-            background: 'linear-gradient(#11111166 0%, rgba(17, 17, 17, 0) 100%)'
+            background: 'linear-gradient(#11111166 0%, rgba(17, 17, 17, 0) 100%)',
+            zIndex: -2
           }}
         />
         <div
           style={{
             flex: 1,
             width: '100%',
-            background: 'linear-gradient(to top, #11111166 0%, rgba(17, 17, 17, 0) 100%)'
+            background: 'linear-gradient(to top, #11111166 0%, rgba(17, 17, 17, 0) 100%)',
+            zIndex: -2
           }}
         />
       </div>

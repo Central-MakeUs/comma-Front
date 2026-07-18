@@ -41,7 +41,7 @@ export function Question({
   const rootClassName = [question, className].filter(Boolean).join(' ');
 
   return (
-    <section className={rootClassName}>
+    <section className={rootClassName} style={{ marginTop: 24 }}>
       <div className={topArea}>
         {showBackButton ? (
           <button
@@ -52,7 +52,9 @@ export function Question({
           >
             <Icon aria-hidden name="backArrow" />
           </button>
-        ) : null}
+        ) : (
+          <div style={{ height: 56 }} />
+        )}
       </div>
 
       <div className={content}>

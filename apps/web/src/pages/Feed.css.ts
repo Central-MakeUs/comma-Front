@@ -2,7 +2,7 @@ import { colors, typography } from '@comma/design-system';
 import { style } from '@vanilla-extract/css';
 
 export const container = style({
-  width: '100vw',
+  width: '100%',
   height: '100dvh',
   overflow: 'hidden',
   backgroundColor: colors.backgroundPrimary,
@@ -55,9 +55,11 @@ export const secondChip = style({
 
 export const scrollContainer = style({
   width: '100%',
+  boxSizing: 'border-box',
   flex: 1,
   minHeight: 0,
   overflowY: 'auto',
+  overflowX: 'hidden',
   display: 'flex',
   flexDirection: 'column',
   gap: 40

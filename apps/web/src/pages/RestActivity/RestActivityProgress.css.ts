@@ -9,7 +9,7 @@ export const header = style({
   display: 'flex',
   justifyContent: 'flex-end',
   alignItems: 'flex-start',
-  padding: '68px 32px 20px'
+  padding: '20px 32px 20px'
 });
 
 export const content = style({
@@ -49,7 +49,9 @@ export const participantLabel = style({
   minWidth: 0,
   height: 45,
   paddingBottom: 7,
-  color: colors.textTertiary
+  color: colors.textTertiary,
+  display: 'inline-flex',
+  alignItems: 'flex-end'
 });
 
 export const footer = style({

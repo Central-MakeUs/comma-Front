@@ -6,7 +6,7 @@ import { StatusBar } from 'expo-status-bar';
 import * as WebBrowser from 'expo-web-browser';
 import { useEffect, useRef } from 'react';
 import { Platform, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { WebViewErrorEvent, WebViewMessageEvent } from 'react-native-webview/lib/WebViewTypes';
 import { postMessage, WebView } from './src/bridge';
 
@@ -73,6 +73,7 @@ const params = new URLSearchParams({
 
 export default function App() {
   const { error, url: webUrl } = getWebUrlConfig();
+  const insets = useSafeAreaInsets();
   const webViewRef = useRef<BridgeWebView>(null);
   const handleMessage = async (event: WebViewMessageEvent) => {
     let message: { type?: string } | undefined;
@@ -128,45 +129,41 @@ export default function App() {
 
   if (error || !webUrl) {
     return (
-      <SafeAreaProvider>
-        <View style={styles.container}>
-          <StatusBar style="auto" translucent backgroundColor="transparent" />
-          <View style={styles.errorState}>
-            <Text style={styles.errorTitle}>Unable to load Comma</Text>
-            <Text style={styles.errorMessage}>{error ?? 'Web URL is unavailable.'}</Text>
-          </View>
+      <View style={{ ...styles.container, paddingTop: insets.top }}>
+        <StatusBar style="auto" translucent backgroundColor="transparent" />
+        <View style={styles.errorState}>
+          <Text style={styles.errorTitle}>Unable to load Comma</Text>
+          <Text style={styles.errorMessage}>{error ?? 'Web URL is unavailable.'}</Text>
         </View>
-      </SafeAreaProvider>
+      </View>
     );
   }
 
   return (
-    <SafeAreaProvider>
-      <View style={styles.container}>
-        <StatusBar style="auto" translucent backgroundColor="transparent" />
-        <WebView
-          ref={webViewRef}
-          style={styles.webView}
-          source={{ uri: webUrl }}
-          originWhitelist={['*']}
-          javaScriptEnabled
-          domStorageEnabled
-          onError={(event: WebViewErrorEvent) => {
-            console.warn('Failed to load web app.', {
-              webUrl,
-              description: event.nativeEvent.description
-            });
-          }}
-          onLoadEnd={() => {
-            postMessage(POST_MESSAGE_EVENT.APP_READY, {
-              platform: Platform.OS
-            });
-            SplashScreen.hideAsync();
-          }}
-          onMessage={handleMessage}
-        />
-      </View>
-    </SafeAreaProvider>
+    <View style={{ ...styles.container, paddingTop: insets.top }}>
+      <StatusBar style="auto" translucent backgroundColor="transparent" />
+      <WebView
+        ref={webViewRef}
+        style={styles.webView}
+        source={{ uri: webUrl }}
+        originWhitelist={['*']}
+        javaScriptEnabled
+        domStorageEnabled
+        onError={(event: WebViewErrorEvent) => {
+          console.warn('Failed to load web app.', {
+            webUrl,
+            description: event.nativeEvent.description
+          });
+        }}
+        onLoadEnd={() => {
+          postMessage(POST_MESSAGE_EVENT.APP_READY, {
+            platform: Platform.OS
+          });
+          SplashScreen.hideAsync();
+        }}
+        onMessage={handleMessage}
+      />
+    </View>
   );
 }
 

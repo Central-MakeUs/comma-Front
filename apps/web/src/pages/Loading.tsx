@@ -26,7 +26,7 @@ function Loading() {
         alt="콤마 로고"
         width={110}
         height={24}
-        style={{ marginTop: 68 }}
+        style={{ marginTop: 20 }}
       />
       <div style={{ width: '100%', display: 'flex', flexDirection: 'column', marginBottom: 80 }}>
         <span className={styles.title}>반가워요,</span>

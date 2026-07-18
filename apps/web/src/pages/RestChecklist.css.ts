@@ -59,7 +59,7 @@ export const logo = style({
 });
 
 export const progress = style({
-  marginTop: 80
+  marginTop: 36
 });
 
 export const question = style({

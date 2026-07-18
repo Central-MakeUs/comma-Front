@@ -1,6 +1,10 @@
 import { CtaButton, colors, Icon } from '@comma/design-system';
 import { assignInlineVars } from '@vanilla-extract/dynamic';
-import { ACTIVITY_PROGRESS_TITLE, REST_DESCRIPTION } from './RestActivity.constants';
+import {
+  ACTIVITY_PROGRESS_COUNT,
+  ACTIVITY_PROGRESS_TITLE,
+  REST_DESCRIPTION
+} from './RestActivity.constants';
 import * as sharedStyles from './RestActivity.shared.css';
 import * as styles from './RestActivityProgress.css';
 import { RestActivityReselectModal } from './RestActivityReselectModal';
@@ -12,22 +16,28 @@ type RestActivityProgressProps = {
   onCancelReselect: () => void;
   onConfirmReselect: () => void;
   onComplete: () => void;
+  title?: string;
+  imageSrc?: string | null;
+  desc?: string;
 };
 
 export function RestActivityProgress({
-  participantCount,
+  participantCount = ACTIVITY_PROGRESS_COUNT,
   showReselectModal,
   onOpenReselectModal,
   onCancelReselect,
   onConfirmReselect,
-  onComplete
+  onComplete,
+  title = ACTIVITY_PROGRESS_TITLE,
+  imageSrc,
+  desc = REST_DESCRIPTION
 }: RestActivityProgressProps) {
   return (
     <main className={sharedStyles.page}>
       <div
         className={sharedStyles.screen}
         style={assignInlineVars({
-          [sharedStyles.backgroundImageVar]: 'url(/images/rest_activity_progress.jpg)'
+          [sharedStyles.backgroundImageVar]: `url(${imageSrc || '/images/feed-image.svg'})`
         })}
       >
         <div
@@ -51,9 +61,9 @@ export function RestActivityProgress({
         <section className={styles.content} aria-labelledby="rest-activity-progress-title">
           <div className={styles.heroText}>
             <h1 className={sharedStyles.title} id="rest-activity-progress-title">
-              {ACTIVITY_PROGRESS_TITLE}
+              {title}
             </h1>
-            <p className={sharedStyles.description}>{REST_DESCRIPTION}</p>
+            <p className={sharedStyles.description}>{desc}</p>
           </div>
 
           <div className={styles.participantRow}>

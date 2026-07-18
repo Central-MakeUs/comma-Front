@@ -34,6 +34,8 @@ export type { SmallButtonProps, SmallButtonState } from './SmallButton';
 export { SmallButton } from './SmallButton';
 export type { TextInputProps, TextInputState, TextInputVariant } from './TextInput';
 export { TextInput } from './TextInput';
+export type { ToastProps, ToastVariant } from './Toast';
+export { Toast } from './Toast';
 export {
   colors,
   grid,

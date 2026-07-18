@@ -37,7 +37,7 @@ const navigationItems = [
   },
   {
     id: 'archive',
-    label: '아카이브',
+    label: '내 쉼표',
     Icon: ArchiveIcon
   },
   {

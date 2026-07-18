@@ -37,8 +37,8 @@ export const dimOverlay = style({
   zIndex: 0,
   display: 'none',
   background: 'rgba(26, 24, 20, 0.5)',
-  backdropFilter: 'blur(20px)',
-  WebkitBackdropFilter: 'blur(20px)'
+  backdropFilter: 'blur(5px)',
+  WebkitBackdropFilter: 'blur(5px)'
 });
 
 export const dimOverlayVisible = style({
@@ -46,24 +46,17 @@ export const dimOverlayVisible = style({
 });
 
 export const topGradient = style({
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  right: 0,
-  zIndex: 0,
-  height: 120,
-  background: 'linear-gradient(rgba(17, 17, 17, 0.66) 0%, rgba(17, 17, 17, 0) 100%)',
-  pointerEvents: 'none'
+  display: 'none'
 });
 
 export const bottomGradient = style({
   position: 'absolute',
+  top: 254,
   right: 0,
-  bottom: 0,
+  bottom: -2,
   left: 0,
   zIndex: 0,
-  height: 600,
-  background: 'linear-gradient(to top, rgba(17, 17, 17, 0.66) 0%, rgba(17, 17, 17, 0) 100%)',
+  background: 'linear-gradient(0deg, rgba(17, 17, 17, 0.66) 0%, rgba(17, 17, 17, 0) 100%)',
   pointerEvents: 'none'
 });
 

@@ -14,6 +14,7 @@ export const screen = style({
   minHeight: '100vh',
   overflow: 'hidden',
   color: colors.textPrimary,
+  backgroundColor: 'lightgray',
   backgroundImage: 'url(/images/Home.png)',
   backgroundRepeat: 'no-repeat',
   backgroundPosition: 'center',
@@ -21,12 +22,7 @@ export const screen = style({
 });
 
 export const dimOverlay = style({
-  position: 'absolute',
-  inset: 0,
-  zIndex: 0,
-  background: 'rgb(26 24 20 / 50%)',
-  backdropFilter: 'blur(5px)',
-  WebkitBackdropFilter: 'blur(5px)'
+  display: 'none'
 });
 
 export const topGradient = style({
@@ -34,14 +30,7 @@ export const topGradient = style({
 });
 
 export const bottomGradient = style({
-  position: 'absolute',
-  top: 254,
-  left: 0,
-  right: 0,
-  bottom: -2,
-  zIndex: 1,
-  background: 'linear-gradient(0deg, rgb(17 17 17 / 66%) 0%, rgb(17 17 17 / 0%) 100%)',
-  pointerEvents: 'none'
+  display: 'none'
 });
 
 export const content = style({

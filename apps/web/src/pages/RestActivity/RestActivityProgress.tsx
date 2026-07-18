@@ -4,7 +4,6 @@ import {
   ACTIVITY_PROGRESS_COUNT,
   ACTIVITY_PROGRESS_TITLE,
   REST_DESCRIPTION,
-  REST_TITLE
 } from './RestActivity.constants';
 import * as sharedStyles from './RestActivity.shared.css';
 import * as styles from './RestActivityProgress.css';
@@ -38,7 +37,7 @@ export function RestActivityProgress({
       <div
         className={sharedStyles.screen}
         style={assignInlineVars({
-          [sharedStyles.backgroundImageVar]: `url(${imageSrc || '/images/feed-image.svg)'}`
+          [sharedStyles.backgroundImageVar]: `url(${imageSrc || '/images/feed-image.svg'})`
         })}
       >
         <div

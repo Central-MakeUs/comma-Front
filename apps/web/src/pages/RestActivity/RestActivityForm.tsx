@@ -58,6 +58,7 @@ export function RestActivityForm({
 
   const handleTagKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key !== 'Enter') return;
+    if (event.nativeEvent.isComposing) return;
 
     event.preventDefault();
     handleAddTag();

@@ -1,54 +1,16 @@
 import { NavigationBar, ProgressBar, Question } from '@comma/design-system';
 import { useFunnel } from '@use-funnel/react-router-dom';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getChecklists } from '../apis/checklist';
 import { recommend } from '../apis/relax';
-import type { MoodType, TimeType } from '../types/relax';
+import type { questionInfo } from '../types/checklist';
 import * as styles from './RestChecklist.css';
 import { navigateToNavigationItem } from '../utils/navigation';
 
 type RestChecklistFunnel = {
   Mood: { mood?: string };
   Time: { mood: string; time?: string };
-};
-
-const questions = {
-  Mood: {
-    step: 1,
-    title: '지금 기분이 어때요?',
-    options: ['멍하고 싶어', '기분 전환이 필요해', '가볍게 해볼 수 있어']
-  },
-  Time: {
-    step: 2,
-    title: '어느 정도 시간이 있어요?',
-    options: ['잠깐 (1시간 이내)', '여유 (1-6시간 이내)', '넉넉 (6시간 이상)']
-  }
-} as const;
-
-const convertMood = (answer: string): MoodType => {
-  switch (answer) {
-    case '멍하고 싶어':
-      return 'A';
-    case '기분 전환이 필요해':
-      return 'B';
-    case '가볍게 해볼 수 있어':
-      return 'C';
-    default:
-      throw new Error(`Unknown mood answer: ${answer}`);
-  }
-};
-
-const convertTime = (time: string): TimeType => {
-  switch (time) {
-    case '잠깐 (1시간 이내)':
-      return 'X';
-    case '여유 (1-6시간 이내)':
-      return 'Y';
-    case '넉넉 (6시간 이상)':
-      return 'Z';
-    default:
-      throw new Error(`Unknown time answer: ${time}`);
-  }
 };
 
 function useSelectedOption() {
@@ -66,6 +28,8 @@ function RestChecklist() {
   const navigate = useNavigate();
   const { selectedKey, setSelectedKey, selectThenMove } = useSelectedOption();
   const [recommendLoading, setRecommendLoading] = useState(false);
+  const [questionInfo, setQuestionInfo] = useState<questionInfo[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const funnel = useFunnel<RestChecklistFunnel>({
     id: 'rest-checklist',
@@ -74,6 +38,32 @@ function RestChecklist() {
       context: {}
     }
   });
+
+  useEffect(() => {
+    const handleInit = async () => {
+      let res: Awaited<ReturnType<typeof getChecklists>> | undefined;
+      try {
+        res = await getChecklists();
+        if (
+          !res?.success ||
+          (res.data?.questions?.length ?? 0) < 2 ||
+          res.data?.questions?.some((q) => (q.options?.length ?? 0) < 2)
+        )
+          throw new Error();
+      } catch (error) {
+        alert('체크리스트를 불러오는 중 오류가 발생했습니다.');
+        console.error(error);
+        navigate(-1);
+      } finally {
+        if (res?.success) {
+          setQuestionInfo([...(res?.data?.questions ?? [])]);
+          setLoading(false);
+        }
+      }
+    };
+
+    handleInit();
+  }, [navigate]);
 
   return (
     <main className={styles.page}>
@@ -87,75 +77,83 @@ function RestChecklist() {
             <img alt="comma" className={styles.logo} src="/images/logo_glass.svg" />
           </header>
 
-          <funnel.Render
-            Mood={({ history }) => (
-              <>
-                <ProgressBar className={styles.progress} step={1} />
-                <Question
-                  backButton={false}
-                  className={styles.question}
-                  options={[...questions.Mood.options]}
-                  selectedIndex={questions.Mood.options.findIndex(
-                    (option) => selectedKey === `Mood:${option}`
-                  )}
-                  step={questions.Mood.step}
-                  title={questions.Mood.title}
-                  onOptionSelect={(_, mood) => {
-                    selectThenMove(`Mood:${mood}`, () => {
-                      setSelectedKey(undefined);
-                      void history.push('Time', { mood });
-                    });
-                  }}
-                />
-              </>
-            )}
-            Time={({ context, history }) => (
-              <>
-                <ProgressBar className={styles.progress} step={2} />
-                <Question
-                  className={styles.question}
-                  options={[...questions.Time.options]}
-                  selectedIndex={questions.Time.options.findIndex(
-                    (option) => selectedKey === `Time:${option}`
-                  )}
-                  step={questions.Time.step}
-                  title={questions.Time.title}
-                  onBackClick={() => {
-                    setSelectedKey(undefined);
-                    void history.back();
-                  }}
-                  onOptionSelect={async (_, time) => {
-                    if (recommendLoading) return;
-                    setRecommendLoading(true);
-                    try {
-                      const res = await recommend({
-                        mood: convertMood(context.mood),
-                        time: convertTime(time)
+          {loading ? null : (
+            <funnel.Render
+              Mood={({ history }) => (
+                <>
+                  <ProgressBar className={styles.progress} step={1} />
+                  <Question
+                    backButton={false}
+                    className={styles.question}
+                    options={[...questionInfo[0].options.map((o) => o.label)]}
+                    selectedIndex={questionInfo[0].options
+                      .map((o) => o.label)
+                      .findIndex((option) => selectedKey === `Mood:${option}`)}
+                    step={questionInfo[0].order}
+                    title={questionInfo[0].title}
+                    onOptionSelect={(_, mood) => {
+                      selectThenMove(`Mood:${mood}`, () => {
+                        setSelectedKey(undefined);
+                        void history.push('Time', { mood });
                       });
-                      if (!res?.success || !res.data?.length) {
-                        throw new Error(res.message ?? 'No recommendations found.');
-                      } else {
-                        selectThenMove(`Time:${time}`, async () => {
-                          setSelectedKey(undefined);
-                          void history.replace('Time', { ...context, time });
-                          void navigate('/rest/loading', {
-                            state: {
-                              data: res.data
-                            }
-                          });
+                    }}
+                  />
+                </>
+              )}
+              Time={({ context, history }) => (
+                <>
+                  <ProgressBar className={styles.progress} step={2} />
+                  <Question
+                    className={styles.question}
+                    options={[
+                      ...questionInfo[1].options.map((o) => `${o.label} (${o.description})`)
+                    ]}
+                    selectedIndex={questionInfo[1].options
+                      .map((o) => `${o.label} (${o.description})`)
+                      .findIndex((option) => selectedKey === `Time:${option}`)}
+                    step={questionInfo[1].order}
+                    title={questionInfo[1].title}
+                    onBackClick={() => {
+                      setSelectedKey(undefined);
+                      void history.back();
+                    }}
+                    onOptionSelect={async (index, time) => {
+                      if (recommendLoading) return;
+                      setRecommendLoading(true);
+                      try {
+                        const selectedMoodCode = questionInfo[0].options.filter(
+                          (o) => context.mood === o.label
+                        )[0].code;
+                        if (!selectedMoodCode) throw new Error();
+                        const res = await recommend({
+                          mood: selectedMoodCode,
+                          time: questionInfo[1].options[index].code
                         });
+                        if (!res?.success || !res.data?.length) {
+                          throw new Error(res.message ?? 'No recommendations found.');
+                        } else {
+                          selectThenMove(`Time:${time}`, async () => {
+                            setSelectedKey(undefined);
+                            void history.replace('Time', { ...context, time });
+                            void navigate('/rest/loading', {
+                              state: {
+                                data: res.data
+                              }
+                            });
+                          });
+                        }
+                      } catch (error) {
+                        console.log(error);
+                        alert('휴식 추천 오류: 다시 선택해주세요.');
+                      } finally {
+                        setRecommendLoading(false);
                       }
-                    } catch (error) {
-                      console.log(error);
-                      alert('휴식 추천 오류: 다시 선택해주세요.');
-                    } finally {
-                      setRecommendLoading(false);
-                    }
-                  }}
-                />
-              </>
-            )}
-          />
+                    }}
+                  />
+                </>
+              )}
+            />
+          )}
         </div>
         <NavigationBar
           active="rest"

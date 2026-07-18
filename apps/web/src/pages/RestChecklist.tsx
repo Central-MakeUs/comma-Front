@@ -5,8 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { getChecklists } from '../apis/checklist';
 import { recommend } from '../apis/relax';
 import type { questionInfo } from '../types/checklist';
-import * as styles from './RestChecklist.css';
 import { navigateToNavigationItem } from '../utils/navigation';
+import * as styles from './RestChecklist.css';
 
 type RestChecklistFunnel = {
   Mood: { mood?: string };

@@ -67,7 +67,7 @@ export const ctaButtonStyle = style({
   position: 'absolute',
   bottom: 40,
   left: '50%',
-  transform: 'translateX(-50%)',
+  transform: 'translateX(-50%)'
 });
 
 export const navStyle = style({

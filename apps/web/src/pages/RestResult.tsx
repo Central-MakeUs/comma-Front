@@ -1,4 +1,4 @@
-import { CtaButton, colors, Icon, ImageUpload, NavigationBar } from '@comma/design-system';
+import { CtaButton, colors, Icon, ImageUpload } from '@comma/design-system';
 import { assignInlineVars } from '@vanilla-extract/dynamic';
 import useEmblaCarousel from 'embla-carousel-react';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
@@ -7,7 +7,6 @@ import { getRelaxActiveCount, startRelax } from '../apis/relax';
 import { BIG_HEIGHT, GAP, SMALL_WIDTH } from '../data/cardInfo';
 import type { RelaxActivity, RestResultLocationState } from '../types/relax';
 import { computeLoopedLayout } from '../utils/compute_layout';
-import { navigateToNavigationItem } from '../utils/navigation';
 import * as styles from './RestResult.css';
 
 function Modal({ onClose }: { onClose: () => void }) {
@@ -309,11 +308,6 @@ function RestResult() {
         </div>
         <CtaButton className={styles.ctaButtonStyle} onClick={handleStartClick} />
       </div>
-      <NavigationBar
-        active="rest"
-        className={styles.navStyle}
-        onItemSelect={(item) => navigateToNavigationItem(navigate, item, 'rest')}
-      />
     </div>
   );
 }

@@ -37,7 +37,7 @@ export const title = style({
 export const subTitle = style({
   ...typography.bodyReadingR,
   color: colors.textTertiary,
-  marginBottom: 30
+  marginBottom: 64
 });
 
 export const imageUploadStyle = style({
@@ -64,7 +64,10 @@ export const dot = style({
 export const ctaButtonStyle = style({
   margin: '0 auto',
   color: colors.textPrimary,
-  marginBottom: 37
+  position: 'absolute',
+  bottom: 40,
+  left: '50%',
+  transform: 'translateX(-50%)'
 });
 
 export const navStyle = style({

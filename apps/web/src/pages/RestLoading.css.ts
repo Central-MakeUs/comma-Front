@@ -21,7 +21,9 @@ export const title = style({
 export const num = style({
   ...typography.engNum,
   color: colors.textPrimary,
-  marginRight: 4
+  marginRight: 4,
+  textBoxTrim: 'trim-end',
+  textBoxEdge: 'cap alphabetic'
 });
 
 export const desc = style({

@@ -212,21 +212,10 @@ function RestResult() {
       <div
         style={{
           position: 'absolute',
-          top: 0,
+          top: 254,
+          bottom: -2,
           width: '100%',
-          height: 120,
-          background: 'linear-gradient(rgba(17, 17, 17, 0.66) 0%, rgba(17, 17, 17, 0) 100%)',
-          zIndex: -1
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          bottom: 0,
-          width: '100%',
-          height: 600,
-          background:
-            'linear-gradient(to top, rgba(17, 17, 17, 0.66) 0%, rgba(17, 17, 17, 0) 100%)',
+          background: 'linear-gradient(0deg, rgba(17, 17, 17, 0.66) 0%, rgba(17, 17, 17, 0) 100%)',
           zIndex: -1
         }}
       />

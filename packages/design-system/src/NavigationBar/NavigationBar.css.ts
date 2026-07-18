@@ -2,32 +2,32 @@ import { style, styleVariants } from '@vanilla-extract/css';
 import { vars } from '../theme.css';
 
 export const navigationBar = style({
-  width: 344,
-  height: 68,
+  width: 329,
+  height: 64,
   display: 'flex',
   alignItems: 'center',
-  justifyContent: 'space-between',
+  justifyContent: 'center',
   boxSizing: 'border-box',
-  border: `1px solid rgb(255 255 255 / 12%)`,
   borderRadius: vars.radius.pill,
   padding: '0 16px',
-  background: 'rgb(66 61 56 / 72%)',
-  boxShadow: `${vars.shadow.glassInsetStrong}, 0 8px 24px rgb(0 0 0 / 18%)`,
+  background: 'rgb(27 24 19 / 10%)',
+  boxShadow: vars.shadow.glassInset,
   backdropFilter: 'blur(20px)',
   WebkitBackdropFilter: 'blur(20px)',
   fontFamily: vars.font.body
 });
 
 export const navigationItem = style({
-  width: 72,
-  height: 56,
+  flex: '1 0 0',
+  minWidth: 0,
+  height: '100%',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
   gap: 2,
+  padding: '8px 0',
   boxSizing: 'border-box',
-  flexShrink: 0,
   border: 0,
   background: 'transparent',
   cursor: 'pointer',
@@ -50,8 +50,8 @@ export const navigationItemTone = styleVariants({
 });
 
 export const navigationIcon = style({
-  width: 32,
-  height: 32,
+  width: 28,
+  height: 28,
   display: 'block',
   flexShrink: 0,
   transition: 'color 0.3s ease-out'

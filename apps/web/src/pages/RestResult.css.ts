@@ -21,7 +21,8 @@ export const container = style({
       content: '',
       position: 'absolute',
       background: `rgba(26, 24, 20, 0.5)`,
-      backdropFilter: 'blur(40px)',
+      backdropFilter: 'blur(5px)',
+      WebkitBackdropFilter: 'blur(5px)',
       inset: 0,
       zIndex: -1
     }

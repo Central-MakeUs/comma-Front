@@ -46,7 +46,7 @@ export const selectButtonState = styleVariants({
     ...pressedState
   },
   selected: {
-    background: 'rgb(253 252 252 / 10%)',
+    background: 'rgb(253 252 252 / 25%)',
     color: vars.color.textPrimary,
     fontWeight: vars.typography.headlineB.fontWeight,
     boxShadow: 'inset -2px 0 10px rgb(255 255 255 / 66%)'

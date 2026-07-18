@@ -49,7 +49,9 @@ export const participantLabel = style({
   minWidth: 0,
   height: 45,
   paddingBottom: 7,
-  color: colors.textTertiary
+  color: colors.textTertiary,
+  display: 'inline-flex',
+  alignItems: 'flex-end'
 });
 
 export const footer = style({

@@ -1,10 +1,11 @@
-import { ProgressBar, Question } from '@comma/design-system';
+import { NavigationBar, ProgressBar, Question } from '@comma/design-system';
 import { useFunnel } from '@use-funnel/react-router-dom';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { recommend } from '../apis/relax';
 import type { MoodType, TimeType } from '../types/relax';
 import * as styles from './RestChecklist.css';
+import { navigateToNavigationItem } from '../utils/navigation';
 
 type RestChecklistFunnel = {
   Mood: { mood?: string };
@@ -156,6 +157,11 @@ function RestChecklist() {
             )}
           />
         </div>
+        <NavigationBar
+          active="rest"
+          className={styles.navigation}
+          onItemSelect={(item) => navigateToNavigationItem(navigate, item, 'rest')}
+        />
       </div>
     </main>
   );

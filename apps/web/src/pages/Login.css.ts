@@ -20,7 +20,6 @@ export const container = style({
   paddingLeft: 32,
   paddingRight: 32,
   boxSizing: 'border-box',
-  paddingTop: 48
 });
 
 export const title = style({

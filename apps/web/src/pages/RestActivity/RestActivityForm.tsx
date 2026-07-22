@@ -152,6 +152,7 @@ export function RestActivityForm({
                 title="해시태그 추가"
                 value={tagInput}
                 variant="field"
+                helperText={tagInputState == 'focus'? '최대 2개까지 입력할 수 있어요' : undefined}
               />
               {tags.length > 0 ? (
                 <div className={styles.tagList}>

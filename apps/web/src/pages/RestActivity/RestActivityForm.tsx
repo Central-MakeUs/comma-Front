@@ -113,7 +113,7 @@ export function RestActivityForm({
             className={sharedStyles.iconButton}
             onClick={onOpenReselectModal}
             type="button"
-            style={{width: 44, height: 44, position: 'absolute', top: 10, right: 22}}
+            style={{ width: 44, height: 44, position: 'absolute', top: 10, right: 22 }}
           >
             <Icon color={colors.iconPrimary} name="x" />
           </button>
@@ -152,7 +152,7 @@ export function RestActivityForm({
                 title="해시태그 추가"
                 value={tagInput}
                 variant="field"
-                helperText={tagInputState == 'focus'? '최대 2개까지 입력할 수 있어요' : undefined}
+                helperText={tagInputState === 'focus' ? '최대 2개까지 입력할 수 있어요' : undefined}
               />
               {tags.length > 0 ? (
                 <div className={styles.tagList}>

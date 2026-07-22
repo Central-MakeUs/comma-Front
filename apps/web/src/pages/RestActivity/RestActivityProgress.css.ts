@@ -9,7 +9,8 @@ export const header = style({
   display: 'flex',
   justifyContent: 'flex-end',
   alignItems: 'flex-start',
-  padding: 'calc(20px + var(--safe-area-top)) calc(32px + var(--safe-area-right)) 20px calc(32px + var(--safe-area-left))'
+  padding:
+    'calc(20px + var(--safe-area-top)) calc(32px + var(--safe-area-right)) 20px calc(32px + var(--safe-area-left))'
 });
 
 export const content = style({
@@ -64,7 +65,8 @@ export const footer = style({
   flexDirection: 'column',
   alignItems: 'center',
   gap: 8,
-  padding: '64px calc(32px + var(--safe-area-right)) max(32px, var(--safe-area-bottom)) calc(32px + var(--safe-area-left))',
+  padding:
+    '64px calc(32px + var(--safe-area-right)) max(32px, var(--safe-area-bottom)) calc(32px + var(--safe-area-left))',
   background: 'linear-gradient(to bottom, rgba(26, 24, 20, 0) 0%, #1A1814 46.767%, #1A1814 100%)',
   pointerEvents: 'none'
 });

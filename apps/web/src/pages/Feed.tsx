@@ -4,11 +4,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { navigateToNavigationItem } from '../utils/navigation';
 import * as styles from './Feed.css';
 
-const feelCat = ['전체', '멍하고 싶어', '기분 전환이 필요해', '가볍게 해볼 수 있어'];
+const feelCat = ['전체', '지치고 무기력해', '답답하고 환기가 필요해', '괜찮아, 가볍게 즐기고 싶어'];
 
-const bodyStateCat = ['전체', '완전 방전이야', '견딜 만해', '안 피곤해'];
+const bodyStateCat = ['전체', '잠깐 (1시간 이내)', '여유 (1-3시간 이내)', '넉넉 (3시간 이상)'];
 
-type fieldType = 'feel' | 'body' | 'rest';
+type fieldType = 'feel' | 'time';
 
 interface ICategoryModal {
   field: fieldType;
@@ -18,6 +18,7 @@ interface ICategoryModal {
 
 const itemStyle: React.CSSProperties = {
   padding: '8px 16px',
+  paddingRight: 0,
   textAlign: 'left',
   background: 'none',
   border: 'none',
@@ -44,16 +45,14 @@ function Feed() {
   const [feelOpen, setFeelOpen] = useState(false);
   const [bodyOpen, setBodyOpen] = useState(false);
 
-  const [currentFeel, setCurrentFeel] = useState('기분');
-  const [currentBody, setCurrentBody] = useState('몸 상태');
+  const [currentFeel, setCurrentFeel] = useState('상태');
+  const [currentBody, setCurrentBody] = useState('시간');
 
   const feelRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
-  const _restRef = useRef<HTMLDivElement>(null);
 
   const [feelPos, setFeelPos] = useState<{ top: number; left: number }>();
   const [bodyPos, setBodyPos] = useState<{ top: number; left: number }>();
-  const [_restPos, _setRestPos] = useState<{ top: number; left: number }>();
 
   const navigate = useNavigate();
 
@@ -125,7 +124,7 @@ function Feed() {
               />
               {bodyOpen ? (
                 <CategoryModal
-                  field="body"
+                  field="time"
                   style={bodyPos}
                   onClick={(cat) => {
                     setCurrentBody(cat);

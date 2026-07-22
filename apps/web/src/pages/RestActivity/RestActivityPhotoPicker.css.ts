@@ -16,7 +16,8 @@ export const header = style({
   width: '100%',
   display: 'flex',
   justifyContent: 'flex-start',
-  padding: 'calc(20px + var(--safe-area-top)) calc(32px + var(--safe-area-right)) 20px calc(32px + var(--safe-area-left))'
+  padding:
+    'calc(20px + var(--safe-area-top)) calc(32px + var(--safe-area-right)) 20px calc(32px + var(--safe-area-left))'
 });
 
 export const content = style({

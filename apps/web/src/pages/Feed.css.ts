@@ -18,7 +18,8 @@ export const headerContainer = style({
   boxSizing: 'border-box',
   padding: '16px 32px',
   justifyContent: 'space-between',
-  borderBottom: `1px solid ${colors.lineTertiary}`
+  borderBottom: `1px solid ${colors.lineTertiary}`,
+  backgroundColor: colors.backgroundFill
 });
 
 export const headerText = style({

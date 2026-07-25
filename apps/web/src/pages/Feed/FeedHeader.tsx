@@ -1,7 +1,7 @@
-import { useRef, useState } from "react";
-import { Chip } from "@comma/design-system";
-import CategoryModal from "./FeedCategoryModal";
-import * as styles from "./Feed.css";
+import { Chip } from '@comma/design-system';
+import { useRef, useState } from 'react';
+import * as styles from './Feed.css';
+import CategoryModal from './FeedCategoryModal';
 
 interface IFeedHeader {
   currentFeel: string;

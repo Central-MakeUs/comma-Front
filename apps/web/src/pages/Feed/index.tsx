@@ -1,14 +1,14 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { FeedCard, NavigationBar } from "@comma/design-system";
-import { navigateToNavigationItem } from "../../utils/navigation";
-import FeedHeader from "./FeedHeader";
-import FeedToast from "./FeedToast";
-import { feedInfo } from "../../types/feed";
-import { getFeeds } from "../../apis/feed";
-import { transformDate } from "../../utils/transformDate";
+import { FeedCard, NavigationBar } from '@comma/design-system';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { getFeeds } from '../../apis/feed';
+import type { feedInfo } from '../../types/feed';
+import { navigateToNavigationItem } from '../../utils/navigation';
+import { transformDate } from '../../utils/transformDate';
+import { moods, times } from './Feed.constants';
 import * as styles from './Feed.css';
-import { moods, times } from "./Feed.constants";
+import FeedHeader from './FeedHeader';
+import FeedToast from './FeedToast';
 
 function Feed() {
   const [currentFeel, setCurrentFeel] = useState('상태');
@@ -19,7 +19,7 @@ function Feed() {
 
   useEffect(() => {
     const handleInit = async () => {
-      let res;
+      let res: Awaited<ReturnType<typeof getFeeds>> | undefined;
       try {
         res = await getFeeds({
           mood: moods[currentFeel],
@@ -27,12 +27,11 @@ function Feed() {
           cursor: undefined,
           size: undefined
         });
-
-      } catch(error) {
+      } catch (error) {
         console.error(error);
         alert('피드 조회 오류 발생');
       } finally {
-        if(res && res.success) {
+        if (res?.success) {
           setFeeds([...(res.data?.items ?? [])]);
           setLoading(false);
         }
@@ -49,17 +48,30 @@ function Feed() {
       <FeedToast />
       <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
         <FeedHeader
-            currentFeel={currentFeel}
-            currentBody={currentBody}
-            onFeelChange={setCurrentFeel}
-            onBodyChange={setCurrentBody}
+          currentFeel={currentFeel}
+          currentBody={currentBody}
+          onFeelChange={setCurrentFeel}
+          onBodyChange={setCurrentBody}
         />
         <div className={styles.scrollContainer}>
           {
             // TODO: liked 및 likeCount 연동
-            loading? null : (
-              feeds.map((f) => <FeedCard id={String(f.feedId)} imageSrc={f.imageUrl} imageAlt={`피드 이미지 ${f.feedId}`} timeLabel={transformDate(f.createdAt)} tags={[...f.hashtags]} content={f.review} variant='others' liked={false} likeCount={0} />) 
-            )
+            loading
+              ? null
+              : feeds.map((f) => (
+                  <FeedCard
+                    key={f.feedId}
+                    id={String(f.feedId)}
+                    imageSrc={f.imageUrl}
+                    imageAlt={`피드 이미지 ${f.feedId}`}
+                    timeLabel={transformDate(f.createdAt)}
+                    tags={[...f.hashtags]}
+                    content={f.review}
+                    variant="others"
+                    liked={false}
+                    likeCount={0}
+                  />
+                ))
           }
         </div>
       </div>

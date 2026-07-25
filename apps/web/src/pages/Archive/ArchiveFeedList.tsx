@@ -1,8 +1,7 @@
 import { FeedCard } from '@comma/design-system';
-import type { ArchiveItem } from './Archive.constants';
-import * as styles from './Archive.css';
-import { feedInfo } from '../../types/feed';
+import type { feedInfo } from '../../types/feed';
 import { transformDate } from '../../utils/transformDate';
+import * as styles from './Archive.css';
 
 type ArchiveFeedListProps = {
   items: readonly feedInfo[];

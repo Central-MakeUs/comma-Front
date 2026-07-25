@@ -1,14 +1,14 @@
 import { NavigationBar } from '@comma/design-system';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getMyFeeds } from '../../apis/feed';
+import type { feedInfo } from '../../types/feed';
 import { navigateToNavigationItem } from '../../utils/navigation';
-import { ARCHIVE_ITEMS, type ArchiveViewMode } from './Archive.constants';
+import type { ArchiveViewMode } from './Archive.constants';
 import * as styles from './Archive.css';
 import { ArchiveFeedGrid } from './ArchiveFeedGrid';
 import { ArchiveFeedList } from './ArchiveFeedList';
 import { ArchiveHeader } from './ArchiveHeader';
-import { getMyFeeds } from '../../apis/feed';
-import { feedInfo } from '../../types/feed';
 
 function Archive() {
   const navigate = useNavigate();
@@ -18,30 +18,29 @@ function Archive() {
 
   useEffect(() => {
     const handleInit = async () => {
-      let res;
+      let res: Awaited<ReturnType<typeof getMyFeeds>> | undefined;
       try {
-        res = await getMyFeeds({cursor: undefined, size: undefined});
-
-      } catch(error) {
+        res = await getMyFeeds({ cursor: undefined, size: undefined });
+      } catch (error) {
         console.error(error);
         alert('내 쉼표 조회 중 오류 발생');
       } finally {
         setContent([...(res?.data?.items ?? [])]);
         setLoading(false);
       }
-    }
+    };
 
     handleInit();
-  }, [])
+  }, []);
 
   return (
     <main className={styles.page}>
       <div className={styles.screen}>
         <ArchiveHeader viewMode={viewMode} onViewModeChange={setViewMode} />
         {viewMode === 'list' ? (
-          <ArchiveFeedList items={loading? [] : content} />
+          <ArchiveFeedList items={loading ? [] : content} />
         ) : (
-          <ArchiveFeedGrid items={loading? [] : content} />
+          <ArchiveFeedGrid items={loading ? [] : content} />
         )}
         <NavigationBar
           active="archive"

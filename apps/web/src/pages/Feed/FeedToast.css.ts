@@ -1,5 +1,5 @@
-import { style } from "@vanilla-extract/css";
-import { typography, colors } from "@comma/design-system";
+import { colors, typography } from '@comma/design-system';
+import { style } from '@vanilla-extract/css';
 
 export const headerContainer = style({
   width: '100%',

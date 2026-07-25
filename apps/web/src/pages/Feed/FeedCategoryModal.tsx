@@ -1,5 +1,5 @@
+import { bodyStateCat, feelCat, type ICategoryModal, itemStyle } from './Feed.constants';
 import * as styles from './FeedCategoryModal.css';
-import { feelCat, bodyStateCat, itemStyle, ICategoryModal } from './Feed.constants';
 
 function CategoryModal({ field, onClick, style }: ICategoryModal) {
   const items = field === 'feel' ? feelCat : bodyStateCat;

@@ -1,7 +1,7 @@
 import { FeedBadook } from '@comma/design-system';
-import * as styles from './Archive.css';
-import { feedInfo } from '../../types/feed';
+import type { feedInfo } from '../../types/feed';
 import { transformDate } from '../../utils/transformDate';
+import * as styles from './Archive.css';
 
 type ArchiveFeedGridProps = {
   items: readonly feedInfo[];

@@ -5,6 +5,7 @@ import { navigateToNavigationItem } from '../utils/navigation';
 import * as styles from './Feed.css';
 import { feedInfo } from '../types/feed';
 import { getFeeds } from '../apis/feed';
+import { transformDate } from '../utils/transformDate';
 
 const feelCat = ['전체', '지치고 무기력해', '답답하고 환기가 필요해', '괜찮아, 가볍게 즐기고 싶어'];
 
@@ -70,12 +71,6 @@ function Feed() {
 
   const [loading, setLoading] = useState(true);
   const [feeds, setFeeds] = useState<feedInfo[] | never[]>([]);
-  const transformDate = (date:string) => {
-    const diff = (Date.now() - new Date(date).getTime())/1000;
-    if(diff < 60) return `${Math.floor(diff)}초 전`;
-    else if(diff < 3600) return `${Math.floor(diff/60)}분 전`;
-    else return `${Math.floor(diff/3600)}시간 전`;
-  }
 
   useEffect(() => {
     const handleInit = async () => {
@@ -87,7 +82,7 @@ function Feed() {
           cursor: undefined,
           size: undefined
         });
-        console.log(res);
+
       } catch(error) {
         console.error(error);
         alert('피드 조회 오류 발생');
@@ -185,8 +180,9 @@ function Feed() {
         </div>
         <div className={styles.scrollContainer}>
           {
+            // TODO: liked 및 likeCount 연동
             loading? null : (
-              feeds.map((f) => <FeedCard id={String(f.feedId)} imageSrc={f.imageUrl} timeLabel={transformDate(f.createdAt)} tags={f.hashtags}/>) 
+              feeds.map((f) => <FeedCard id={String(f.feedId)} imageSrc={f.imageUrl} imageAlt={`피드 이미지 ${f.feedId}`} timeLabel={transformDate(f.createdAt)} tags={[...f.hashtags]} content={f.review} variant='others' liked={false} likeCount={0} />) 
             )
           }
         </div>

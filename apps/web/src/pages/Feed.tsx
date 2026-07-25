@@ -1,8 +1,10 @@
 import { Chip, FeedCard, Icon, NavigationBar } from '@comma/design-system';
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { navigateToNavigationItem } from '../utils/navigation';
 import * as styles from './Feed.css';
+import { feedInfo } from '../types/feed';
+import { getFeeds } from '../apis/feed';
 
 const feelCat = ['전체', '지치고 무기력해', '답답하고 환기가 필요해', '괜찮아, 가볍게 즐기고 싶어'];
 
@@ -26,6 +28,18 @@ const itemStyle: React.CSSProperties = {
   font: 'inherit',
   cursor: 'pointer'
 };
+
+const moods:Record<string, string> = {
+  '지치고 무기력해': 'A',
+  '답답하고 환기가 필요해': 'B',
+  '괜찮아, 가볍게 즐기고 싶어': 'C'
+}
+
+const times:Record<string, string> = {
+  '잠깐 (1시간 이내)': 'X',
+  '여유 (1-3시간 이내)': 'Y',
+  '넉넉 (3시간 이상)': 'Z'
+}
 
 function CategoryModal({ field, onClick, style }: ICategoryModal) {
   const items = field === 'feel' ? feelCat : bodyStateCat;
@@ -53,6 +67,40 @@ function Feed() {
 
   const [feelPos, setFeelPos] = useState<{ top: number; left: number }>();
   const [bodyPos, setBodyPos] = useState<{ top: number; left: number }>();
+
+  const [loading, setLoading] = useState(true);
+  const [feeds, setFeeds] = useState<feedInfo[] | never[]>([]);
+  const transformDate = (date:string) => {
+    const diff = (Date.now() - new Date(date).getTime())/1000;
+    if(diff < 60) return `${Math.floor(diff)}초 전`;
+    else if(diff < 3600) return `${Math.floor(diff/60)}분 전`;
+    else return `${Math.floor(diff/3600)}시간 전`;
+  }
+
+  useEffect(() => {
+    const handleInit = async () => {
+      let res;
+      try {
+        res = await getFeeds({
+          mood: moods[currentFeel],
+          timeBudget: times[currentBody],
+          cursor: undefined,
+          size: undefined
+        });
+        console.log(res);
+      } catch(error) {
+        console.error(error);
+        alert('피드 조회 오류 발생');
+      } finally {
+        if(res && res.success) {
+          setFeeds([...(res.data?.items ?? [])]);
+          setLoading(false);
+        }
+      }
+    };
+
+    handleInit();
+  }, [currentFeel, currentBody]);
 
   const navigate = useNavigate();
 
@@ -136,10 +184,11 @@ function Feed() {
           </div>
         </div>
         <div className={styles.scrollContainer}>
-          <FeedCard />
-          <FeedCard />
-          <FeedCard />
-          <FeedCard />
+          {
+            loading? null : (
+              feeds.map((f) => <FeedCard id={String(f.feedId)} imageSrc={f.imageUrl} timeLabel={transformDate(f.createdAt)} tags={f.hashtags}/>) 
+            )
+          }
         </div>
       </div>
       <NavigationBar

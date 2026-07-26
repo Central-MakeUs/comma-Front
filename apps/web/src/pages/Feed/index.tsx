@@ -20,7 +20,7 @@ function Feed() {
   useEffect(() => {
     const handleInit = async () => {
       let res: Awaited<ReturnType<typeof getFeeds>> | undefined;
-      let likeRes;
+      let likeRes: feedInfo[] | undefined;
 
       try {
         res = await getFeeds({
@@ -30,20 +30,19 @@ function Feed() {
           size: undefined
         });
 
-        if(res?.success && res.data) {
+        if (res?.success && res.data) {
           likeRes = await Promise.all(
             (res.data.items ?? []).map(async (item) => {
-              const likeRes = await getLikes({feedId: item.feedId});
+              const likeRes = await getLikes({ feedId: item.feedId });
 
               return {
                 ...item,
                 liked: likeRes.data?.liked ?? false,
                 likeCount: likeRes.data?.likeCount ?? 0
-              }
+              };
             })
-          )
+          );
         }
-
       } catch (error) {
         console.error(error);
         alert('피드 조회 오류 발생');
@@ -71,24 +70,22 @@ function Feed() {
           onBodyChange={setCurrentBody}
         />
         <div className={styles.scrollContainer}>
-          {
-            loading
-              ? null
-              : feeds.map((f) => (
-                  <FeedCard
-                    key={f.feedId}
-                    id={String(f.feedId)}
-                    imageSrc={f.imageUrl}
-                    imageAlt={`피드 이미지 ${f.feedId}`}
-                    timeLabel={transformDate(f.createdAt)}
-                    tags={[...f.hashtags]}
-                    content={f.review}
-                    variant="others"
-                    liked={f.liked}
-                    likeCount={f.likeCount}
-                  />
-                ))
-          }
+          {loading
+            ? null
+            : feeds.map((f) => (
+                <FeedCard
+                  key={f.feedId}
+                  id={String(f.feedId)}
+                  imageSrc={f.imageUrl}
+                  imageAlt={`피드 이미지 ${f.feedId}`}
+                  timeLabel={transformDate(f.createdAt)}
+                  tags={[...f.hashtags]}
+                  content={f.review}
+                  variant="others"
+                  liked={f.liked}
+                  likeCount={f.likeCount}
+                />
+              ))}
         </div>
       </div>
       <NavigationBar

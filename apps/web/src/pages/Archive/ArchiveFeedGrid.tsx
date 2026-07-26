@@ -17,9 +17,8 @@ export function ArchiveFeedGrid({ items }: ArchiveFeedGridProps) {
           imageAlt={`피드 이미지 ${item.feedId}`}
           imageSrc={item.imageUrl}
           key={item.feedId}
-          /* TODO: liked 및 likeCount 반영 */
-          liked={false}
-          likeCount={0}
+          liked={item.liked}
+          likeCount={item.likeCount}
           tags={[...item.hashtags]}
         />
       ))}

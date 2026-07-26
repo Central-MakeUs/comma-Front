@@ -53,3 +53,18 @@ export const getMyFeeds = async ({ cursor, size }: myRequest) => {
 
   return data;
 };
+
+interface likeRequest {
+  feedId: number
+}
+
+interface likeResponse {
+  liked: boolean,
+  likeCount: number
+}
+
+export const getLikes = async ({ feedId }:likeRequest) => {
+  const { data } = await apiClient.post<ApiResponse<likeResponse>>(`/api/feeds/${feedId}/likes`);
+
+  return data;
+}

@@ -1,7 +1,7 @@
 import { NavigationBar } from '@comma/design-system';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getMyFeeds } from '../../apis/feed';
+import { getMyFeeds, getLikes } from '../../apis/feed';
 import type { feedInfo } from '../../types/feed';
 import { navigateToNavigationItem } from '../../utils/navigation';
 import type { ArchiveViewMode } from './Archive.constants';
@@ -19,13 +19,29 @@ function Archive() {
   useEffect(() => {
     const handleInit = async () => {
       let res: Awaited<ReturnType<typeof getMyFeeds>> | undefined;
+      let likeRes;
+
       try {
         res = await getMyFeeds({ cursor: undefined, size: undefined });
+        if(res?.success && res.data) {
+          likeRes = await Promise.all(
+            (res.data.items ?? []).map(async (item) => {
+              const likeRes = await getLikes({feedId: item.feedId});
+        
+              return {
+                ...item,
+                liked: likeRes.data?.liked ?? false,
+                likeCount: likeRes.data?.likeCount ?? 0
+              }
+            })
+          )
+        }
+
       } catch (error) {
         console.error(error);
         alert('내 쉼표 조회 중 오류 발생');
       } finally {
-        setContent([...(res?.data?.items ?? [])]);
+        setContent([...(likeRes ?? [])]);
         setLoading(false);
       }
     };

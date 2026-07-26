@@ -1,7 +1,7 @@
 import { FeedCard, NavigationBar } from '@comma/design-system';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getFeeds } from '../../apis/feed';
+import { getFeeds, getLikes } from '../../apis/feed';
 import type { feedInfo } from '../../types/feed';
 import { navigateToNavigationItem } from '../../utils/navigation';
 import { transformDate } from '../../utils/transformDate';
@@ -20,6 +20,8 @@ function Feed() {
   useEffect(() => {
     const handleInit = async () => {
       let res: Awaited<ReturnType<typeof getFeeds>> | undefined;
+      let likeRes;
+
       try {
         res = await getFeeds({
           mood: moods[currentFeel],
@@ -27,12 +29,27 @@ function Feed() {
           cursor: undefined,
           size: undefined
         });
+
+        if(res?.success && res.data) {
+          likeRes = await Promise.all(
+            (res.data.items ?? []).map(async (item) => {
+              const likeRes = await getLikes({feedId: item.feedId});
+
+              return {
+                ...item,
+                liked: likeRes.data?.liked ?? false,
+                likeCount: likeRes.data?.likeCount ?? 0
+              }
+            })
+          )
+        }
+
       } catch (error) {
         console.error(error);
         alert('피드 조회 오류 발생');
       } finally {
         if (res?.success) {
-          setFeeds([...(res.data?.items ?? [])]);
+          setFeeds([...(likeRes ?? [])]);
           setLoading(false);
         }
       }
@@ -55,7 +72,6 @@ function Feed() {
         />
         <div className={styles.scrollContainer}>
           {
-            // TODO: liked 및 likeCount 연동
             loading
               ? null
               : feeds.map((f) => (
@@ -68,8 +84,8 @@ function Feed() {
                     tags={[...f.hashtags]}
                     content={f.review}
                     variant="others"
-                    liked={false}
-                    likeCount={0}
+                    liked={f.liked}
+                    likeCount={f.likeCount}
                   />
                 ))
           }

@@ -2,8 +2,7 @@ import { style } from '@vanilla-extract/css';
 import { vars } from '../theme.css';
 
 export const feedCard = style({
-  width: 393,
-  maxWidth: '100%',
+  width: '100%',
   display: 'grid',
   gridTemplateColumns: 'minmax(0, 1fr)',
   background: vars.color.backgroundPrimary,

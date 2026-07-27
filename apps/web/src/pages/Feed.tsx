@@ -44,6 +44,7 @@ function CategoryModal({ field, onClick, style }: ICategoryModal) {
 function Feed() {
   const [feelOpen, setFeelOpen] = useState(false);
   const [bodyOpen, setBodyOpen] = useState(false);
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
 
   const [currentFeel, setCurrentFeel] = useState('상태');
   const [currentBody, setCurrentBody] = useState('시간');
@@ -63,7 +64,14 @@ function Feed() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.headerContainer}>
+      <div
+        className={[
+          styles.headerContainer,
+          isHeaderVisible ? styles.headerContainerVisible : styles.headerContainerHidden
+        ]
+          .filter(Boolean)
+          .join(' ')}
+      >
         <span className={styles.headerText}>
           오늘 아직 쉬지 못했어요.
           <br />
@@ -135,7 +143,12 @@ function Feed() {
             </div>
           </div>
         </div>
-        <div className={styles.scrollContainer}>
+        <div
+          className={styles.scrollContainer}
+          onScroll={(event) => {
+            setIsHeaderVisible(event.currentTarget.scrollTop <= 4);
+          }}
+        >
           <FeedCard />
           <FeedCard />
           <FeedCard />

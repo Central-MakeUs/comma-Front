@@ -11,6 +11,33 @@ export interface NicknameData {
 
 export type NicknameResponse = ApiResponse<NicknameData>;
 
+export type UserPlan = 'FREE' | 'PREMIUM';
+export type PremiumAlertContactType = 'EMAIL' | 'PHONE';
+
+export interface PlanCard {
+  plan: UserPlan;
+  label: string;
+  description: string;
+  selected: boolean;
+}
+
+export interface PlanData {
+  currentPlan: UserPlan;
+  plans: PlanCard[];
+}
+
+export interface PlanRequest {
+  plan: UserPlan;
+}
+
+export interface PremiumAlertRequest {
+  contactType: PremiumAlertContactType;
+  contact: string;
+}
+
+export type PlanResponse = ApiResponse<PlanData>;
+export type VoidResponse = ApiResponse<void>;
+
 export const getRandomNickname = async () => {
   const { data } = await apiClient.get<NicknameResponse>('/api/users/nickname/random');
 
@@ -19,6 +46,33 @@ export const getRandomNickname = async () => {
 
 export const updateNickname = async ({ nickname }: NicknameRequest) => {
   const { data } = await apiClient.patch<NicknameResponse>('/api/users/nickname', { nickname });
+
+  return data;
+};
+
+export const getPlan = async () => {
+  const { data } = await apiClient.get<PlanResponse>('/api/users/me/plan');
+
+  return data;
+};
+
+export const changePlan = async ({ plan }: PlanRequest) => {
+  const { data } = await apiClient.patch<PlanResponse>('/api/users/me/plan', { plan });
+
+  return data;
+};
+
+export const requestPremiumAlert = async ({ contactType, contact }: PremiumAlertRequest) => {
+  const { data } = await apiClient.post<VoidResponse>('/api/users/me/premium-alert', {
+    contactType,
+    contact
+  });
+
+  return data;
+};
+
+export const withdrawUser = async () => {
+  const { data } = await apiClient.delete<VoidResponse>('/api/users/me');
 
   return data;
 };

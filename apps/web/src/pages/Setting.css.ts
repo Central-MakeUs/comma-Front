@@ -10,7 +10,7 @@ export const leftArrow = style({
 
 export const container = style({
   background: 'linear-gradient(#11111166 0%, #11111100 100%), #322E29',
-  width: '100vw',
+  width: '100%',
   height: '100dvh',
   display: 'flex',
   flexDirection: 'column',
@@ -58,6 +58,13 @@ export const rateDesc = style({
 
 export const startBtn = style({
   width: 87,
+  height: 36,
+  marginTop: 8
+});
+
+export const planActionBtn = style({
+  minWidth: 87,
+  width: 'auto',
   height: 36,
   marginTop: 8
 });

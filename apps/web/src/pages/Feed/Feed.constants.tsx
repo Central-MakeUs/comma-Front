@@ -1,3 +1,5 @@
+import type { CSSProperties } from 'react';
+
 export const feelCat = [
   '전체',
   '지치고 무기력해',
@@ -16,10 +18,10 @@ export type fieldType = 'feel' | 'time';
 export interface ICategoryModal {
   field: fieldType;
   onClick: (arg0: string) => void;
-  style?: React.CSSProperties;
+  style?: CSSProperties;
 }
 
-export const itemStyle: React.CSSProperties = {
+export const itemStyle: CSSProperties = {
   padding: '8px 16px',
   paddingRight: 0,
   textAlign: 'left',

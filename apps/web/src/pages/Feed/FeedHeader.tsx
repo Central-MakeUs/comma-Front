@@ -1,5 +1,6 @@
 import { Chip } from '@comma/design-system';
 import { useRef, useState } from 'react';
+import type { RefObject } from 'react';
 import * as styles from './Feed.css';
 import CategoryModal from './FeedCategoryModal';
 
@@ -20,7 +21,7 @@ function FeedHeader({ currentFeel, currentBody, onFeelChange, onBodyChange }: IF
   const [feelPos, setFeelPos] = useState<{ top: number; left: number }>();
   const [bodyPos, setBodyPos] = useState<{ top: number; left: number }>();
 
-  const getModalPos = (ref: React.RefObject<HTMLDivElement | null>) => {
+  const getModalPos = (ref: RefObject<HTMLDivElement | null>) => {
     const rect = ref.current?.getBoundingClientRect();
     return rect ? { top: rect.bottom + 8, left: rect.left } : undefined;
   };

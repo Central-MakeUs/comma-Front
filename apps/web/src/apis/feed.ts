@@ -9,20 +9,20 @@ interface feedRequest {
 }
 
 interface feedResponse {
-  items: [
-    {
-      feedId: number;
-      mood: string;
-      timeBudget: string;
-      imageUrl: string;
-      hashtags: string[];
-      review: string;
-      isPublic: boolean;
-      createdAt: string;
-      likeCount: number;
-      isLiked: boolean;
-    }
-  ];
+  items: Array<
+      {
+        feedId: number;
+        mood: string;
+        timeBudget: string;
+        imageUrl: string;
+        hashtags: string[];
+        review: string;
+        isPublic: boolean;
+        createdAt: string;
+        likeCount: number;
+        isLiked: boolean;
+      }
+    >;
   nextCursor: number;
   hasNext: boolean;
 }

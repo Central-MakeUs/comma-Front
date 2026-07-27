@@ -19,6 +19,8 @@ interface feedResponse {
       review: string;
       isPublic: boolean;
       createdAt: string;
+      likeCount: number;
+      isLiked: boolean;
     }
   ];
   nextCursor: number;

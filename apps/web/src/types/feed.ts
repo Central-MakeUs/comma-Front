@@ -7,6 +7,6 @@ export interface feedInfo {
   review: string;
   isPublic: boolean;
   createdAt: string;
-  liked: boolean;
+  isLiked: boolean;
   likeCount: number;
 }

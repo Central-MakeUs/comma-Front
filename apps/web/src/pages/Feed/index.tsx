@@ -1,7 +1,7 @@
 import { FeedCard, NavigationBar } from '@comma/design-system';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getFeeds, getLikes } from '../../apis/feed';
+import { getFeeds } from '../../apis/feed';
 import type { feedInfo } from '../../types/feed';
 import { navigateToNavigationItem } from '../../utils/navigation';
 import { transformDate } from '../../utils/transformDate';
@@ -15,12 +15,11 @@ function Feed() {
   const [currentBody, setCurrentBody] = useState('시간');
 
   const [loading, setLoading] = useState(true);
-  const [feeds, setFeeds] = useState<feedInfo[] | never[]>([]);
+  const [feeds, setFeeds] = useState<feedInfo[]>([]);
 
   useEffect(() => {
     const handleInit = async () => {
       let res: Awaited<ReturnType<typeof getFeeds>> | undefined;
-      let likeRes: feedInfo[] | undefined;
 
       try {
         res = await getFeeds({
@@ -30,25 +29,12 @@ function Feed() {
           size: undefined
         });
 
-        if (res?.success && res.data) {
-          likeRes = await Promise.all(
-            (res.data.items ?? []).map(async (item) => {
-              const likeRes = await getLikes({ feedId: item.feedId });
-
-              return {
-                ...item,
-                liked: likeRes.data?.liked ?? false,
-                likeCount: likeRes.data?.likeCount ?? 0
-              };
-            })
-          );
-        }
       } catch (error) {
         console.error(error);
         alert('피드 조회 오류 발생');
       } finally {
         if (res?.success) {
-          setFeeds([...(likeRes ?? [])]);
+          setFeeds([...(res.data?.items ?? [])]);
           setLoading(false);
         }
       }
@@ -82,7 +68,7 @@ function Feed() {
                   tags={[...f.hashtags]}
                   content={f.review}
                   variant="others"
-                  liked={f.liked}
+                  liked={f.isLiked}
                   likeCount={f.likeCount}
                 />
               ))}

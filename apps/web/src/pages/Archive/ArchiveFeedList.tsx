@@ -20,9 +20,8 @@ export function ArchiveFeedList({ items }: ArchiveFeedListProps) {
           imageHeart
           imageSrc={item.imageUrl}
           key={item.feedId}
-          /* TODO: liked 및 likeCount 연동 */
-          liked={false}
-          likeCount={0}
+          liked={item.isLiked}
+          likeCount={item.likeCount}
           tags={[...item.hashtags]}
           variant="my"
         />

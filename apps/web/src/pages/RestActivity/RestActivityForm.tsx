@@ -6,7 +6,6 @@ import {
   SecretToggle,
   TextInput
 } from '@comma/design-system';
-import { assignInlineVars } from '@vanilla-extract/dynamic';
 import { type KeyboardEvent, useState } from 'react';
 import {
   COMMENT_MAX_LENGTH,
@@ -20,12 +19,13 @@ import { RestActivityReselectModal } from './RestActivityReselectModal';
 
 type RestActivityFormProps = {
   imagePreview?: string;
+  isSubmitting?: boolean;
   showReselectModal: boolean;
   onOpenPhotoPicker: () => void;
   onOpenReselectModal: () => void;
   onCancelReselect: () => void;
   onConfirmReselect: () => void;
-  onComplete: () => void;
+  onComplete: (values: { hashtags: string[]; review: string; isPublic: boolean }) => void;
 };
 
 function normalizeTag(value: string) {
@@ -34,6 +34,7 @@ function normalizeTag(value: string) {
 
 export function RestActivityForm({
   imagePreview,
+  isSubmitting = false,
   showReselectModal,
   onOpenPhotoPicker,
   onOpenReselectModal,
@@ -82,19 +83,22 @@ export function RestActivityForm({
         : 'default';
   const isComplete =
     Boolean(imagePreview) && tags.length > 0 && comment.trim().length > 0 && !isCommentOverLimit;
+  const isDoneDisabled = !isComplete || isSubmitting;
 
   return (
     <main className={sharedStyles.page}>
-      <div
-        className={sharedStyles.screen}
-        style={
-          imagePreview
-            ? assignInlineVars({
-                [sharedStyles.backgroundImageVar]: `url(${imagePreview})`
-              })
-            : undefined
-        }
-      >
+      <div className={sharedStyles.screen}>
+        {imagePreview ? (
+          <img
+            alt=""
+            aria-hidden="true"
+            className={sharedStyles.backgroundImage}
+            decoding="async"
+            fetchPriority="high"
+            loading="eager"
+            src={imagePreview}
+          />
+        ) : null}
         <div
           aria-hidden="true"
           className={[
@@ -191,10 +195,16 @@ export function RestActivityForm({
           </div>
           <CtaButton
             className={sharedStyles.doneButton}
-            disabled={!isComplete}
-            onClick={onComplete}
+            disabled={isDoneDisabled}
+            onClick={() =>
+              onComplete({
+                hashtags: tags,
+                review: comment.trim(),
+                isPublic: !isSecret
+              })
+            }
           >
-            휴식 완료
+            {isSubmitting ? '올리는 중' : '휴식 완료'}
           </CtaButton>
         </footer>
 

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import type { RelaxActivity } from '../apis/relax';
 import { onlineCount } from '../apis/relax';
+import type { RestLoadingLocationState } from '../types/relax';
 import * as styles from './RestLoading.css';
 
 function RestLoading() {
@@ -12,7 +12,8 @@ function RestLoading() {
   useEffect(() => {
     let timeoutId: ReturnType<typeof setTimeout>;
     let canceled = false;
-    const data = (location.state as { data?: RelaxActivity[] } | null)?.data ?? [];
+    const locationState = location.state as RestLoadingLocationState | null;
+    const data = locationState?.data ?? [];
 
     const handleInit = async () => {
       try {
@@ -31,7 +32,9 @@ function RestLoading() {
           timeoutId = setTimeout(() => {
             navigate('/rest/result', {
               state: {
-                data
+                data,
+                mood: locationState?.mood,
+                timeBudget: locationState?.timeBudget
               }
             });
           }, 5000);
@@ -44,10 +47,19 @@ function RestLoading() {
       canceled = true;
       clearTimeout(timeoutId);
     };
-  }, [navigate, (location.state as { data?: RelaxActivity[] } | null)?.data]);
+  }, [navigate, location.state]);
 
   return (
     <div className={styles.container} role="status">
+      <img
+        alt=""
+        aria-hidden="true"
+        className={styles.backgroundImage}
+        decoding="async"
+        fetchPriority="high"
+        loading="eager"
+        src="/images/Home.png"
+      />
       <div className={styles.content}>
         <span className={styles.title}>휴식을 찾고 있어요...</span>
         <div

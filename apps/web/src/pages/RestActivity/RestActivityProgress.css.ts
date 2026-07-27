@@ -57,9 +57,12 @@ export const participantLabel = style({
 
 export const footer = style({
   position: 'fixed',
-  right: 0,
+  width: '100%',
+  maxWidth: 'var(--app-max-width)',
+  right: 'auto',
   bottom: 0,
-  left: 0,
+  left: '50%',
+  transform: 'translateX(-50%)',
   zIndex: 3,
   display: 'flex',
   flexDirection: 'column',

@@ -10,10 +10,58 @@ type GalleryPhotoItem = {
   src: string;
 };
 
+export type SelectedActivityPhoto =
+  | {
+      kind: 'file';
+      previewSrc: string;
+      file: File;
+    }
+  | {
+      kind: 'native';
+      previewSrc: string;
+      assetId: string;
+    }
+  | {
+      kind: 'preview';
+      previewSrc: string;
+    };
+
+const GALLERY_PHOTO_LIMIT = 30;
+const GALLERY_BRIDGE_RETRY_COUNT = 8;
+const GALLERY_BRIDGE_RETRY_DELAY_MS = 150;
+
 type RestActivityPhotoPickerProps = {
   onClose: () => void;
-  onPhotoSelect: (src: string) => void;
+  onPhotoSelect: (photo: SelectedActivityPhoto) => void;
 };
+
+function isReactNativeWebView() {
+  return typeof window !== 'undefined' && Boolean(window.ReactNativeWebView);
+}
+
+function wait(ms: number) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
+async function getNativeGalleryPhotos() {
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt <= GALLERY_BRIDGE_RETRY_COUNT; attempt += 1) {
+    try {
+      return await appBridge.getGalleryPhotos(GALLERY_PHOTO_LIMIT);
+    } catch (error) {
+      lastError = error;
+
+      if (!isReactNativeWebView() || attempt === GALLERY_BRIDGE_RETRY_COUNT) {
+        break;
+      }
+
+      await wait(GALLERY_BRIDGE_RETRY_DELAY_MS);
+    }
+  }
+
+  throw lastError;
+}
 
 export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivityPhotoPickerProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -25,8 +73,7 @@ export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivity
   useEffect(() => {
     let isActive = true;
 
-    appBridge
-      .getGalleryPhotos(30)
+    getNativeGalleryPhotos()
       .then((nativePhotos) => {
         if (!isActive) return;
 
@@ -54,7 +101,11 @@ export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivity
 
     if (!file) return;
 
-    onPhotoSelect(URL.createObjectURL(file));
+    onPhotoSelect({
+      kind: 'file',
+      previewSrc: URL.createObjectURL(file),
+      file
+    });
     event.currentTarget.value = '';
   };
 
@@ -97,7 +148,20 @@ export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivity
               aria-label="사진 선택"
               className={styles.photoTile}
               key={photo.id}
-              onClick={() => onPhotoSelect(photo.src)}
+              onClick={() =>
+                onPhotoSelect(
+                  galleryPhotos.length > 0
+                    ? {
+                        kind: 'native',
+                        previewSrc: photo.src,
+                        assetId: photo.id
+                      }
+                    : {
+                        kind: 'preview',
+                        previewSrc: photo.src
+                      }
+                )
+              }
               type="button"
             >
               <img alt="" className={styles.photoTileImage} src={photo.src} />

@@ -3,22 +3,27 @@ import { style } from '@vanilla-extract/css';
 
 export const page = style({
   minHeight: '100dvh',
-  width: '100vw',
+  width: '100%',
   overflow: 'hidden',
   background: colors.backgroundPrimary
 });
 
 export const screen = style({
   position: 'relative',
-  width: '100vw',
+  width: '100%',
   minHeight: '100dvh',
   overflow: 'hidden',
   color: colors.textPrimary,
-  backgroundColor: 'lightgray',
-  backgroundImage: 'url(/images/Home.png)',
-  backgroundRepeat: 'no-repeat',
-  backgroundPosition: 'center',
-  backgroundSize: 'cover'
+  backgroundColor: 'lightgray'
+});
+
+export const backgroundImage = style({
+  position: 'absolute',
+  inset: 0,
+  width: '100%',
+  height: '100%',
+  objectFit: 'cover',
+  zIndex: 0
 });
 
 export const dimOverlay = style({

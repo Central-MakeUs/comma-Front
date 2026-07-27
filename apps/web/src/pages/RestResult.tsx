@@ -1,5 +1,4 @@
 import { CtaButton, colors, Icon, ImageUpload } from '@comma/design-system';
-import { assignInlineVars } from '@vanilla-extract/dynamic';
 import useEmblaCarousel from 'embla-carousel-react';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -137,7 +136,9 @@ function RestResult() {
       navigate('/rest/activity', {
         state: {
           data,
-          selectedRelax: nextSelectedRelax
+          selectedRelax: nextSelectedRelax,
+          mood: locationState?.mood,
+          timeBudget: locationState?.timeBudget
         }
       });
     }
@@ -187,13 +188,20 @@ function RestResult() {
 
   if (!data || data.length === 0) return null;
 
+  const backgroundSrc = data[slideIdx].imageUrl || '/images/feed-image.svg';
+
   return (
-    <div
-      className={styles.container}
-      style={assignInlineVars({
-        [styles.backgroundImageVar]: `url(${data[slideIdx].imageUrl || '/images/feed-image.svg'}) center / cover no-repeat`
-      })}
-    >
+    <div className={styles.container}>
+      <img
+        alt=""
+        aria-hidden="true"
+        className={styles.backgroundImage}
+        decoding="async"
+        fetchPriority="high"
+        loading="eager"
+        src={backgroundSrc}
+      />
+      <div aria-hidden="true" className={styles.backgroundOverlay} />
       {showModal ? (
         <div
           style={{

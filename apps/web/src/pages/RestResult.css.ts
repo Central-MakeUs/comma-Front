@@ -1,32 +1,37 @@
 import { colors, radii, shadows, typography } from '@comma/design-system';
-import { createVar, style } from '@vanilla-extract/css';
-
-export const backgroundImageVar = createVar();
+import { globalStyle, style } from '@vanilla-extract/css';
 
 export const container = style({
-  width: '100vw',
+  width: '100%',
   height: '100dvh',
   overflow: 'hidden',
   boxSizing: 'border-box',
   position: 'relative',
-  selectors: {
-    '&::before': {
-      content: '',
-      position: 'absolute',
-      inset: 0,
-      background: backgroundImageVar,
-      zIndex: -10
-    },
-    '&::after': {
-      content: '',
-      position: 'absolute',
-      background: `rgba(26, 24, 20, 0.5)`,
-      backdropFilter: 'blur(5px)',
-      WebkitBackdropFilter: 'blur(5px)',
-      inset: 0,
-      zIndex: -1
-    }
-  }
+  isolation: 'isolate',
+  background: colors.backgroundPrimary
+});
+
+globalStyle(`${container} > :not([aria-hidden="true"])`, {
+  position: 'relative',
+  zIndex: 2
+});
+
+export const backgroundImage = style({
+  position: 'absolute',
+  inset: 0,
+  zIndex: 0,
+  width: '100%',
+  height: '100%',
+  objectFit: 'cover'
+});
+
+export const backgroundOverlay = style({
+  position: 'absolute',
+  inset: 0,
+  zIndex: 1,
+  background: 'rgba(26, 24, 20, 0.5)',
+  backdropFilter: 'blur(5px)',
+  WebkitBackdropFilter: 'blur(5px)'
 });
 
 export const title = style({

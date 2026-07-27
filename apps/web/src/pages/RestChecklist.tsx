@@ -1,3 +1,4 @@
+import type { FeedMood, FeedTimeBudget } from '@comma/bridge';
 import { NavigationBar, ProgressBar, Question } from '@comma/design-system';
 import { useFunnel } from '@use-funnel/react-router-dom';
 import { useEffect, useState } from 'react';
@@ -22,6 +23,14 @@ function useSelectedOption() {
   };
 
   return { selectedKey, setSelectedKey, selectThenMove };
+}
+
+function isFeedMood(value: string): value is FeedMood {
+  return value === 'A' || value === 'B' || value === 'C';
+}
+
+function isFeedTimeBudget(value: string): value is FeedTimeBudget {
+  return value === 'X' || value === 'Y' || value === 'Z';
 }
 
 function RestChecklist() {
@@ -68,6 +77,15 @@ function RestChecklist() {
   return (
     <main className={styles.page}>
       <div className={styles.screen}>
+        <img
+          alt=""
+          aria-hidden="true"
+          className={styles.backgroundImage}
+          decoding="async"
+          fetchPriority="high"
+          loading="eager"
+          src="/images/Home.png"
+        />
         <div aria-hidden="true" className={styles.dimOverlay} />
         <div aria-hidden="true" className={styles.topGradient} />
         <div aria-hidden="true" className={styles.bottomGradient} />
@@ -124,10 +142,16 @@ function RestChecklist() {
                         const selectedMoodCode = questionInfo[0].options.filter(
                           (o) => context.mood === o.label
                         )[0].code;
-                        if (!selectedMoodCode) throw new Error();
+                        const selectedTimeBudgetCode = questionInfo[1].options[index].code;
+                        if (
+                          !isFeedMood(selectedMoodCode) ||
+                          !isFeedTimeBudget(selectedTimeBudgetCode)
+                        ) {
+                          throw new Error();
+                        }
                         const res = await recommend({
                           mood: selectedMoodCode,
-                          time: questionInfo[1].options[index].code
+                          time: selectedTimeBudgetCode
                         });
                         if (!res?.success || !res.data?.length) {
                           throw new Error(res.message ?? 'No recommendations found.');
@@ -137,7 +161,9 @@ function RestChecklist() {
                             void history.replace('Time', { ...context, time });
                             void navigate('/rest/loading', {
                               state: {
-                                data: res.data
+                                data: res.data,
+                                mood: selectedMoodCode,
+                                timeBudget: selectedTimeBudgetCode
                               }
                             });
                           });

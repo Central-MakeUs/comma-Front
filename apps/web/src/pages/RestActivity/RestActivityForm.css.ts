@@ -44,12 +44,12 @@ export const formStack = style({
 });
 
 export const input = style({
-  width: 'calc(100vw - 64px)',
+  width: 'calc(var(--app-width) - 64px)',
   maxWidth: 329
 });
 
 export const tagSection = style({
-  width: 'calc(100vw - 64px)',
+  width: 'calc(var(--app-width) - 64px)',
   maxWidth: 329,
   display: 'flex',
   flexDirection: 'column',
@@ -90,9 +90,12 @@ export const visibilityLabel = style({
 
 export const footer = style({
   position: 'fixed',
-  right: 0,
+  width: '100%',
+  maxWidth: 'var(--app-max-width)',
+  right: 'auto',
   bottom: 0,
-  left: 0,
+  left: '50%',
+  transform: 'translateX(-50%)',
   zIndex: 3,
   display: 'flex',
   flexDirection: 'column',

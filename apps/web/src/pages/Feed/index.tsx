@@ -39,16 +39,17 @@ function Feed() {
           cursor: undefined,
           size: undefined
         });
-      } catch (error) {
-        console.error(error);
-        setState('error');
-        alert('피드 조회 오류 발생');
-      } finally {
+
         if (res?.success) {
           if (res.data?.items.length) setState('success');
           else setState('empty');
           setFeeds([...(res.data?.items ?? [])]);
         } else setState('error');
+
+      } catch (error) {
+        console.error(error);
+        setState('error');
+        alert('피드 조회 오류 발생');
       }
     };
 

@@ -23,16 +23,17 @@ function Archive() {
 
       try {
         res = await getMyFeeds({ cursor: undefined, size: undefined });
-      } catch (error) {
-        console.error(error);
-        setState('error');
-        alert('내 쉼표 조회 중 오류 발생');
-      } finally {
+
         if (res?.success) {
           if (res.data?.items.length) setState('success');
           else setState('empty');
           setContent([...(res.data?.items ?? [])]);
         } else setState('error');
+        
+      } catch (error) {
+        console.error(error);
+        setState('error');
+        alert('내 쉼표 조회 중 오류 발생');
       }
     };
 

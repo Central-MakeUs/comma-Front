@@ -41,18 +41,23 @@ function Feed() {
       let res: Awaited<ReturnType<typeof getFeeds>> | undefined;
 
       try {
-        res = await getFeeds({
-          mood: moods[currentFeel],
-          timeBudget: times[currentBody],
-          cursor: undefined,
-          size: undefined
-        });
+        let cnt = 0;
+        do {
+          res = await getFeeds({
+            mood: moods[currentFeel],
+            timeBudget: times[currentBody],
+            cursor: cnt,
+            size: 5
+          });
 
-        if (res?.success) {
-          if (res.data?.items.length) setState('success');
-          else setState('empty');
-          setFeeds([...(res.data?.items ?? [])]);
-        } else setState('error');
+          if (res?.success) {
+            setFeeds(prev => [...prev, ...(res?.data?.items ?? [])]);
+            if(res?.data?.hasNext) cnt += 5;
+          } else setState('error');
+        } while(res?.data?.hasNext)
+        
+        if(state !== 'error' && feeds.length) setState('success');
+        else if(feeds.length === 0) setState('empty');
 
       } catch (error) {
         console.error(error);

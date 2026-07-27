@@ -1,6 +1,6 @@
 import { Chip } from '@comma/design-system';
-import { useRef, useState } from 'react';
 import type { RefObject } from 'react';
+import { useRef, useState } from 'react';
 import * as styles from './Feed.css';
 import CategoryModal from './FeedCategoryModal';
 

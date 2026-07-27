@@ -1,6 +1,6 @@
 export const transformDate = (date: string) => {
   const t = new Date(date).getTime();
-  if(Number.isNaN(t)) return '';
+  if (Number.isNaN(t)) return '';
 
   const diff = (Date.now() - t) / 1000;
   if (diff < 60) return `${Math.floor(diff)}초 전`;

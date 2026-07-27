@@ -2,6 +2,7 @@ import { FeedCard, NavigationBar } from '@comma/design-system';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getFeeds } from '../../apis/feed';
+import type { loadingState } from '../../types/api';
 import type { feedInfo } from '../../types/feed';
 import { navigateToNavigationItem } from '../../utils/navigation';
 import { transformDate } from '../../utils/transformDate';
@@ -9,7 +10,6 @@ import { moods, times } from './Feed.constants';
 import * as styles from './Feed.css';
 import FeedHeader from './FeedHeader';
 import FeedToast from './FeedToast';
-import { loadingState } from '../../types/api';
 
 function Feed() {
   const [currentFeel, setCurrentFeel] = useState('상태');
@@ -29,20 +29,16 @@ function Feed() {
           cursor: undefined,
           size: undefined
         });
-
       } catch (error) {
         console.error(error);
         setState('error');
         alert('피드 조회 오류 발생');
-
       } finally {
         if (res?.success) {
-          if(res.data?.items.length) setState('success');
+          if (res.data?.items.length) setState('success');
           else setState('empty');
           setFeeds([...(res.data?.items ?? [])]);
-          
-        }
-        else setState('error');
+        } else setState('error');
       }
     };
 
@@ -62,7 +58,7 @@ function Feed() {
           onBodyChange={setCurrentBody}
         />
         <div className={styles.scrollContainer}>
-          {state == 'loading'
+          {state === 'loading'
             ? null
             : feeds.map((f) => (
                 <FeedCard

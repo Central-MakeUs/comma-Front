@@ -9,13 +9,14 @@ import { moods, times } from './Feed.constants';
 import * as styles from './Feed.css';
 import FeedHeader from './FeedHeader';
 import FeedToast from './FeedToast';
+import { loadingState } from '../../types/api';
 
 function Feed() {
   const [currentFeel, setCurrentFeel] = useState('상태');
   const [currentBody, setCurrentBody] = useState('시간');
 
-  const [loading, setLoading] = useState(true);
   const [feeds, setFeeds] = useState<feedInfo[]>([]);
+  const [state, setState] = useState<loadingState>('loading');
 
   useEffect(() => {
     const handleInit = async () => {
@@ -31,11 +32,15 @@ function Feed() {
 
       } catch (error) {
         console.error(error);
+        setState('error');
         alert('피드 조회 오류 발생');
+
       } finally {
         if (res?.success) {
+          if(res.data?.items.length) setState('success');
+          else setState('empty');
           setFeeds([...(res.data?.items ?? [])]);
-          setLoading(false);
+          
         }
       }
     };
@@ -56,7 +61,7 @@ function Feed() {
           onBodyChange={setCurrentBody}
         />
         <div className={styles.scrollContainer}>
-          {loading
+          {state == 'loading'
             ? null
             : feeds.map((f) => (
                 <FeedCard

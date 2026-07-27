@@ -18,10 +18,18 @@ function Feed() {
   const [feeds, setFeeds] = useState<feedInfo[]>([]);
   const [state, setState] = useState<loadingState>('loading');
 
-  const onHeartClick = async (feedId:number) => {
-    let res;
+  const onHeartClick = async (feedId:number, isLiked:boolean) => {
     try {
-      res = await postLikes({feedId});
+      const res = await postLikes({feedId});
+      if(res.success) {
+        setFeeds((prev) => 
+          prev.map((feed) => 
+            feed.feedId === feedId?
+            {...feed, isLiked: !feed.isLiked, likeCount: isLiked? feed.likeCount - 1 : feed.likeCount + 1}
+            : feed
+          )
+        )
+      }
 
     } catch(error) {
       console.error(error);
@@ -70,6 +78,7 @@ function Feed() {
         />
         <div className={styles.scrollContainer}>
           {state === 'loading'
+            /* TODO: error와 empty 시 화면 UI 반영 */
             ? null
             : feeds.map((f) => (
                 <FeedCard
@@ -83,7 +92,7 @@ function Feed() {
                   variant="others"
                   liked={f.isLiked}
                   likeCount={f.likeCount}
-                  onHeartClick={() => onHeartClick(f.feedId)}
+                  onHeartClick={() => onHeartClick(f.feedId, f.isLiked)}
                 />
               ))}
         </div>

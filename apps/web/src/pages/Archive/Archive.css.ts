@@ -2,7 +2,7 @@ import { colors, radii, typography } from '@comma/design-system';
 import { style, styleVariants } from '@vanilla-extract/css';
 
 export const page = style({
-  width: '100vw',
+  width: '100%',
   minHeight: '100dvh',
   overflowX: 'hidden',
   background: colors.backgroundPrimary
@@ -14,8 +14,7 @@ export const screen = style({
   minHeight: '100dvh',
   overflowX: 'hidden',
   color: colors.textPrimary,
-  background: colors.backgroundPrimary,
-  paddingBottom: 'calc(140px + var(--safe-area-bottom))'
+  background: colors.backgroundPrimary
 });
 
 export const header = style({
@@ -83,7 +82,8 @@ export const list = style({
   width: '100%',
   display: 'grid',
   justifyItems: 'stretch',
-  gap: 40
+  gap: 40,
+  paddingBottom: 'calc(140px + var(--safe-area-bottom))'
 });
 
 export const listCard = style({
@@ -101,7 +101,7 @@ export const grid = style({
   justifyContent: 'center',
   columnGap: 15,
   rowGap: 32,
-  padding: '0 24px'
+  padding: '0 24px calc(140px + var(--safe-area-bottom))'
 });
 
 export const navigation = style({

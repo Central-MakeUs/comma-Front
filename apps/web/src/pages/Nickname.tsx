@@ -57,6 +57,15 @@ function Nickname() {
 
   return (
     <div className={styles.container}>
+      <img
+        alt=""
+        aria-hidden="true"
+        className={styles.backgroundImage}
+        decoding="async"
+        fetchPriority="high"
+        loading="eager"
+        src="/images/onboardingBackground_blur.png"
+      />
       <div
         style={{
           width: '100%',

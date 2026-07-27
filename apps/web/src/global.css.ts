@@ -11,6 +11,8 @@ globalStyle('html, body, #root', {
 
 globalStyle(':root', {
   vars: {
+    '--app-max-width': '430px',
+    '--app-width': 'min(100vw, var(--app-max-width))',
     '--safe-area-top': 'env(safe-area-inset-top, 0px)',
     '--safe-area-bottom': 'env(safe-area-inset-bottom, 0px)',
     '--safe-area-left': 'env(safe-area-inset-left, 0px)',
@@ -29,5 +31,16 @@ globalFontFace('Pretendard', {
 });
 
 globalStyle('body', {
+  background: '#F4F4F4',
   fontFamily: 'Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif'
+});
+
+globalStyle('#root', {
+  width: '100%',
+  maxWidth: 'var(--app-max-width)',
+  minHeight: '100dvh',
+  margin: '0 auto',
+  overflowX: 'hidden',
+  position: 'relative',
+  background: '#1A1814'
 });

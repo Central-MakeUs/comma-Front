@@ -1,14 +1,13 @@
 import { colors, typography } from '@comma/design-system';
-import { style, styleVariants } from '@vanilla-extract/css';
+import { globalStyle, style, styleVariants } from '@vanilla-extract/css';
 
 export const container = style({
+  position: 'relative',
+  isolation: 'isolate',
   backgroundColor: '#1A1814',
-  backgroundImage: 'url("/images/onboardingBackground_blur.png")',
-  backgroundRepeat: 'no-repeat',
-  backgroundSize: 'cover',
-  width: '100vw',
+  width: '100%',
   height: '100dvh',
-  backgroundPosition: 'center',
+  overflow: 'hidden',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
@@ -18,6 +17,20 @@ export const container = style({
   paddingLeft: 32,
   paddingRight: 32,
   boxSizing: 'border-box'
+});
+
+globalStyle(`${container} > :not([aria-hidden="true"])`, {
+  position: 'relative',
+  zIndex: 1
+});
+
+export const backgroundImage = style({
+  position: 'absolute',
+  inset: 0,
+  width: '100%',
+  height: '100%',
+  objectFit: 'cover',
+  zIndex: 0
 });
 
 export const title = style({

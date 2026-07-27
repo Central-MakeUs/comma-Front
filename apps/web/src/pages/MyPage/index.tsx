@@ -1,5 +1,4 @@
 import { colors, Icon, NavigationBar, SmallButton } from '@comma/design-system';
-import { assignInlineVars } from '@vanilla-extract/dynamic';
 import useEmblaCarousel from 'embla-carousel-react';
 import { useLayoutEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -115,179 +114,186 @@ function MyPage() {
   }, [emblaApi]);
 
   return (
-    <div
-      className={styles.container}
-      style={assignInlineVars({
-        [styles.backgroundImageVar]: `url(${bgUrl}) no-repeat center / cover`
-      })}
-    >
-      {showModal ? (
-        <div style={{ position: 'fixed', zIndex: 2, inset: 0, backgroundColor: '#1A181466' }}>
-          <MyPageNicknameModal
-            onCancelClick={() => setShowModal(false)}
-            onSave={(nextNickname) => {
-              setNickname(nextNickname);
-              setShowModal(false);
-            }}
-          />
-        </div>
+    <div className={styles.container}>
+      {bgUrl ? (
+        <img
+          alt=""
+          aria-hidden="true"
+          className={styles.backgroundImage}
+          decoding="async"
+          fetchPriority="high"
+          loading="eager"
+          src={bgUrl}
+        />
       ) : null}
-      <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column' }}>
-        <div
-          style={{
-            width: '100%',
-            height: 447,
-            background: 'linear-gradient(#11111166 0%, rgba(17, 17, 17, 0) 100%)',
-            zIndex: -2
+      <div aria-hidden="true" className={styles.backgroundBlur} />
+      {showModal ? (
+        <MyPageNicknameModal
+          onCancelClick={() => setShowModal(false)}
+          onSave={(nextNickname) => {
+            setNickname(nextNickname);
+            setShowModal(false);
           }}
         />
-        <div
-          style={{
-            flex: 1,
-            width: '100%',
-            background: 'linear-gradient(to top, #11111166 0%, rgba(17, 17, 17, 0) 100%)',
-            zIndex: -2
-          }}
-        />
-      </div>
-      <div />
-      <div className={styles.header}>
-        <span>마이페이지</span>
-        <div className={styles.headerIconContainer}>
-          <button
+      ) : null}
+      <div className={styles.foreground}>
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column' }}>
+          <div
             style={{
-              border: 'none',
-              background: 'transparent',
-              width: 44,
-              height: 44,
-              color: colors.iconSecondary
+              width: '100%',
+              height: 447,
+              background: 'linear-gradient(#11111166 0%, rgba(17, 17, 17, 0) 100%)',
+              zIndex: -2
             }}
-            onClick={() => navigate('/setting')}
-            type="submit"
-          >
-            <Icon name="setting" />
-          </button>
+          />
+          <div
+            style={{
+              flex: 1,
+              width: '100%',
+              background: 'linear-gradient(to top, #11111166 0%, rgba(17, 17, 17, 0) 100%)',
+              zIndex: -2
+            }}
+          />
         </div>
-      </div>
-      <div
-        style={{
-          width: '100%',
-          marginTop: 8,
-          display: 'flex',
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          paddingLeft: 32,
-          paddingRight: 32,
-          marginBottom: 32
-        }}
-      >
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <span className={styles.title}>{nickname}</span>
-          <span className={styles.desc}>마지막 쉼표 3시간 전</span>
+        <div />
+        <div className={styles.header}>
+          <span>마이페이지</span>
+          <div className={styles.headerIconContainer}>
+            <button
+              style={{
+                border: 'none',
+                background: 'transparent',
+                width: 44,
+                height: 44,
+                color: colors.iconSecondary
+              }}
+              onClick={() => navigate('/setting')}
+              type="submit"
+            >
+              <Icon name="setting" />
+            </button>
+          </div>
         </div>
-        <SmallButton
-          label="닉네임 수정"
-          className={styles.nicknameEditBtn}
-          onClick={() => setShowModal(true)}
+        <div
+          style={{
+            width: '100%',
+            marginTop: 8,
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            paddingLeft: 32,
+            paddingRight: 32,
+            marginBottom: 32
+          }}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <span className={styles.title}>{nickname}</span>
+            <span className={styles.desc}>마지막 쉼표 3시간 전</span>
+          </div>
+          <SmallButton
+            label="닉네임 수정"
+            className={styles.nicknameEditBtn}
+            onClick={() => setShowModal(true)}
+          />
+        </div>
+        <div
+          ref={(node) => {
+            embiaRef(node);
+            containerRef.current = node;
+          }}
+          style={{ position: 'relative', overflow: 'hidden', height: 404 }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: GAP }}>
+            <div style={{ flex: `0 0 ${SMALL_WIDTH}px`, height: BIG_HEIGHT }} />
+            <div style={{ flex: `0 0 ${SMALL_WIDTH}px`, height: BIG_HEIGHT }} />
+            <div style={{ flex: `0 0 ${SMALL_WIDTH}px`, height: BIG_HEIGHT }} />
+            <div style={{ flex: `0 0 ${SMALL_WIDTH}px`, height: BIG_HEIGHT }} />
+            <div style={{ flex: `0 0 ${SMALL_WIDTH}px`, height: BIG_HEIGHT }} />
+          </div>
+          <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+            <MyPageCard
+              backgroundUrl="/images/rest_1.png"
+              num={1}
+              count={13}
+              title="가볍게 산책하기"
+              path={paths[0]}
+              width={sizes[0].width}
+              height={sizes[0].height}
+              x={xs[0]}
+            />
+            <MyPageCard
+              backgroundUrl="/images/rest_5.png"
+              num={2}
+              count={5}
+              title="가볍게 산책하기"
+              path={paths[1]}
+              width={sizes[1].width}
+              height={sizes[1].height}
+              x={xs[1]}
+            />
+            <MyPageCard
+              num={3}
+              count={4}
+              title="가볍게 산책하기"
+              path={paths[2]}
+              width={sizes[2].width}
+              height={sizes[2].height}
+              x={xs[2]}
+            />
+            <MyPageCard
+              num={4}
+              count={3}
+              title="가볍게 산책하기"
+              path={paths[3]}
+              width={sizes[3].width}
+              height={sizes[3].height}
+              x={xs[3]}
+            />
+            <MyPageCard
+              backgroundUrl="/images/rest_2.png"
+              num={5}
+              count={2}
+              title="가볍게 산책하기"
+              path={paths[4]}
+              width={sizes[4].width}
+              height={sizes[4].height}
+              x={xs[4]}
+            />
+          </div>
+        </div>
+        <div
+          style={{
+            width: '100%',
+            marginTop: 48,
+            paddingBottom: 'calc(155px + var(--safe-area-bottom))',
+            paddingLeft: 32,
+            paddingRight: 32
+          }}
+        >
+          <div className={styles.questionContainer}>
+            <span className={styles.questionNum}>Q1.</span>지금 기분이 어때요?
+          </div>
+          <div>
+            <MyPageAnswerContainer num={1} text={'멍하고 싶어'} percent={55} />
+            <MyPageAnswerContainer num={2} text={'기분 전환이 필요해'} percent={35} />
+            <MyPageAnswerContainer num={3} text={'가볍게 해볼 수 있어'} percent={10} />
+          </div>
+          <div className={styles.questionContainer} style={{ marginTop: 40 }}>
+            <span className={styles.questionNum}>Q2.</span>어느정도 시간이 있어요?
+          </div>
+          <div>
+            <MyPageAnswerContainer num={1} text={'잠깐(1시간 이내)'} percent={70} />
+            <MyPageAnswerContainer num={2} text={'여유(1-6시간이내)'} percent={25} />
+            <MyPageAnswerContainer num={3} text={'넉넉(6시간이상)'} percent={5} />
+          </div>
+        </div>
+        <NavigationBar
+          active="mypage"
+          className={styles.navStyle}
+          onItemSelect={(item) => navigateToNavigationItem(navigate, item, 'mypage')}
         />
       </div>
-      <div
-        ref={(node) => {
-          embiaRef(node);
-          containerRef.current = node;
-        }}
-        style={{ position: 'relative', overflow: 'hidden', height: 404 }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: GAP }}>
-          <div style={{ flex: `0 0 ${SMALL_WIDTH}px`, height: BIG_HEIGHT }} />
-          <div style={{ flex: `0 0 ${SMALL_WIDTH}px`, height: BIG_HEIGHT }} />
-          <div style={{ flex: `0 0 ${SMALL_WIDTH}px`, height: BIG_HEIGHT }} />
-          <div style={{ flex: `0 0 ${SMALL_WIDTH}px`, height: BIG_HEIGHT }} />
-          <div style={{ flex: `0 0 ${SMALL_WIDTH}px`, height: BIG_HEIGHT }} />
-        </div>
-        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-          <MyPageCard
-            backgroundUrl="/images/rest_1.png"
-            num={1}
-            count={13}
-            title="가볍게 산책하기"
-            path={paths[0]}
-            width={sizes[0].width}
-            height={sizes[0].height}
-            x={xs[0]}
-          />
-          <MyPageCard
-            backgroundUrl="/images/rest_5.png"
-            num={2}
-            count={5}
-            title="가볍게 산책하기"
-            path={paths[1]}
-            width={sizes[1].width}
-            height={sizes[1].height}
-            x={xs[1]}
-          />
-          <MyPageCard
-            num={3}
-            count={4}
-            title="가볍게 산책하기"
-            path={paths[2]}
-            width={sizes[2].width}
-            height={sizes[2].height}
-            x={xs[2]}
-          />
-          <MyPageCard
-            num={4}
-            count={3}
-            title="가볍게 산책하기"
-            path={paths[3]}
-            width={sizes[3].width}
-            height={sizes[3].height}
-            x={xs[3]}
-          />
-          <MyPageCard
-            backgroundUrl="/images/rest_2.png"
-            num={5}
-            count={2}
-            title="가볍게 산책하기"
-            path={paths[4]}
-            width={sizes[4].width}
-            height={sizes[4].height}
-            x={xs[4]}
-          />
-        </div>
-      </div>
-      <div
-        style={{
-          width: '100%',
-          marginTop: 48,
-          paddingBottom: 'calc(155px + var(--safe-area-bottom))',
-          paddingLeft: 32,
-          paddingRight: 32
-        }}
-      >
-        <div className={styles.questionContainer}>
-          <span className={styles.questionNum}>Q1.</span>지금 기분이 어때요?
-        </div>
-        <div>
-          <MyPageAnswerContainer num={1} text={'멍하고 싶어'} percent={55} />
-          <MyPageAnswerContainer num={2} text={'기분 전환이 필요해'} percent={35} />
-          <MyPageAnswerContainer num={3} text={'가볍게 해볼 수 있어'} percent={10} />
-        </div>
-        <div className={styles.questionContainer} style={{ marginTop: 40 }}>
-          <span className={styles.questionNum}>Q2.</span>어느정도 시간이 있어요?
-        </div>
-        <div>
-          <MyPageAnswerContainer num={1} text={'잠깐(1시간 이내)'} percent={70} />
-          <MyPageAnswerContainer num={2} text={'여유(1-6시간이내)'} percent={25} />
-          <MyPageAnswerContainer num={3} text={'넉넉(6시간이상)'} percent={5} />
-        </div>
-      </div>
-      <NavigationBar
-        active="mypage"
-        className={styles.navStyle}
-        onItemSelect={(item) => navigateToNavigationItem(navigate, item, 'mypage')}
-      />
     </div>
   );
 }

@@ -20,6 +20,8 @@ function MyPageCard({
   height: number;
   x: number;
 }) {
+  const resolvedBackgroundUrl = backgroundUrl ? backgroundUrl : '/images/feed-image.svg';
+
   return (
     <div
       style={{
@@ -36,17 +38,25 @@ function MyPageCard({
         style={{
           width,
           height,
-          clipPath: `path("${path}")`,
-          backgroundImage: `linear-gradient(rgba(17, 17, 17, 0) 0%, #111111 100%), url(${backgroundUrl ? backgroundUrl : '/images/feed-image.svg'})`,
-          backgroundSize: 'cover',
-          backgroundRepeat: 'no-repeat',
-          backgroundPosition: 'center'
+          clipPath: `path("${path}")`
         }}
       >
-        <div style={{ ...typography.engNum, fontSize: 64, color: '#FCFCFC66', textAlign: 'right' }}>
+        <img
+          alt=""
+          aria-hidden="true"
+          className={styles.cardBackgroundImage}
+          decoding="async"
+          loading="eager"
+          src={resolvedBackgroundUrl}
+        />
+        <div aria-hidden="true" className={styles.cardGradient} />
+        <div
+          className={styles.cardContent}
+          style={{ ...typography.engNum, fontSize: 64, color: '#FCFCFC66', textAlign: 'right' }}
+        >
           #{num}
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
+        <div className={styles.cardContent} style={{ display: 'flex', flexDirection: 'column' }}>
           <div>
             <span style={{ ...typography.engNum, fontSize: 48, color: colors.textPrimary }}>
               {count}

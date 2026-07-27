@@ -75,7 +75,19 @@ function CallbackPage() {
     };
     handleLogin();
   }, [navigate, pathname, appleCode, location.search, loginMutateAsync]);
-  return <div className={styles.container} />;
+  return (
+    <div className={styles.container}>
+      <img
+        alt=""
+        aria-hidden="true"
+        className={styles.backgroundImage}
+        decoding="async"
+        fetchPriority="high"
+        loading="eager"
+        src="/images/onboardingBackground_blur.png"
+      />
+    </div>
+  );
 }
 
 export default CallbackPage;

@@ -15,7 +15,7 @@ export const container = style({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  zIndex: 3,
+  zIndex: 10,
   position: 'absolute',
   bottom: 0
 });

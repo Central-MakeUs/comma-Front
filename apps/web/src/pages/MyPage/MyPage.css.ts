@@ -1,30 +1,37 @@
 import { colors, typography } from '@comma/design-system';
-import { createVar, style } from '@vanilla-extract/css';
-
-export const backgroundImageVar = createVar();
+import { style } from '@vanilla-extract/css';
 
 export const container = style({
-  width: '100vw',
+  width: '100%',
   minHeight: '100dvh',
   position: 'relative',
   isolation: 'isolate',
-  selectors: {
-    '&::before': {
-      content: '',
-      position: 'absolute',
-      inset: 0,
-      background: backgroundImageVar,
-      zIndex: -10
-    },
-    '&::after': {
-      content: '',
-      position: 'absolute',
-      inset: 0,
-      backdropFilter: 'blur(40px)',
-      zIndex: -3,
-      backgroundColor: '#1A181450'
-    }
-  }
+  background: colors.backgroundPrimary
+});
+
+export const backgroundImage = style({
+  position: 'absolute',
+  inset: 0,
+  zIndex: 0,
+  width: '100%',
+  height: '100%',
+  objectFit: 'cover'
+});
+
+export const backgroundBlur = style({
+  position: 'absolute',
+  inset: 0,
+  backdropFilter: 'blur(40px)',
+  WebkitBackdropFilter: 'blur(40px)',
+  zIndex: 1,
+  backgroundColor: '#1A181450'
+});
+
+export const foreground = style({
+  position: 'relative',
+  zIndex: 2,
+  width: '100%',
+  minHeight: '100dvh'
 });
 
 export const header = style({

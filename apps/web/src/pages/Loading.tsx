@@ -22,6 +22,15 @@ function Loading() {
   return (
     <div className={styles.container}>
       <img
+        alt=""
+        aria-hidden="true"
+        className={styles.backgroundImage}
+        decoding="async"
+        fetchPriority="high"
+        loading="eager"
+        src="/images/loading_background.png"
+      />
+      <img
         src="/images/logo_glass.svg"
         alt="콤마 로고"
         width={110}

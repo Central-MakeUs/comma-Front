@@ -42,6 +42,7 @@ function Feed() {
           setFeeds([...(res.data?.items ?? [])]);
           
         }
+        else setState('error');
       }
     };
 

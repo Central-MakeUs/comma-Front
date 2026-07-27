@@ -36,7 +36,7 @@ function Archive() {
           setContent([...(res.data?.items ?? [])]);
 
         }
-
+        else setState('error');
       }
     };
 

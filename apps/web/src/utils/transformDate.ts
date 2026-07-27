@@ -1,5 +1,8 @@
 export const transformDate = (date: string) => {
-  const diff = (Date.now() - new Date(date).getTime()) / 1000;
+  const t = new Date(date).getTime();
+  if(Number.isNaN(t)) return '';
+
+  const diff = (Date.now() - t) / 1000;
   if (diff < 60) return `${Math.floor(diff)}초 전`;
   else if (diff < 3600) return `${Math.floor(diff / 60)}분 전`;
   else if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`;

@@ -23,7 +23,7 @@ function Archive() {
 
       try {
         res = await getMyFeeds({ cursor: undefined, size: undefined });
-
+        
       } catch (error) {
         console.error(error);
         setState('error');

@@ -63,7 +63,7 @@ interface likeResponse {
   likeCount: number;
 }
 
-export const getLikes = async ({ feedId }: likeRequest) => {
+export const postLikes = async ({ feedId }: likeRequest) => {
   const { data } = await apiClient.post<ApiResponse<likeResponse>>(`/api/feeds/${feedId}/likes`);
 
   return data;

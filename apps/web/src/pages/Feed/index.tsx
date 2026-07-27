@@ -1,7 +1,7 @@
 import { FeedCard, NavigationBar } from '@comma/design-system';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getFeeds } from '../../apis/feed';
+import { getFeeds, postLikes } from '../../apis/feed';
 import type { loadingState } from '../../types/api';
 import type { feedInfo } from '../../types/feed';
 import { navigateToNavigationItem } from '../../utils/navigation';
@@ -17,6 +17,16 @@ function Feed() {
 
   const [feeds, setFeeds] = useState<feedInfo[]>([]);
   const [state, setState] = useState<loadingState>('loading');
+
+  const onHeartClick = async (feedId:number) => {
+    let res;
+    try {
+      res = await postLikes({feedId});
+
+    } catch(error) {
+      console.error(error);
+    }
+  }
 
   useEffect(() => {
     const handleInit = async () => {
@@ -72,6 +82,7 @@ function Feed() {
                   variant="others"
                   liked={f.isLiked}
                   likeCount={f.likeCount}
+                  onHeartClick={() => onHeartClick(f.feedId)}
                 />
               ))}
         </div>

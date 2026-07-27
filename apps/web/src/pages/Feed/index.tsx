@@ -18,23 +18,26 @@ function Feed() {
   const [feeds, setFeeds] = useState<feedInfo[]>([]);
   const [state, setState] = useState<loadingState>('loading');
 
-  const onHeartClick = async (feedId:number, isLiked:boolean) => {
+  const onHeartClick = async (feedId: number, isLiked: boolean) => {
     try {
-      const res = await postLikes({feedId});
-      if(res.success) {
-        setFeeds((prev) => 
-          prev.map((feed) => 
-            feed.feedId === feedId?
-            {...feed, isLiked: !feed.isLiked, likeCount: isLiked? feed.likeCount - 1 : feed.likeCount + 1}
-            : feed
+      const res = await postLikes({ feedId });
+      if (res.success) {
+        setFeeds((prev) =>
+          prev.map((feed) =>
+            feed.feedId === feedId
+              ? {
+                  ...feed,
+                  isLiked: !feed.isLiked,
+                  likeCount: isLiked ? feed.likeCount - 1 : feed.likeCount + 1
+                }
+              : feed
           )
-        )
+        );
       }
-
-    } catch(error) {
+    } catch (error) {
       console.error(error);
     }
-  }
+  };
 
   useEffect(() => {
     const handleInit = async () => {
@@ -51,14 +54,13 @@ function Feed() {
           });
 
           if (res?.success) {
-            setFeeds(prev => [...prev, ...(res?.data?.items ?? [])]);
-            if(res?.data?.hasNext) cnt += 5;
+            setFeeds((prev) => [...prev, ...(res?.data?.items ?? [])]);
+            if (res?.data?.hasNext) cnt += 5;
           } else setState('error');
-        } while(res?.data?.hasNext)
-        
-        if(state !== 'error' && feeds.length) setState('success');
-        else if(feeds.length === 0) setState('empty');
+        } while (res?.data?.hasNext);
 
+        if (state !== 'error' && feeds.length) setState('success');
+        else if (feeds.length === 0) setState('empty');
       } catch (error) {
         console.error(error);
         setState('error');
@@ -67,7 +69,7 @@ function Feed() {
     };
 
     handleInit();
-  }, [currentFeel, currentBody]);
+  }, [currentFeel, currentBody, state, feeds.length]);
 
   const navigate = useNavigate();
 
@@ -83,8 +85,8 @@ function Feed() {
         />
         <div className={styles.scrollContainer}>
           {state === 'loading'
-            /* TODO: error와 empty 시 화면 UI 반영 */
-            ? null
+            ? /* TODO: error와 empty 시 화면 UI 반영 */
+              null
             : feeds.map((f) => (
                 <FeedCard
                   key={f.feedId}

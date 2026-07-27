@@ -29,7 +29,6 @@ function Archive() {
           else setState('empty');
           setContent([...(res.data?.items ?? [])]);
         } else setState('error');
-        
       } catch (error) {
         console.error(error);
         setState('error');

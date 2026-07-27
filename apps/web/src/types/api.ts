@@ -3,3 +3,5 @@ export interface ApiResponse<TData = unknown> {
   message?: string;
   data?: TData;
 }
+
+export type loadingState = 'loading' | 'empty' | 'error' | 'success';

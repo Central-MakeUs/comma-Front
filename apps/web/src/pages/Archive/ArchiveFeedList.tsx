@@ -1,9 +1,10 @@
 import { FeedCard } from '@comma/design-system';
-import type { ArchiveItem } from './Archive.constants';
+import type { feedInfo } from '../../types/feed';
+import { transformDate } from '../../utils/transformDate';
 import * as styles from './Archive.css';
 
 type ArchiveFeedListProps = {
-  items: readonly ArchiveItem[];
+  items: readonly feedInfo[];
 };
 
 export function ArchiveFeedList({ items }: ArchiveFeedListProps) {
@@ -12,16 +13,16 @@ export function ArchiveFeedList({ items }: ArchiveFeedListProps) {
       {items.map((item) => (
         <FeedCard
           className={styles.listCard}
-          content={item.content}
-          dateLabel={item.dateLabel}
-          imageAlt={item.imageAlt}
+          content={item.review}
+          dateLabel={transformDate(item.createdAt)}
+          imageAlt={`피드 이미지 ${item.feedId}`}
           imageClassName={styles.listImage}
           imageHeart
-          imageSrc={item.imageSrc}
-          key={item.id}
-          liked={item.liked}
+          imageSrc={item.imageUrl}
+          key={item.feedId}
+          liked={item.isLiked}
           likeCount={item.likeCount}
-          tags={[...item.tags]}
+          tags={[...item.hashtags]}
           variant="my"
         />
       ))}

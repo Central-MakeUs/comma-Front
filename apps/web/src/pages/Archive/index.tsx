@@ -1,8 +1,11 @@
 import { NavigationBar } from '@comma/design-system';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getMyFeeds } from '../../apis/feed';
+import type { loadingState } from '../../types/api';
+import type { feedInfo } from '../../types/feed';
 import { navigateToNavigationItem } from '../../utils/navigation';
-import { ARCHIVE_ITEMS, type ArchiveViewMode } from './Archive.constants';
+import type { ArchiveViewMode } from './Archive.constants';
 import * as styles from './Archive.css';
 import { ArchiveFeedGrid } from './ArchiveFeedGrid';
 import { ArchiveFeedList } from './ArchiveFeedList';
@@ -11,15 +14,39 @@ import { ArchiveHeader } from './ArchiveHeader';
 function Archive() {
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState<ArchiveViewMode>('list');
+  const [state, setState] = useState<loadingState>('loading');
+  const [content, setContent] = useState<feedInfo[]>([]);
+
+  useEffect(() => {
+    const handleInit = async () => {
+      let res: Awaited<ReturnType<typeof getMyFeeds>> | undefined;
+
+      try {
+        res = await getMyFeeds({ cursor: undefined, size: undefined });
+
+        if (res?.success) {
+          if (res.data?.items.length) setState('success');
+          else setState('empty');
+          setContent([...(res.data?.items ?? [])]);
+        } else setState('error');
+      } catch (error) {
+        console.error(error);
+        setState('error');
+        alert('내 쉼표 조회 중 오류 발생');
+      }
+    };
+
+    handleInit();
+  }, []);
 
   return (
     <main className={styles.page}>
       <div className={styles.screen}>
         <ArchiveHeader viewMode={viewMode} onViewModeChange={setViewMode} />
         {viewMode === 'list' ? (
-          <ArchiveFeedList items={ARCHIVE_ITEMS} />
+          <ArchiveFeedList items={state === 'loading' ? [] : content} />
         ) : (
-          <ArchiveFeedGrid items={ARCHIVE_ITEMS} />
+          <ArchiveFeedGrid items={state === 'loading' ? [] : content} />
         )}
         <NavigationBar
           active="archive"

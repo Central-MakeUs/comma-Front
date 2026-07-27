@@ -1,7 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom';
 import Archive from '../pages/Archive';
 import CallbackPage from '../pages/CallbackPage';
-import Feed from '../pages/Feed';
+import Feed from '../pages/Feed/index';
 import Loading from '../pages/Loading';
 import Login from '../pages/Login';
 import MyPage from '../pages/MyPage';

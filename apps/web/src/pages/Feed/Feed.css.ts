@@ -11,31 +11,6 @@ export const container = style({
   paddingTop: 'var(--safe-area-top)'
 });
 
-export const headerContainer = style({
-  width: '100%',
-  display: 'flex',
-  flexDirection: 'row',
-  boxSizing: 'border-box',
-  padding: '16px 32px',
-  justifyContent: 'space-between',
-  borderBottom: `1px solid ${colors.lineTertiary}`,
-  backgroundColor: colors.backgroundFill
-});
-
-export const headerText = style({
-  ...typography.bodyReadingR,
-  color: colors.textTertiary
-});
-
-export const headerLink = style({
-  ...typography.bodyReadingR,
-  color: colors.textPrimary,
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'flex-end',
-  textDecoration: 'none'
-});
-
 export const title = style({
   width: '100%',
   padding: 16,
@@ -66,17 +41,4 @@ export const scrollContainer = style({
   flexDirection: 'column',
   gap: 40,
   paddingBottom: 'calc(104px + var(--safe-area-bottom))'
-});
-
-export const chipModal = style({
-  position: 'fixed',
-  width: 200,
-  borderRadius: 20,
-  backgroundColor: 'rgba(50, 46, 41, 0.66)',
-  boxSizing: 'border-box',
-  display: 'flex',
-  flexDirection: 'column',
-  ...typography.bodyNormalR,
-  color: colors.textTertiary,
-  zIndex: 10
 });

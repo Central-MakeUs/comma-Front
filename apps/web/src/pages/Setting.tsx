@@ -2,6 +2,7 @@ import { CtaButton, colors, Icon, SmallButton } from '@comma/design-system';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { logout } from '../apis/auth';
 import {
   changePlan,
   getPlan,
@@ -142,6 +143,14 @@ function Setting() {
       alert(err instanceof Error ? err.message : '회원 탈퇴에 실패했습니다.');
     }
   });
+  const logoutMutation = useMutation({
+    mutationFn: logout,
+    onSettled: () => {
+      clearTokens();
+      queryClient.clear();
+      navigate('/', { replace: true });
+    }
+  });
 
   const planData = planQuery.data;
   const currentPlan = planData?.currentPlan;
@@ -280,8 +289,11 @@ function Setting() {
         <Modal
           title={logOutSetting.title}
           desc={logOutSetting.desc}
-          btnText={logOutSetting.btnText}
+          btnText={logoutMutation.isPending ? '로그아웃 중' : logOutSetting.btnText}
           onCancelClick={() => setLogOutOpen(false)}
+          onConfirmClick={() => {
+            if (!logoutMutation.isPending) logoutMutation.mutate();
+          }}
         />
       ) : withdrawOpen ? (
         <Modal

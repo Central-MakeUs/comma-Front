@@ -1,7 +1,14 @@
 import { colors, Icon, NavigationBar, SmallButton } from '@comma/design-system';
+import { useQuery } from '@tanstack/react-query';
 import useEmblaCarousel from 'embla-carousel-react';
 import { useLayoutEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  type ActivityRank,
+  getMyReport,
+  type MoodRatio,
+  myReportQueryKey
+} from '../../apis/mypage';
 import { interpolatePath, lerp } from '../../utils/compute_layout';
 import { navigateToNavigationItem } from '../../utils/navigation';
 import * as styles from './MyPage.css';
@@ -15,6 +22,20 @@ const backgrounds = [
   '/images/feed-image.svg',
   '/images/feed-image.svg',
   '/images/rest_2.png'
+];
+
+const fallbackActivityRanking: ActivityRank[] = [
+  { rank: 1, relaxId: 1, name: '가볍게 산책하기', count: 13 },
+  { rank: 2, relaxId: 2, name: '가볍게 산책하기', count: 5 },
+  { rank: 3, relaxId: 3, name: '가볍게 산책하기', count: 4 },
+  { rank: 4, relaxId: 4, name: '가볍게 산책하기', count: 3 },
+  { rank: 5, relaxId: 5, name: '가볍게 산책하기', count: 2 }
+];
+
+const fallbackMoodRatio: MoodRatio[] = [
+  { mood: 'A', label: '멍하고 싶어', count: 55, ratio: 55 },
+  { mood: 'B', label: '기분 전환이 필요해', count: 35, ratio: 35 },
+  { mood: 'C', label: '가볍게 해볼 수 있어', count: 10, ratio: 10 }
 ];
 
 const BIG_PATH =
@@ -75,6 +96,30 @@ function MyPage() {
   const [nickname, setNickname] = useState('꿈꾸는 소녀');
   const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const reportQuery = useQuery({
+    queryKey: myReportQueryKey,
+    queryFn: async () => {
+      const response = await getMyReport();
+
+      if (!response.success || !response.data) {
+        throw new Error(response.message ?? '마이페이지 리포트를 불러오지 못했습니다.');
+      }
+
+      return response.data;
+    },
+    staleTime: 1000 * 60 * 5
+  });
+  const activityRanking = reportQuery.data?.activityRanking?.length
+    ? reportQuery.data.activityRanking
+    : fallbackActivityRanking;
+  const moodRatio = reportQuery.data?.moodRatio?.length
+    ? reportQuery.data.moodRatio
+    : fallbackMoodRatio;
+  const displayActivityRanking = fallbackActivityRanking.map((fallback, index) => ({
+    ...fallback,
+    ...activityRanking[index],
+    rank: activityRanking[index]?.rank ?? index + 1
+  }));
 
   useLayoutEffect(() => {
     if (!containerRef.current) return;
@@ -212,54 +257,19 @@ function MyPage() {
             <div style={{ flex: `0 0 ${SMALL_WIDTH}px`, height: BIG_HEIGHT }} />
           </div>
           <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-            <MyPageCard
-              backgroundUrl="/images/rest_1.png"
-              num={1}
-              count={13}
-              title="가볍게 산책하기"
-              path={paths[0]}
-              width={sizes[0].width}
-              height={sizes[0].height}
-              x={xs[0]}
-            />
-            <MyPageCard
-              backgroundUrl="/images/rest_5.png"
-              num={2}
-              count={5}
-              title="가볍게 산책하기"
-              path={paths[1]}
-              width={sizes[1].width}
-              height={sizes[1].height}
-              x={xs[1]}
-            />
-            <MyPageCard
-              num={3}
-              count={4}
-              title="가볍게 산책하기"
-              path={paths[2]}
-              width={sizes[2].width}
-              height={sizes[2].height}
-              x={xs[2]}
-            />
-            <MyPageCard
-              num={4}
-              count={3}
-              title="가볍게 산책하기"
-              path={paths[3]}
-              width={sizes[3].width}
-              height={sizes[3].height}
-              x={xs[3]}
-            />
-            <MyPageCard
-              backgroundUrl="/images/rest_2.png"
-              num={5}
-              count={2}
-              title="가볍게 산책하기"
-              path={paths[4]}
-              width={sizes[4].width}
-              height={sizes[4].height}
-              x={xs[4]}
-            />
+            {displayActivityRanking.map((activity, index) => (
+              <MyPageCard
+                key={`${activity.rank}-${activity.relaxId}`}
+                backgroundUrl={backgrounds[index]}
+                num={activity.rank}
+                count={activity.count}
+                title={activity.name}
+                path={paths[index]}
+                width={sizes[index].width}
+                height={sizes[index].height}
+                x={xs[index]}
+              />
+            ))}
           </div>
         </div>
         <div
@@ -275,9 +285,14 @@ function MyPage() {
             <span className={styles.questionNum}>Q1.</span>지금 기분이 어때요?
           </div>
           <div>
-            <MyPageAnswerContainer num={1} text={'멍하고 싶어'} percent={55} />
-            <MyPageAnswerContainer num={2} text={'기분 전환이 필요해'} percent={35} />
-            <MyPageAnswerContainer num={3} text={'가볍게 해볼 수 있어'} percent={10} />
+            {moodRatio.map((mood, index) => (
+              <MyPageAnswerContainer
+                key={mood.mood}
+                num={index + 1}
+                text={mood.label}
+                percent={mood.ratio}
+              />
+            ))}
           </div>
           <div className={styles.questionContainer} style={{ marginTop: 40 }}>
             <span className={styles.questionNum}>Q2.</span>어느정도 시간이 있어요?

@@ -91,16 +91,15 @@ const skeletonBase = style({
 });
 
 export const skeletonContainer = style({
-  width: '100%',
+  width: 393,
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center'
 });
 
 export const skeletonProgress = style({
-  width: '100%',
+  width: 329,
   display: 'flex',
-  justifyContent: 'center',
   gap: 4,
   marginTop: 36
 });
@@ -108,7 +107,7 @@ export const skeletonProgress = style({
 export const skeletonProgressFill = style([
   skeletonBase,
   {
-    width: 163,
+    flex: 1,
     height: 2,
     background: 'rgba(252, 252, 252, 0.76)'
   }
@@ -117,17 +116,38 @@ export const skeletonProgressFill = style([
 export const skeletonProgressTrack = style([
   skeletonBase,
   {
-    width: 163,
+    flex: 1,
     height: 2,
     background: 'rgba(252, 252, 252, 0.22)'
   }
 ]);
 
 export const skeletonQuestion = style({
-  width: 'calc(100% - 126px)',
-  marginTop: 64,
+  width: '100%',
+  marginTop: 24,
   display: 'flex',
   flexDirection: 'column',
+  gap: 32
+});
+
+export const skeletonTopArea = style({
+  height: 24,
+  boxSizing: 'border-box',
+  padding: '0 32px'
+});
+
+export const skeletonContent = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 43
+});
+
+export const skeletonTitleBlock = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 8,
+  boxSizing: 'border-box',
+  padding: '0 32px',
   alignItems: 'flex-start'
 });
 
@@ -135,8 +155,7 @@ export const skeletonStep = style([
   skeletonBase,
   {
     width: 38,
-    height: 16,
-    marginBottom: 18
+    height: 16
   }
 ]);
 
@@ -145,17 +164,24 @@ export const skeletonTitle = style([
   {
     width: 214,
     height: 34,
-    marginBottom: 48,
     borderRadius: 8
   }
 ]);
+
+export const skeletonOptions = style({
+  width: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 8,
+  boxSizing: 'border-box',
+  padding: '0 32px'
+});
 
 export const skeletonOption = style([
   skeletonBase,
   {
     width: '100%',
     height: 60,
-    marginBottom: 8,
     background: 'rgba(252, 252, 252, 0.18)',
     backdropFilter: 'blur(14px)',
     WebkitBackdropFilter: 'blur(14px)'

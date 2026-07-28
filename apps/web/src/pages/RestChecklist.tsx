@@ -45,11 +45,18 @@ function RestChecklistSkeleton() {
         <div className={styles.skeletonProgressTrack} />
       </div>
       <div className={styles.skeletonQuestion}>
-        <div className={styles.skeletonStep} />
-        <div className={styles.skeletonTitle} />
-        <div className={styles.skeletonOption} />
-        <div className={styles.skeletonOption} />
-        <div className={styles.skeletonOption} />
+        <div className={styles.skeletonTopArea} />
+        <div className={styles.skeletonContent}>
+          <div className={styles.skeletonTitleBlock}>
+            <div className={styles.skeletonStep} />
+            <div className={styles.skeletonTitle} />
+          </div>
+          <div className={styles.skeletonOptions}>
+            <div className={styles.skeletonOption} />
+            <div className={styles.skeletonOption} />
+            <div className={styles.skeletonOption} />
+          </div>
+        </div>
       </div>
     </div>
   );

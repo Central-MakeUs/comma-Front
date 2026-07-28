@@ -4,7 +4,7 @@ import { vars } from '../theme.css';
 export const feedImage = style({
   position: 'relative',
   width: '100%',
-  aspectRatio: '393 / 499',
+  height: 'clamp(360px, 58dvh, 499px)',
   overflow: 'hidden',
   background: vars.color.backgroundFill
 });

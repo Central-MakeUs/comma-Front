@@ -82,7 +82,7 @@ export const list = style({
   width: '100%',
   display: 'grid',
   justifyItems: 'stretch',
-  gap: 40,
+  gap: 'clamp(24px, 4.69dvh, 40px)',
   paddingBottom: 'calc(140px + var(--safe-area-bottom))'
 });
 

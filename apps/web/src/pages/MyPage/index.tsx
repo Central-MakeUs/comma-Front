@@ -51,19 +51,37 @@ const SMALL_WIDTH = 240;
 const SMALL_HEIGHT = 303;
 const GAP = 16;
 const CARD_COUNT = 5;
+const CARD_SPACERS = ['spacer-1', 'spacer-2', 'spacer-3', 'spacer-4', 'spacer-5'];
+const MIN_CARD_SCALE = 0.78;
+const MAX_CARD_SCALE = 1;
+
+const scalePath = (path: string, scale: number) => {
+  const regex = /-?\d*\.?\d+/g;
+
+  return path.replace(regex, (value) => (Number(value) * scale).toFixed(3));
+};
 
 const computeLayout = (virtualIndex: number, viewportWidth: number) => {
+  const layoutScale = Math.max(
+    MIN_CARD_SCALE,
+    Math.min(MAX_CARD_SCALE, (viewportWidth - 64) / BIG_WIDTH)
+  );
+  const bigWidth = BIG_WIDTH * layoutScale;
+  const bigHeight = BIG_HEIGHT * layoutScale;
+  const smallWidth = SMALL_WIDTH * layoutScale;
+  const smallHeight = SMALL_HEIGHT * layoutScale;
+  const gap = GAP * layoutScale;
   const scales = Array.from({ length: CARD_COUNT }, (_, i) =>
     Math.max(0, 1 - Math.abs(virtualIndex - i))
   );
-  const widths = scales.map((s) => lerp(SMALL_WIDTH, BIG_WIDTH, s));
-  const heights = scales.map((s) => lerp(SMALL_HEIGHT, BIG_HEIGHT, s));
+  const widths = scales.map((s) => lerp(smallWidth, bigWidth, s));
+  const heights = scales.map((s) => lerp(smallHeight, bigHeight, s));
 
   const lefts: number[] = [];
   let cursor = 0;
   widths.forEach((w) => {
     lefts.push(cursor);
-    cursor += w + GAP;
+    cursor += w + gap;
   });
   const centers = widths.map((w, i) => lefts[i] + w / 2);
 
@@ -73,9 +91,10 @@ const computeLayout = (virtualIndex: number, viewportWidth: number) => {
   const virtualScrollLeft = focalCenter - viewportWidth / 2;
 
   return {
-    paths: scales.map((s) => interpolatePath(SMALL_PATH, BIG_PATH, s)),
+    paths: scales.map((s) => scalePath(interpolatePath(SMALL_PATH, BIG_PATH, s), layoutScale)),
     sizes: widths.map((w, i) => ({ width: w, height: heights[i] })),
-    xs: lefts.map((l) => l - virtualScrollLeft)
+    xs: lefts.map((l) => l - virtualScrollLeft),
+    layoutScale
   };
 };
 
@@ -95,6 +114,7 @@ function MyPage() {
     { width: SMALL_WIDTH, height: SMALL_HEIGHT }
   ]);
   const [xs, setXs] = useState([0, 0, 0, 0, 0]);
+  const [cardLayoutScale, setCardLayoutScale] = useState(1);
   const [showModal, setShowModal] = useState(false);
   const [nickname, setNickname] = useState(() => getStoredNickname() ?? '꿈꾸는 소녀');
   const navigate = useNavigate();
@@ -153,10 +173,11 @@ function MyPage() {
   useLayoutEffect(() => {
     if (!containerRef.current) return;
     const viewportWidth = containerRef.current.getBoundingClientRect().width;
-    const { paths, sizes, xs } = computeLayout(0, viewportWidth);
+    const { paths, sizes, xs, layoutScale } = computeLayout(0, viewportWidth);
     setPaths(paths);
     setSizes(sizes);
     setXs(xs);
+    setCardLayoutScale(layoutScale);
   }, []);
 
   useLayoutEffect(() => {
@@ -165,10 +186,11 @@ function MyPage() {
       const viewportWidth = emblaApi.rootNode().getBoundingClientRect().width;
       const scrollProgress = emblaApi.scrollProgress();
       const virtualIndex = scrollProgress * (CARD_COUNT - 1);
-      const { paths, sizes, xs } = computeLayout(virtualIndex, viewportWidth);
+      const { paths, sizes, xs, layoutScale } = computeLayout(virtualIndex, viewportWidth);
       setPaths(paths);
       setSizes(sizes);
       setXs(xs);
+      setCardLayoutScale(layoutScale);
     };
     const onSelect = () => {
       const index = emblaApi.selectedScrollSnap();
@@ -277,14 +299,28 @@ function MyPage() {
             embiaRef(node);
             containerRef.current = node;
           }}
-          style={{ position: 'relative', overflow: 'hidden', height: 404 }}
+          style={{
+            position: 'relative',
+            overflow: 'hidden',
+            height: BIG_HEIGHT * cardLayoutScale
+          }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: GAP }}>
-            <div style={{ flex: `0 0 ${SMALL_WIDTH}px`, height: BIG_HEIGHT }} />
-            <div style={{ flex: `0 0 ${SMALL_WIDTH}px`, height: BIG_HEIGHT }} />
-            <div style={{ flex: `0 0 ${SMALL_WIDTH}px`, height: BIG_HEIGHT }} />
-            <div style={{ flex: `0 0 ${SMALL_WIDTH}px`, height: BIG_HEIGHT }} />
-            <div style={{ flex: `0 0 ${SMALL_WIDTH}px`, height: BIG_HEIGHT }} />
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: GAP * cardLayoutScale
+            }}
+          >
+            {CARD_SPACERS.map((spacer) => (
+              <div
+                key={spacer}
+                style={{
+                  flex: `0 0 ${SMALL_WIDTH * cardLayoutScale}px`,
+                  height: BIG_HEIGHT * cardLayoutScale
+                }}
+              />
+            ))}
           </div>
           <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
             {displayActivityRanking.map((activity, index) => (

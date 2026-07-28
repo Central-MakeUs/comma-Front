@@ -96,11 +96,17 @@ const skeletonBase = style({
   borderRadius: 999,
   background: 'rgba(252, 252, 252, 0.22)',
   boxShadow: 'inset -2px 0 18px rgba(255, 255, 255, 0.16)',
-  animation: `${skeletonPulse} 1200ms ease-in-out infinite`
+  animation: `${skeletonPulse} 1200ms ease-in-out infinite`,
+  '@media': {
+    '(prefers-reduced-motion: reduce)': {
+      animation: 'none'
+    }
+  }
 });
 
 export const skeletonContainer = style({
-  width: 393,
+  width: '100%',
+  maxWidth: 393,
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center'

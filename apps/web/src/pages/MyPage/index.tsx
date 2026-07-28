@@ -1,7 +1,7 @@
 import { colors, Icon, NavigationBar, SmallButton } from '@comma/design-system';
 import { useQuery } from '@tanstack/react-query';
 import useEmblaCarousel from 'embla-carousel-react';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getMyFeeds } from '../../apis/feed';
 import {
@@ -50,8 +50,6 @@ const BIG_HEIGHT = 404;
 const SMALL_WIDTH = 240;
 const SMALL_HEIGHT = 303;
 const GAP = 16;
-const CARD_COUNT = 5;
-const CARD_SPACERS = ['spacer-1', 'spacer-2', 'spacer-3', 'spacer-4', 'spacer-5'];
 const MIN_CARD_SCALE = 0.78;
 const MAX_CARD_SCALE = 1;
 
@@ -61,7 +59,7 @@ const scalePath = (path: string, scale: number) => {
   return path.replace(regex, (value) => (Number(value) * scale).toFixed(3));
 };
 
-const computeLayout = (virtualIndex: number, viewportWidth: number) => {
+const computeLayout = (virtualIndex: number, viewportWidth: number, cardCount: number) => {
   const layoutScale = Math.max(
     MIN_CARD_SCALE,
     Math.min(MAX_CARD_SCALE, (viewportWidth - 64) / BIG_WIDTH)
@@ -71,7 +69,16 @@ const computeLayout = (virtualIndex: number, viewportWidth: number) => {
   const smallWidth = SMALL_WIDTH * layoutScale;
   const smallHeight = SMALL_HEIGHT * layoutScale;
   const gap = GAP * layoutScale;
-  const scales = Array.from({ length: CARD_COUNT }, (_, i) =>
+  if (cardCount <= 1) {
+    return {
+      paths: [scalePath(BIG_PATH, layoutScale)],
+      sizes: [{ width: bigWidth, height: bigHeight }],
+      xs: [(viewportWidth - bigWidth) / 2],
+      layoutScale
+    };
+  }
+
+  const scales = Array.from({ length: cardCount }, (_, i) =>
     Math.max(0, 1 - Math.abs(virtualIndex - i))
   );
   const widths = scales.map((s) => lerp(smallWidth, bigWidth, s));
@@ -85,7 +92,7 @@ const computeLayout = (virtualIndex: number, viewportWidth: number) => {
   });
   const centers = widths.map((w, i) => lefts[i] + w / 2);
 
-  const lowerIndex = Math.max(0, Math.min(CARD_COUNT - 2, Math.floor(virtualIndex)));
+  const lowerIndex = Math.max(0, Math.min(cardCount - 2, Math.floor(virtualIndex)));
   const frac = virtualIndex - lowerIndex;
   const focalCenter = lerp(centers[lowerIndex], centers[lowerIndex + 1], frac);
   const virtualScrollLeft = focalCenter - viewportWidth / 2;
@@ -132,17 +139,13 @@ function MyPage() {
     },
     staleTime: 1000 * 60 * 5
   });
-  const activityRanking = reportQuery.data?.activityRanking?.length
-    ? reportQuery.data.activityRanking
-    : fallbackActivityRanking;
   const moodRatio = reportQuery.data?.moodRatio?.length
     ? reportQuery.data.moodRatio
     : fallbackMoodRatio;
-  const displayActivityRanking = fallbackActivityRanking.map((fallback, index) => ({
-    ...fallback,
-    ...activityRanking[index],
-    rank: activityRanking[index]?.rank ?? index + 1
-  }));
+  const displayActivityRanking = reportQuery.data?.activityRanking?.length
+    ? reportQuery.data.activityRanking
+    : fallbackActivityRanking;
+  const activityCardCount = displayActivityRanking.length;
   const latestMyFeedQuery = useQuery({
     queryKey: ['feeds', 'me', 'latest'],
     queryFn: async () => {
@@ -152,41 +155,40 @@ function MyPage() {
         throw new Error(response.message ?? '마지막 쉼표를 불러오지 못했습니다.');
       }
 
-      return response.data.items[0];
+      return response.data.items[0] ?? null;
     },
     staleTime: 1000 * 60
   });
   const latestFeed = latestMyFeedQuery.data;
   const lastCommaLabel = latestMyFeedQuery.isLoading
     ? '마지막 쉼표 불러오는 중'
-    : latestFeed?.createdAt
-      ? `마지막 쉼표 ${transformDate(latestFeed.createdAt)}`
-      : '아직 쉼표 기록이 없어요';
-
-  useEffect(() => {
-    if (!latestFeed?.nickname) return;
-
-    setNickname(latestFeed.nickname);
-    setStoredNickname(latestFeed.nickname);
-  }, [latestFeed?.nickname]);
+    : latestMyFeedQuery.isError
+      ? '마지막 쉼표를 불러오지 못했어요'
+      : latestFeed?.createdAt
+        ? `마지막 쉼표 ${transformDate(latestFeed.createdAt)}`
+        : '아직 쉼표 기록이 없어요';
 
   useLayoutEffect(() => {
     if (!containerRef.current) return;
     const viewportWidth = containerRef.current.getBoundingClientRect().width;
-    const { paths, sizes, xs, layoutScale } = computeLayout(0, viewportWidth);
+    const { paths, sizes, xs, layoutScale } = computeLayout(0, viewportWidth, activityCardCount);
     setPaths(paths);
     setSizes(sizes);
     setXs(xs);
     setCardLayoutScale(layoutScale);
-  }, []);
+  }, [activityCardCount]);
 
   useLayoutEffect(() => {
-    if (!emblaApi) return;
+    if (!emblaApi || activityCardCount === 0) return;
     const updateCardTransforms = () => {
       const viewportWidth = emblaApi.rootNode().getBoundingClientRect().width;
       const scrollProgress = emblaApi.scrollProgress();
-      const virtualIndex = scrollProgress * (CARD_COUNT - 1);
-      const { paths, sizes, xs, layoutScale } = computeLayout(virtualIndex, viewportWidth);
+      const virtualIndex = scrollProgress * (activityCardCount - 1);
+      const { paths, sizes, xs, layoutScale } = computeLayout(
+        virtualIndex,
+        viewportWidth,
+        activityCardCount
+      );
       setPaths(paths);
       setSizes(sizes);
       setXs(xs);
@@ -194,7 +196,7 @@ function MyPage() {
     };
     const onSelect = () => {
       const index = emblaApi.selectedScrollSnap();
-      setBgUrl(backgrounds[index]);
+      setBgUrl(backgrounds[index % backgrounds.length]);
     };
     updateCardTransforms();
     onSelect();
@@ -207,7 +209,7 @@ function MyPage() {
       emblaApi.off('reInit', updateCardTransforms);
       emblaApi.off('select', onSelect);
     };
-  }, [emblaApi]);
+  }, [emblaApi, activityCardCount]);
 
   return (
     <div className={styles.container}>
@@ -312,9 +314,9 @@ function MyPage() {
               gap: GAP * cardLayoutScale
             }}
           >
-            {CARD_SPACERS.map((spacer) => (
+            {displayActivityRanking.map((activity) => (
               <div
-                key={spacer}
+                key={`spacer-${activity.rank}-${activity.relaxId}`}
                 style={{
                   flex: `0 0 ${SMALL_WIDTH * cardLayoutScale}px`,
                   height: BIG_HEIGHT * cardLayoutScale
@@ -326,14 +328,14 @@ function MyPage() {
             {displayActivityRanking.map((activity, index) => (
               <MyPageCard
                 key={`${activity.rank}-${activity.relaxId}`}
-                backgroundUrl={backgrounds[index]}
+                backgroundUrl={backgrounds[index % backgrounds.length]}
                 num={activity.rank}
                 count={activity.count}
                 title={activity.name}
                 path={paths[index]}
-                width={sizes[index].width}
-                height={sizes[index].height}
-                x={xs[index]}
+                width={sizes[index]?.width ?? SMALL_WIDTH * cardLayoutScale}
+                height={sizes[index]?.height ?? SMALL_HEIGHT * cardLayoutScale}
+                x={xs[index] ?? 0}
               />
             ))}
           </div>

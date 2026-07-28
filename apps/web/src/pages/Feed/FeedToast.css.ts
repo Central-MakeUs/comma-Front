@@ -16,9 +16,10 @@ export const headerContainer = style({
 });
 
 export const headerContainerVisible = style({
-  maxHeight: 96,
+  maxHeight: 160,
   opacity: 1,
-  transform: 'translateY(0)'
+  transform: 'translateY(0)',
+  pointerEvents: 'auto'
 });
 
 export const headerContainerHidden = style({
@@ -27,7 +28,8 @@ export const headerContainerHidden = style({
   paddingBottom: 0,
   opacity: 0,
   transform: 'translateY(-12px)',
-  borderBottomColor: 'transparent'
+  borderBottomColor: 'transparent',
+  pointerEvents: 'none'
 });
 
 export const headerText = style({

@@ -1,4 +1,5 @@
 import { Icon } from '@comma/design-system';
+import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import * as styles from './FeedToast.css';
 
@@ -7,9 +8,21 @@ type FeedToastProps = {
 };
 
 function FeedToast({ isVisible }: FeedToastProps) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (isVisible || !containerRef.current) return;
+    const activeElement = document.activeElement;
+
+    if (activeElement instanceof HTMLElement && containerRef.current.contains(activeElement)) {
+      activeElement.blur();
+    }
+  }, [isVisible]);
+
   return (
     <div
       aria-hidden={!isVisible}
+      ref={containerRef}
       className={[
         styles.headerContainer,
         isVisible ? styles.headerContainerVisible : styles.headerContainerHidden

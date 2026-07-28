@@ -11,7 +11,7 @@ export const container = style({
   background: colors.backgroundPrimary
 });
 
-globalStyle(`${container} > :not([aria-hidden="true"])`, {
+globalStyle(`:where(${container} > :not([aria-hidden="true"]))`, {
   position: 'relative',
   zIndex: 2
 });

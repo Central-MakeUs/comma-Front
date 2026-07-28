@@ -5,7 +5,7 @@
   },
   "build": {
     "production": {
-      "autoIncrement": false,
+      "autoIncrement": true,
       "distribution": "store",
       "ios": {
         "simulator": false

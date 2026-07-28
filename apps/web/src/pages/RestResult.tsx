@@ -177,18 +177,29 @@ function RestResult() {
   }, [cardCount, carouselLayoutScale]);
 
   useEffect(() => {
-    const updateCarouselLayoutScale = () => {
+    const updateCarouselLayout = () => {
       setCarouselLayoutScale(getCarouselLayoutScale());
+      emblaApi?.reInit();
     };
 
-    window.addEventListener('resize', updateCarouselLayoutScale);
-    window.visualViewport?.addEventListener('resize', updateCarouselLayoutScale);
+    const containerNode = containerRef.current;
+    const resizeObserver =
+      typeof ResizeObserver === 'undefined' || !containerNode
+        ? null
+        : new ResizeObserver(updateCarouselLayout);
+
+    if (containerNode) {
+      resizeObserver?.observe(containerNode);
+    }
+    window.addEventListener('resize', updateCarouselLayout);
+    window.visualViewport?.addEventListener('resize', updateCarouselLayout);
 
     return () => {
-      window.removeEventListener('resize', updateCarouselLayoutScale);
-      window.visualViewport?.removeEventListener('resize', updateCarouselLayoutScale);
+      resizeObserver?.disconnect();
+      window.removeEventListener('resize', updateCarouselLayout);
+      window.visualViewport?.removeEventListener('resize', updateCarouselLayout);
     };
-  }, []);
+  }, [emblaApi]);
 
   useLayoutEffect(() => {
     if (!emblaApi) return;

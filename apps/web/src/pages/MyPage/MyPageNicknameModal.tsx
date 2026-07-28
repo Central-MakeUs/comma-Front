@@ -1,7 +1,8 @@
 import { CtaButton, TextInput } from '@comma/design-system';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { type FormEvent, useEffect, useRef, useState } from 'react';
+import type { FormEvent } from 'react';
 import { getRandomNickname, updateNickname } from '../../apis/user';
+import { useEditableNickname } from '../../hooks/useEditableNickname';
 import * as styles from './MyPageNicknameModal.css';
 
 interface MyPageNicknameModalProps {
@@ -10,8 +11,6 @@ interface MyPageNicknameModalProps {
 }
 
 function MyPageNicknameModal({ onCancelClick, onSave }: MyPageNicknameModalProps) {
-  const [value, setValue] = useState('');
-  const hasUserEditedNicknameRef = useRef(false);
   const randomNicknameQuery = useQuery({
     queryKey: ['user', 'nickname', 'random', 'mypage'],
     queryFn: getRandomNickname
@@ -19,19 +18,9 @@ function MyPageNicknameModal({ onCancelClick, onSave }: MyPageNicknameModalProps
   const updateNicknameMutation = useMutation({
     mutationFn: updateNickname
   });
-
-  useEffect(() => {
-    const randomNickname = randomNicknameQuery.data?.data?.nickname;
-
-    if (!randomNickname || hasUserEditedNicknameRef.current || value.length > 0) return;
-
-    setValue(randomNickname);
-  }, [randomNicknameQuery.data?.data?.nickname, value.length]);
-
-  const handleChange = (val: string) => {
-    hasUserEditedNicknameRef.current = true;
-    setValue(val);
-  };
+  const { value, handleChange } = useEditableNickname({
+    suggestedValue: randomNicknameQuery.data?.data?.nickname
+  });
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();

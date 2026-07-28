@@ -1,14 +1,13 @@
 import { CtaButton, TextInput } from '@comma/design-system';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getRandomNickname, updateNickname } from '../apis/user';
+import { useEditableNickname } from '../hooks/useEditableNickname';
 import { setOnboardingCompleted, setStoredNickname } from '../utils/tokenStorage';
 import * as styles from './Nickname.css';
 
 function Nickname() {
-  const [nickname, setNickname] = useState('');
-  const hasUserEditedNicknameRef = useRef(false);
   const navigate = useNavigate();
   const [isAccepted, setIsAccepted] = useState(false);
   const randomNicknameQuery = useQuery({
@@ -18,23 +17,14 @@ function Nickname() {
   const updateNicknameMutation = useMutation({
     mutationFn: updateNickname
   });
-  const onChange = (val: string) => {
-    hasUserEditedNicknameRef.current = true;
-    setNickname(val);
-  };
+  const { value: nickname, handleChange } = useEditableNickname({
+    suggestedValue: randomNicknameQuery.data?.data?.nickname
+  });
 
   useEffect(() => {
     if (nickname.length > 0) setIsAccepted(true);
     else setIsAccepted(false);
   }, [nickname]);
-
-  useEffect(() => {
-    const randomNickname = randomNicknameQuery.data?.data?.nickname;
-
-    if (!randomNickname || hasUserEditedNicknameRef.current || nickname.length > 0) return;
-
-    setNickname(randomNickname);
-  }, [randomNicknameQuery.data?.data?.nickname, nickname.length]);
 
   const handleSubmit = async () => {
     if (!isAccepted || updateNicknameMutation.isPending) return;
@@ -96,7 +86,7 @@ function Nickname() {
             placeholder="예) 낙엽"
             className={styles.inputStyle}
             value={nickname}
-            onChange={(s) => onChange(s)}
+            onChange={handleChange}
             maxLength={10}
             disabled={randomNicknameQuery.isLoading || updateNicknameMutation.isPending}
           />

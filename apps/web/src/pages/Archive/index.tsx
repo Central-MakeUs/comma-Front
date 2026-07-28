@@ -1,6 +1,7 @@
 import { NavigationBar } from '@comma/design-system';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { SESSION_EXPIRED_ERROR_MESSAGE } from '../../apis/client';
 import { getMyFeeds } from '../../apis/feed';
 import type { loadingState } from '../../types/api';
 import type { feedInfo } from '../../types/feed';
@@ -11,43 +12,115 @@ import { ArchiveFeedGrid } from './ArchiveFeedGrid';
 import { ArchiveFeedList } from './ArchiveFeedList';
 import { ArchiveHeader } from './ArchiveHeader';
 
+const ARCHIVE_PAGE_SIZE = 5;
+const SCROLL_LOAD_THRESHOLD = 160;
+
 function Archive() {
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState<ArchiveViewMode>('list');
   const [state, setState] = useState<loadingState>('loading');
   const [content, setContent] = useState<feedInfo[]>([]);
+  const [nextCursor, setNextCursor] = useState<number | null>(null);
+  const [hasNext, setHasNext] = useState(false);
+  const [isFetchingNext, setIsFetchingNext] = useState(false);
+  const isFetchingNextRef = useRef(false);
 
   useEffect(() => {
+    let canceled = false;
+
     const handleInit = async () => {
-      let res: Awaited<ReturnType<typeof getMyFeeds>> | undefined;
+      setState('loading');
+      setContent([]);
+      setNextCursor(null);
+      setHasNext(false);
+      isFetchingNextRef.current = false;
+      setIsFetchingNext(false);
 
       try {
-        res = await getMyFeeds({ cursor: undefined, size: undefined });
+        const res = await getMyFeeds({ size: ARCHIVE_PAGE_SIZE });
 
-        if (res?.success) {
-          if (res.data?.items.length) setState('success');
-          else setState('empty');
-          setContent([...(res.data?.items ?? [])]);
-        } else setState('error');
+        if (canceled) return;
+
+        if (!res.success || !res.data) {
+          setState('error');
+          return;
+        }
+
+        const feedData = res.data;
+        setContent(feedData.items);
+        setNextCursor(feedData.hasNext ? feedData.nextCursor : null);
+        setHasNext(feedData.hasNext);
+        setState(feedData.items.length > 0 ? 'success' : 'empty');
       } catch (error) {
+        if (canceled) return;
+        if (error instanceof Error && error.message === SESSION_EXPIRED_ERROR_MESSAGE) return;
         console.error(error);
         setState('error');
         alert('내 쉼표 조회 중 오류 발생');
       }
     };
 
-    handleInit();
+    void handleInit();
+
+    return () => {
+      canceled = true;
+    };
   }, []);
+
+  const loadNextFeeds = useCallback(async () => {
+    if (!hasNext || nextCursor === null || isFetchingNextRef.current) return;
+
+    isFetchingNextRef.current = true;
+    setIsFetchingNext(true);
+
+    try {
+      const res = await getMyFeeds({
+        cursor: nextCursor,
+        size: ARCHIVE_PAGE_SIZE
+      });
+
+      if (!res.success || !res.data) {
+        setState('error');
+        return;
+      }
+
+      const feedData = res.data;
+      setContent((prev) => [...prev, ...feedData.items]);
+      setNextCursor(feedData.hasNext ? feedData.nextCursor : null);
+      setHasNext(feedData.hasNext);
+    } catch (error) {
+      if (error instanceof Error && error.message === SESSION_EXPIRED_ERROR_MESSAGE) return;
+      console.error(error);
+      setState('error');
+      alert('내 쉼표 조회 중 오류 발생');
+    } finally {
+      isFetchingNextRef.current = false;
+      setIsFetchingNext(false);
+    }
+  }, [hasNext, nextCursor]);
 
   return (
     <main className={styles.page}>
       <div className={styles.screen}>
         <ArchiveHeader viewMode={viewMode} onViewModeChange={setViewMode} />
-        {viewMode === 'list' ? (
-          <ArchiveFeedList items={state === 'loading' ? [] : content} />
-        ) : (
-          <ArchiveFeedGrid items={state === 'loading' ? [] : content} />
-        )}
+        <div
+          className={styles.scrollContainer}
+          onScroll={(event) => {
+            const scrollElement = event.currentTarget;
+            const distanceToBottom =
+              scrollElement.scrollHeight - scrollElement.scrollTop - scrollElement.clientHeight;
+
+            if (distanceToBottom <= SCROLL_LOAD_THRESHOLD && !isFetchingNext) {
+              void loadNextFeeds();
+            }
+          }}
+        >
+          {viewMode === 'list' ? (
+            <ArchiveFeedList items={state === 'loading' ? [] : content} />
+          ) : (
+            <ArchiveFeedGrid items={state === 'loading' ? [] : content} />
+          )}
+        </div>
         <NavigationBar
           active="archive"
           className={styles.navigation}

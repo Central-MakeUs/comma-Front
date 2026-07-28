@@ -11,7 +11,7 @@ export const page = style({
 export const screen = style({
   position: 'relative',
   width: '100%',
-  minHeight: '100dvh',
+  height: '100dvh',
   overflowX: 'hidden',
   color: colors.textPrimary,
   background: colors.backgroundPrimary
@@ -83,7 +83,7 @@ export const list = style({
   display: 'grid',
   justifyItems: 'stretch',
   gap: 'clamp(24px, 4.69dvh, 40px)',
-  paddingBottom: 'calc(140px + var(--safe-area-bottom))'
+  paddingBottom: 0
 });
 
 export const listCard = style({
@@ -101,7 +101,15 @@ export const grid = style({
   justifyContent: 'center',
   columnGap: 15,
   rowGap: 32,
-  padding: '0 24px calc(140px + var(--safe-area-bottom))'
+  padding: '0 24px'
+});
+
+export const scrollContainer = style({
+  width: '100%',
+  height: 'calc(100dvh - 60px - var(--safe-area-top))',
+  overflowY: 'auto',
+  overflowX: 'hidden',
+  paddingBottom: 'calc(140px + var(--safe-area-bottom))'
 });
 
 export const navigation = style({

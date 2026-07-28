@@ -1,6 +1,8 @@
 import { FeedCard, NavigationBar } from '@comma/design-system';
+import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { checklistQueryKey, getChecklistQuestions } from '../../apis/checklist';
 import { getFeeds, postLikes } from '../../apis/feed';
 import type { loadingState } from '../../types/api';
 import type { feedInfo } from '../../types/feed';
@@ -18,6 +20,7 @@ function Feed() {
 
   const [feeds, setFeeds] = useState<feedInfo[]>([]);
   const [state, setState] = useState<loadingState>('loading');
+  const queryClient = useQueryClient();
 
   const onHeartClick = async (feedId: number, isLiked: boolean) => {
     try {
@@ -39,6 +42,14 @@ function Feed() {
       console.error(error);
     }
   };
+
+  useEffect(() => {
+    void queryClient.prefetchQuery({
+      queryKey: checklistQueryKey,
+      queryFn: getChecklistQuestions,
+      staleTime: 1000 * 60 * 10
+    });
+  }, [queryClient]);
 
   useEffect(() => {
     const handleInit = async () => {

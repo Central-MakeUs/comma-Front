@@ -1,11 +1,11 @@
 import { FEED_MOODS, FEED_TIME_BUDGETS, type FeedMood, type FeedTimeBudget } from '@comma/bridge';
 import { NavigationBar, ProgressBar, Question } from '@comma/design-system';
+import { useQuery } from '@tanstack/react-query';
 import { useFunnel } from '@use-funnel/react-router-dom';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getChecklists } from '../apis/checklist';
+import { checklistQueryKey, getChecklistQuestions } from '../apis/checklist';
 import { recommend } from '../apis/relax';
-import type { questionInfo } from '../types/checklist';
 import { navigateToNavigationItem } from '../utils/navigation';
 import * as styles from './RestChecklist.css';
 
@@ -33,12 +33,38 @@ function isFeedTimeBudget(value: string): value is FeedTimeBudget {
   return (FEED_TIME_BUDGETS as readonly string[]).includes(value);
 }
 
+function RestChecklistSkeleton() {
+  return (
+    <div
+      aria-hidden="true"
+      className={styles.skeletonContainer}
+      data-testid="rest-checklist-skeleton"
+    >
+      <div className={styles.skeletonProgress}>
+        <div className={styles.skeletonProgressFill} />
+        <div className={styles.skeletonProgressTrack} />
+      </div>
+      <div className={styles.skeletonQuestion}>
+        <div className={styles.skeletonStep} />
+        <div className={styles.skeletonTitle} />
+        <div className={styles.skeletonOption} />
+        <div className={styles.skeletonOption} />
+        <div className={styles.skeletonOption} />
+      </div>
+    </div>
+  );
+}
+
 function RestChecklist() {
   const navigate = useNavigate();
   const { selectedKey, setSelectedKey, selectThenMove } = useSelectedOption();
   const [recommendLoading, setRecommendLoading] = useState(false);
-  const [questionInfo, setQuestionInfo] = useState<questionInfo[]>([]);
-  const [loading, setLoading] = useState(true);
+  const checklistQuery = useQuery({
+    queryKey: checklistQueryKey,
+    queryFn: getChecklistQuestions,
+    staleTime: 1000 * 60 * 10
+  });
+  const questionInfo = checklistQuery.data;
 
   const funnel = useFunnel<RestChecklistFunnel>({
     id: 'rest-checklist',
@@ -49,30 +75,12 @@ function RestChecklist() {
   });
 
   useEffect(() => {
-    const handleInit = async () => {
-      let res: Awaited<ReturnType<typeof getChecklists>> | undefined;
-      try {
-        res = await getChecklists();
-        if (
-          !res?.success ||
-          (res.data?.questions?.length ?? 0) < 2 ||
-          res.data?.questions?.some((q) => (q.options?.length ?? 0) < 2)
-        )
-          throw new Error();
-      } catch (error) {
-        alert('체크리스트를 불러오는 중 오류가 발생했습니다.');
-        console.error(error);
-        navigate(-1);
-      } finally {
-        if (res?.success) {
-          setQuestionInfo([...(res?.data?.questions ?? [])]);
-          setLoading(false);
-        }
-      }
-    };
+    if (!checklistQuery.isError) return;
 
-    handleInit();
-  }, [navigate]);
+    alert('체크리스트를 불러오는 중 오류가 발생했습니다.');
+    console.error(checklistQuery.error);
+    navigate(-1);
+  }, [checklistQuery.error, checklistQuery.isError, navigate]);
 
   return (
     <main className={styles.page}>
@@ -95,7 +103,9 @@ function RestChecklist() {
             <img alt="comma" className={styles.logo} src="/images/logo_glass.svg" />
           </header>
 
-          {loading ? null : (
+          {!questionInfo ? (
+            <RestChecklistSkeleton />
+          ) : (
             <funnel.Render
               Mood={({ history }) => (
                 <>

@@ -1,8 +1,9 @@
 import { FeedCard, NavigationBar } from '@comma/design-system';
 import { useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { checklistQueryKey, getChecklistQuestions } from '../../apis/checklist';
+import { SESSION_EXPIRED_ERROR_MESSAGE } from '../../apis/client';
 import { getFeeds, postLikes } from '../../apis/feed';
 import type { loadingState } from '../../types/api';
 import type { feedInfo } from '../../types/feed';
@@ -13,6 +14,9 @@ import * as styles from './Feed.css';
 import FeedHeader from './FeedHeader';
 import FeedToast from './FeedToast';
 
+const FEED_PAGE_SIZE = 5;
+const SCROLL_LOAD_THRESHOLD = 160;
+
 function Feed() {
   const [currentFeel, setCurrentFeel] = useState('상태');
   const [currentBody, setCurrentBody] = useState('시간');
@@ -20,6 +24,11 @@ function Feed() {
 
   const [feeds, setFeeds] = useState<feedInfo[]>([]);
   const [state, setState] = useState<loadingState>('loading');
+  const [nextCursor, setNextCursor] = useState<number | null>(null);
+  const [hasNext, setHasNext] = useState(false);
+  const [isFetchingNext, setIsFetchingNext] = useState(false);
+  const isFetchingNextRef = useRef(false);
+  const feedRequestIdRef = useRef(0);
   const queryClient = useQueryClient();
 
   const onHeartClick = async (feedId: number, isLiked: boolean) => {
@@ -52,36 +61,89 @@ function Feed() {
   }, [queryClient]);
 
   useEffect(() => {
+    let canceled = false;
+    const requestId = feedRequestIdRef.current + 1;
+    feedRequestIdRef.current = requestId;
+
     const handleInit = async () => {
-      let res: Awaited<ReturnType<typeof getFeeds>> | undefined;
+      setState('loading');
+      setFeeds([]);
+      setNextCursor(null);
+      setHasNext(false);
+      isFetchingNextRef.current = false;
+      setIsFetchingNext(false);
 
       try {
-        let cnt = 0;
-        do {
-          res = await getFeeds({
-            mood: moods[currentFeel],
-            timeBudget: times[currentBody],
-            cursor: cnt,
-            size: 5
-          });
+        const res = await getFeeds({
+          mood: moods[currentFeel],
+          timeBudget: times[currentBody],
+          size: FEED_PAGE_SIZE
+        });
 
-          if (res?.success) {
-            setFeeds((prev) => [...prev, ...(res?.data?.items ?? [])]);
-            if (res?.data?.hasNext) cnt += 5;
-          } else setState('error');
-        } while (res?.data?.hasNext);
+        if (canceled || feedRequestIdRef.current !== requestId) return;
 
-        if (state !== 'error' && feeds.length) setState('success');
-        else if (feeds.length === 0) setState('empty');
+        if (!res.success || !res.data) {
+          setState('error');
+          return;
+        }
+
+        const feedData = res.data;
+        setFeeds(feedData.items);
+        setNextCursor(feedData.hasNext ? feedData.nextCursor : null);
+        setHasNext(feedData.hasNext);
+        setState(feedData.items.length > 0 ? 'success' : 'empty');
       } catch (error) {
+        if (canceled) return;
+        if (error instanceof Error && error.message === SESSION_EXPIRED_ERROR_MESSAGE) return;
         console.error(error);
         setState('error');
         alert('피드 조회 오류 발생');
       }
     };
 
-    handleInit();
-  }, [currentFeel, currentBody, state, feeds.length]);
+    void handleInit();
+
+    return () => {
+      canceled = true;
+    };
+  }, [currentFeel, currentBody]);
+
+  const loadNextFeeds = useCallback(async () => {
+    if (!hasNext || nextCursor === null || isFetchingNextRef.current) return;
+
+    const requestId = feedRequestIdRef.current;
+    isFetchingNextRef.current = true;
+    setIsFetchingNext(true);
+
+    try {
+      const res = await getFeeds({
+        mood: moods[currentFeel],
+        timeBudget: times[currentBody],
+        cursor: nextCursor,
+        size: FEED_PAGE_SIZE
+      });
+
+      if (feedRequestIdRef.current !== requestId) return;
+
+      if (!res.success || !res.data) {
+        setState('error');
+        return;
+      }
+
+      const feedData = res.data;
+      setFeeds((prev) => [...prev, ...feedData.items]);
+      setNextCursor(feedData.hasNext ? feedData.nextCursor : null);
+      setHasNext(feedData.hasNext);
+    } catch (error) {
+      if (error instanceof Error && error.message === SESSION_EXPIRED_ERROR_MESSAGE) return;
+      console.error(error);
+      setState('error');
+      alert('피드 조회 오류 발생');
+    } finally {
+      isFetchingNextRef.current = false;
+      setIsFetchingNext(false);
+    }
+  }, [currentFeel, currentBody, hasNext, nextCursor]);
 
   const navigate = useNavigate();
 
@@ -98,7 +160,15 @@ function Feed() {
         <div
           className={styles.scrollContainer}
           onScroll={(event) => {
-            setIsHeaderVisible(event.currentTarget.scrollTop <= 4);
+            const scrollElement = event.currentTarget;
+            setIsHeaderVisible(scrollElement.scrollTop <= 4);
+
+            const distanceToBottom =
+              scrollElement.scrollHeight - scrollElement.scrollTop - scrollElement.clientHeight;
+
+            if (distanceToBottom <= SCROLL_LOAD_THRESHOLD && !isFetchingNext) {
+              void loadNextFeeds();
+            }
           }}
         >
           {state === 'loading'

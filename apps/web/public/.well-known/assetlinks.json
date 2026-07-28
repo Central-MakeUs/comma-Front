@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.comma.app",
+      "sha256_cert_fingerprints": [
+        "E6:82:18:18:E1:B0:63:11:C3:29:A5:4B:1D:F3:EB:E9:BC:1C:79:DF:0E:C8:AC:80:D2:9C:B0:D4:F7:76:79:3F"
+      ]
+    }
+  }
+]

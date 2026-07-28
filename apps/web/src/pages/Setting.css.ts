@@ -89,6 +89,27 @@ export const crownIcon = style({
   color: colors.iconSecondary
 });
 
+export const modalOverlay = style({
+  position: 'fixed',
+  top: 0,
+  bottom: 0,
+  left: '50%',
+  width: '100%',
+  maxWidth: 'var(--app-max-width)',
+  transform: 'translateX(-50%)',
+  zIndex: 10
+});
+
+export const backdropButton = style({
+  position: 'absolute',
+  inset: 0,
+  width: '100%',
+  border: 0,
+  padding: 0,
+  background: 'transparent',
+  cursor: 'default'
+});
+
 export const confirmModal = style({
   width: '100%',
   boxShadow: shadows.glassInset,
@@ -103,6 +124,7 @@ export const confirmModal = style({
   paddingTop: 8,
   position: 'absolute',
   bottom: 'calc(-36px + var(--safe-area-bottom))',
+  zIndex: 1,
   backdropFilter: 'blur(10px)',
   WebkitBackdropFilter: 'blur(10px)'
 });

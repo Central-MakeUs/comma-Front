@@ -1,6 +1,27 @@
 import { colors, shadows } from '@comma/design-system';
 import { style } from '@vanilla-extract/css';
 
+export const overlay = style({
+  position: 'fixed',
+  top: 0,
+  bottom: 0,
+  left: '50%',
+  width: '100%',
+  maxWidth: 'var(--app-max-width)',
+  transform: 'translateX(-50%)',
+  zIndex: 10
+});
+
+export const backdropButton = style({
+  position: 'absolute',
+  inset: 0,
+  width: '100%',
+  border: 0,
+  padding: 0,
+  background: 'transparent',
+  cursor: 'default'
+});
+
 export const container = style({
   width: '100%',
   height: 532,
@@ -15,9 +36,9 @@ export const container = style({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  zIndex: 10,
   position: 'absolute',
-  bottom: 0
+  bottom: 0,
+  zIndex: 1
 });
 
 export const icon = style({

@@ -10,6 +10,9 @@
       "ios": {
         "simulator": false
       },
+      "android": {
+        "buildType": "app-bundle"
+      },
       "env": {
         "EXPO_PUBLIC_GOOGLE_CLIENT_ID": "389558827056-o797ta3s8i4ikukrlm883gsbolscsuhq.apps.googleusercontent.com",
         "EXPO_PUBLIC_GOOGLE_REDIRECT_URI": "https://comma-front-web.vercel.app/oauth/google/callback"
@@ -20,6 +23,9 @@
     "production": {
       "ios": {
         "ascAppId": "6786727870"
+      },
+      "android": {
+        "track": "production"
       }
     }
   }

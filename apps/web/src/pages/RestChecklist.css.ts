@@ -1,5 +1,11 @@
-import { colors } from '@comma/design-system';
+import { colors, questionTopGap } from '@comma/design-system';
 import { keyframes, style } from '@vanilla-extract/css';
+
+const topInset = 'clamp(40px, 5.63dvh, 56px)';
+const logoToProgressGap = 'clamp(28px, 4.23dvh, 40px)';
+const progressToQuestionGap = 'clamp(4px, 1.18dvh, 12px)';
+const questionTopAreaGap = 'clamp(8px, 1.64dvh, 18px)';
+const navigationBottomGap = 'clamp(28px, 4.69dvh, 40px)';
 
 export const page = style({
   minHeight: '100dvh',
@@ -45,8 +51,8 @@ export const content = style({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  paddingTop: 'calc(48px + var(--safe-area-top))',
-  paddingBottom: 'calc(132px + var(--safe-area-bottom))'
+  paddingTop: `calc(${topInset} + var(--safe-area-top))`,
+  paddingBottom: `calc(64px + ${navigationBottomGap} + 28px + var(--safe-area-bottom))`
 });
 
 export const header = style({
@@ -64,11 +70,14 @@ export const logo = style({
 });
 
 export const progress = style({
-  marginTop: 36
+  marginTop: logoToProgressGap
 });
 
 export const question = style({
-  marginTop: 64
+  marginTop: progressToQuestionGap,
+  vars: {
+    [questionTopGap]: questionTopAreaGap
+  }
 });
 
 const skeletonPulse = keyframes({
@@ -101,7 +110,7 @@ export const skeletonProgress = style({
   width: 329,
   display: 'flex',
   gap: 4,
-  marginTop: 36
+  marginTop: logoToProgressGap
 });
 
 export const skeletonProgressFill = style([
@@ -124,10 +133,10 @@ export const skeletonProgressTrack = style([
 
 export const skeletonQuestion = style({
   width: '100%',
-  marginTop: 24,
+  marginTop: progressToQuestionGap,
   display: 'flex',
   flexDirection: 'column',
-  gap: 32
+  gap: questionTopAreaGap
 });
 
 export const skeletonTopArea = style({
@@ -191,7 +200,7 @@ export const skeletonOption = style([
 export const navigation = style({
   position: 'absolute',
   left: '50%',
-  bottom: 'max(40px, var(--safe-area-bottom))',
+  bottom: `max(${navigationBottomGap}, var(--safe-area-bottom))`,
   zIndex: 3,
   transform: 'translateX(-50%)'
 });

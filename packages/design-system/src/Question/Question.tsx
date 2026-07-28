@@ -41,7 +41,7 @@ export function Question({
   const rootClassName = [question, className].filter(Boolean).join(' ');
 
   return (
-    <section className={rootClassName} style={{ marginTop: 24 }}>
+    <section className={rootClassName}>
       <div className={topArea}>
         {showBackButton ? (
           <button

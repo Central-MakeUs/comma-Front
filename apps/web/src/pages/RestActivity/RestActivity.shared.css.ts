@@ -32,8 +32,8 @@ export const dimOverlay = style({
   zIndex: 0,
   display: 'none',
   background: 'rgba(26, 24, 20, 0.5)',
-  backdropFilter: 'blur(5px)',
-  WebkitBackdropFilter: 'blur(5px)'
+  backdropFilter: 'blur(20px)',
+  WebkitBackdropFilter: 'blur(20px)'
 });
 
 export const dimOverlayVisible = style({
@@ -41,7 +41,14 @@ export const dimOverlayVisible = style({
 });
 
 export const topGradient = style({
-  display: 'none'
+  position: 'absolute',
+  top: 0,
+  right: 0,
+  left: 0,
+  zIndex: 0,
+  height: 120,
+  background: 'linear-gradient(180deg, rgba(17, 17, 17, 0.66) 0%, rgba(17, 17, 17, 0) 100%)',
+  pointerEvents: 'none'
 });
 
 export const bottomGradient = style({

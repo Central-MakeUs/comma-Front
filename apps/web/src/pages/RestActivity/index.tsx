@@ -152,7 +152,7 @@ function RestActivity() {
         onComplete={() => setIsWritingStarted(true)}
         onConfirmReselect={handleConfirmReselect}
         onOpenReselectModal={() => setShowReselectModal(true)}
-        title={locationState?.selectedRelax?.name}
+        title={locationState?.selectedRelax?.activeMessage}
         desc={locationState?.selectedRelax?.description}
         imageSrc={locationState?.selectedRelax?.imageUrl}
       />

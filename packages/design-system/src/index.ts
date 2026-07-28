@@ -25,7 +25,7 @@ export { NavigationBar } from './NavigationBar';
 export type { ProgressBarProps, ProgressBarStep } from './ProgressBar';
 export { ProgressBar } from './ProgressBar';
 export type { QuestionProps } from './Question';
-export { Question } from './Question';
+export { Question, questionTopGap } from './Question';
 export type { SecretToggleProps, SecretToggleState } from './SecretToggle';
 export { SecretToggle } from './SecretToggle';
 export type { SelectButtonProps, SelectButtonState } from './SelectButton';

@@ -78,8 +78,9 @@ export function RestActivityProgress({
         </section>
 
         <footer className={styles.footer}>
+          <p className={styles.footerMessage}>완료 후 휴식을 기록해요</p>
           <CtaButton className={sharedStyles.doneButton} onClick={onComplete}>
-            휴식 완료
+            휴식 기록하기
           </CtaButton>
         </footer>
 

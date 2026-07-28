@@ -68,12 +68,28 @@ export const dot = style({
 });
 
 export const ctaButtonStyle = style({
-  margin: '0 auto',
+  width: '100%',
+  maxWidth: 329,
   color: colors.textPrimary,
-  position: 'absolute',
-  bottom: 'max(40px, var(--safe-area-bottom))',
+  pointerEvents: 'auto'
+});
+
+export const footer = style({
+  position: 'fixed',
+  width: '100%',
+  maxWidth: 'var(--app-max-width)',
+  right: 'auto',
+  bottom: 0,
   left: '50%',
-  transform: 'translateX(-50%)'
+  transform: 'translateX(-50%)',
+  zIndex: 3,
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  padding:
+    '64px calc(32px + var(--safe-area-right)) max(32px, var(--safe-area-bottom)) calc(32px + var(--safe-area-left))',
+  background: 'linear-gradient(to bottom, rgba(26, 24, 20, 0) 0%, #1A1814 46.767%, #1A1814 100%)',
+  pointerEvents: 'none'
 });
 
 export const navStyle = style({

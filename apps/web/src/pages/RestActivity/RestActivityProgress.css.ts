@@ -24,7 +24,7 @@ export const content = style({
 
 export const heroText = style({
   width: '100%',
-  padding: '0 36px'
+  padding: '0 32px'
 });
 
 export const participantRow = style({
@@ -52,7 +52,7 @@ export const participantLabel = style({
   paddingBottom: 7,
   color: colors.textTertiary,
   display: 'inline-flex',
-  alignItems: 'flex-end'
+  alignItems: 'flex-start'
 });
 
 export const footer = style({
@@ -72,4 +72,12 @@ export const footer = style({
     '64px calc(32px + var(--safe-area-right)) max(32px, var(--safe-area-bottom)) calc(32px + var(--safe-area-left))',
   background: 'linear-gradient(to bottom, rgba(26, 24, 20, 0) 0%, #1A1814 46.767%, #1A1814 100%)',
   pointerEvents: 'none'
+});
+
+export const footerMessage = style({
+  ...typography.bodyReadingR,
+  width: '100%',
+  margin: 0,
+  color: colors.textSecondary,
+  textAlign: 'center'
 });

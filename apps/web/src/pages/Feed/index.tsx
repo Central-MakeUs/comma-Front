@@ -135,13 +135,16 @@ function Feed() {
       setNextCursor(feedData.hasNext ? feedData.nextCursor : null);
       setHasNext(feedData.hasNext);
     } catch (error) {
+      if (feedRequestIdRef.current !== requestId) return;
       if (error instanceof Error && error.message === SESSION_EXPIRED_ERROR_MESSAGE) return;
       console.error(error);
       setState('error');
       alert('피드 조회 오류 발생');
     } finally {
-      isFetchingNextRef.current = false;
-      setIsFetchingNext(false);
+      if (feedRequestIdRef.current === requestId) {
+        isFetchingNextRef.current = false;
+        setIsFetchingNext(false);
+      }
     }
   }, [currentFeel, currentBody, hasNext, nextCursor]);
 

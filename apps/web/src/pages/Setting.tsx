@@ -88,7 +88,15 @@ function Setting() {
   const queryClient = useQueryClient();
   const planQuery = useQuery({
     queryKey: ['user', 'plan'],
-    queryFn: getPlan
+    queryFn: async () => {
+      const response = await getPlan();
+
+      if (!response.success || !response.data) {
+        throw new Error(response.message ?? '플랜 정보를 불러오지 못했습니다.');
+      }
+
+      return response.data;
+    }
   });
   const changePlanMutation = useMutation({
     mutationFn: changePlan,
@@ -135,10 +143,13 @@ function Setting() {
     }
   });
 
-  const planData = planQuery.data?.data;
-  const currentPlan = planData?.currentPlan ?? 'FREE';
+  const planData = planQuery.data;
+  const currentPlan = planData?.currentPlan;
   const freePlan = planData?.plans.find((plan) => plan.plan === 'FREE');
   const premiumPlan = planData?.plans.find((plan) => plan.plan === 'PREMIUM');
+  const currentPlanCard =
+    currentPlan === 'PREMIUM' ? premiumPlan : currentPlan === 'FREE' ? freePlan : undefined;
+  const isPlanActionDisabled = !planData || changePlanMutation.isPending;
 
   const getPlanLabel = (plan: PlanCard | undefined, fallback: string) => plan?.label ?? fallback;
   const getPlanDescription = (plan: PlanCard | undefined, fallback: string) =>
@@ -163,7 +174,7 @@ function Setting() {
   };
 
   const handlePlanChange = (plan: UserPlan) => {
-    if (changePlanMutation.isPending || currentPlan === plan) return;
+    if (!planData || changePlanMutation.isPending || currentPlan === plan) return;
 
     changePlanMutation.mutate({ plan });
   };
@@ -196,13 +207,14 @@ function Setting() {
           <div className={styles.ratePrice}>
             {planQuery.isLoading
               ? '불러오는 중'
-              : getPlanLabel(currentPlan === 'PREMIUM' ? premiumPlan : freePlan, '무료 플랜')}
+              : planQuery.isError
+                ? '불러오기 실패'
+                : getPlanLabel(currentPlanCard, '플랜 정보 없음')}
           </div>
           <div className={styles.rateDesc}>
-            {getPlanDescription(
-              currentPlan === 'PREMIUM' ? premiumPlan : freePlan,
-              '기본 활동 추천 27가지'
-            )}
+            {planQuery.isError
+              ? '잠시 후 다시 시도해주세요.'
+              : getPlanDescription(currentPlanCard, '기본 활동 추천 27가지')}
           </div>
           <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-end' }}>
             <SmallButton
@@ -214,7 +226,7 @@ function Setting() {
                     : '무료로 변경'
               }
               className={styles.planActionBtn}
-              disabled={currentPlan === 'FREE' || changePlanMutation.isPending}
+              disabled={isPlanActionDisabled || currentPlan === 'FREE'}
               onClick={() => handlePlanChange('FREE')}
             />
           </div>
@@ -247,7 +259,7 @@ function Setting() {
                     : '시작하기'
               }
               className={styles.startBtn}
-              disabled={currentPlan === 'PREMIUM' || changePlanMutation.isPending}
+              disabled={isPlanActionDisabled || currentPlan === 'PREMIUM'}
               onClick={() => handlePlanChange('PREMIUM')}
             />
           </div>

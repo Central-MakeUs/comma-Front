@@ -102,7 +102,7 @@ function RestResult() {
 
   useEffect(() => {
     const nextData = locationState?.data;
-    if (!nextData || nextData.length === 0) {
+    if (!nextData || nextData.length === 0 || !locationState?.mood || !locationState.timeBudget) {
       alert('휴식 추천 중 오류가 발생했습니다. 다시 선택해주세요');
       navigate('/rest/checklist', { replace: true });
       return;

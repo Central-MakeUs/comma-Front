@@ -1,4 +1,4 @@
-import type { FeedMood, FeedTimeBudget } from '@comma/bridge';
+import { FEED_MOODS, FEED_TIME_BUDGETS, type FeedMood, type FeedTimeBudget } from '@comma/bridge';
 import { NavigationBar, ProgressBar, Question } from '@comma/design-system';
 import { useFunnel } from '@use-funnel/react-router-dom';
 import { useEffect, useState } from 'react';
@@ -26,11 +26,11 @@ function useSelectedOption() {
 }
 
 function isFeedMood(value: string): value is FeedMood {
-  return value === 'A' || value === 'B' || value === 'C';
+  return (FEED_MOODS as readonly string[]).includes(value);
 }
 
 function isFeedTimeBudget(value: string): value is FeedTimeBudget {
-  return value === 'X' || value === 'Y' || value === 'Z';
+  return (FEED_TIME_BUDGETS as readonly string[]).includes(value);
 }
 
 function RestChecklist() {

@@ -17,8 +17,12 @@ export type GalleryPhoto = {
   height: number;
 };
 
-export type FeedMood = 'A' | 'B' | 'C';
-export type FeedTimeBudget = 'X' | 'Y' | 'Z';
+export const FEED_MOODS = ['A', 'B', 'C'] as const;
+export const FEED_TIME_BUDGETS = ['X', 'Y', 'Z'] as const;
+export const NATIVE_FEED_UPLOAD_UNAUTHORIZED_ERROR = 'NATIVE_FEED_UPLOAD_UNAUTHORIZED';
+
+export type FeedMood = (typeof FEED_MOODS)[number];
+export type FeedTimeBudget = (typeof FEED_TIME_BUDGETS)[number];
 
 export type FeedCreateRequest = {
   mood: FeedMood;

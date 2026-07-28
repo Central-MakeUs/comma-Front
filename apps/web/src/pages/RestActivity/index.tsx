@@ -1,4 +1,4 @@
-import type { FeedCreateRequest } from '@comma/bridge';
+import { type FeedCreateRequest, NATIVE_FEED_UPLOAD_UNAUTHORIZED_ERROR } from '@comma/bridge';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { refreshStoredTokens } from '../../apis/client';
@@ -13,6 +13,10 @@ import { RestActivityProgress } from './RestActivityProgress';
 
 function isObjectUrl(value?: string) {
   return value?.startsWith('blob:') ?? false;
+}
+
+function isNativeUploadUnauthorizedError(error: unknown) {
+  return error instanceof Error && error.message.includes(NATIVE_FEED_UPLOAD_UNAUTHORIZED_ERROR);
 }
 
 function RestActivity() {
@@ -56,6 +60,32 @@ function RestActivity() {
     return refreshStoredTokens();
   };
 
+  const createFeedWithNativePhoto = async (
+    assetId: string,
+    request: FeedCreateRequest,
+    baseUrl: string
+  ) => {
+    const accessToken = await getValidAccessToken();
+
+    try {
+      return await appBridge.createFeedWithGalleryPhoto(assetId, request, {
+        accessToken,
+        baseUrl
+      });
+    } catch (error) {
+      if (!isNativeUploadUnauthorizedError(error)) {
+        throw error;
+      }
+
+      const refreshedAccessToken = await refreshStoredTokens();
+
+      return appBridge.createFeedWithGalleryPhoto(assetId, request, {
+        accessToken: refreshedAccessToken,
+        baseUrl
+      });
+    }
+  };
+
   const handleComplete = async (values: {
     hashtags: string[];
     review: string;
@@ -95,17 +125,13 @@ function RestActivity() {
           throw new Error(response.message ?? '피드 업로드에 실패했어요.');
         }
       } else {
-        const accessToken = await getValidAccessToken();
         const baseUrl = import.meta.env.VITE_BASE_URL;
 
         if (!baseUrl) {
           throw new Error('API 주소가 설정되어 있지 않아요.');
         }
 
-        await appBridge.createFeedWithGalleryPhoto(selectedPhoto.assetId, request, {
-          accessToken,
-          baseUrl
-        });
+        await createFeedWithNativePhoto(selectedPhoto.assetId, request, baseUrl);
       }
 
       navigate('/feed');

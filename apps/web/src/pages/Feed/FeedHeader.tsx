@@ -37,6 +37,7 @@ function FeedHeader({
   return (
     <div style={{ width: '100%' }}>
       <div
+        aria-hidden={!isHeaderVisible}
         className={[
           styles.headerContainer,
           isHeaderVisible ? styles.headerContainerVisible : styles.headerContainerHidden
@@ -47,7 +48,12 @@ function FeedHeader({
           <br />
           잠깐 쉼표 찍으러 갈까요?
         </span>
-        <Link className={styles.headerLink} to="/rest/checklist">
+        <Link
+          aria-hidden={!isHeaderVisible}
+          className={styles.headerLink}
+          tabIndex={isHeaderVisible ? undefined : -1}
+          to="/rest/checklist"
+        >
           휴식하기 <Icon name="rightArrow" />
         </Link>
       </div>

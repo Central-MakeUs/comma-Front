@@ -35,7 +35,7 @@ export const photoGrid = style({
   width: '100%',
   display: 'grid',
   gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-  gridAutoRows: 'calc((var(--app-width) - 6px) / 3)',
+  gridAutoRows: 'calc((var(--app-width) - 54px) / 3)',
   gap: 3,
   marginTop: 28,
   paddingBottom: 'max(40px, var(--safe-area-bottom))'

@@ -5,7 +5,7 @@ import type {
   FeedResponse,
   NativeFeedUploadAuth
 } from '@comma/bridge';
-import { POST_MESSAGE_EVENT } from '@comma/bridge';
+import { NATIVE_FEED_UPLOAD_UNAUTHORIZED_ERROR, POST_MESSAGE_EVENT } from '@comma/bridge';
 import { bridge, createWebView, postMessageSchema } from '@webview-bridge/react-native';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as MediaLibrary from 'expo-media-library';
@@ -14,6 +14,7 @@ import { z } from 'zod';
 
 const MAX_GALLERY_PHOTOS = 30;
 const DEFAULT_IMAGE_MIME_TYPE = 'image/jpeg';
+const FEED_UPLOAD_TIMEOUT_MS = 18_000;
 
 function clampGalleryLimit(limit: number) {
   if (!Number.isFinite(limit)) {
@@ -83,19 +84,27 @@ async function createFeedWithMultipart(
     type: 'application/json'
   } as unknown as Blob);
 
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), FEED_UPLOAD_TIMEOUT_MS);
+
   try {
     const response = await fetch(`${auth.baseUrl.replace(/\/$/, '')}/api/feeds`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${auth.accessToken}`
       },
-      body: formData
+      body: formData,
+      signal: controller.signal
     });
-    const payload = (await response.json()) as {
+    const payload = (await response.json().catch(() => ({}))) as {
       success?: boolean;
       message?: string;
       data?: FeedResponse;
     };
+
+    if (response.status === 401) {
+      throw new Error(NATIVE_FEED_UPLOAD_UNAUTHORIZED_ERROR);
+    }
 
     if (!response.ok || !payload.success || !payload.data) {
       throw new Error(payload.message ?? '피드 업로드에 실패했어요.');
@@ -103,6 +112,7 @@ async function createFeedWithMultipart(
 
     return payload.data;
   } finally {
+    clearTimeout(timeoutId);
     await FileSystem.deleteAsync(requestFileUri, { idempotent: true }).catch(() => {});
   }
 }

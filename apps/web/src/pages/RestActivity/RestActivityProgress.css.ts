@@ -30,7 +30,7 @@ export const heroText = style({
 export const participantRow = style({
   width: '100%',
   display: 'flex',
-  alignItems: 'flex-end',
+  alignItems: 'baseline',
   gap: 4,
   padding: '0 32px'
 });
@@ -48,11 +48,8 @@ export const participantLabel = style({
   ...typography.headlineR,
   flex: 1,
   minWidth: 0,
-  height: 45,
-  paddingBottom: 7,
   color: colors.textTertiary,
-  display: 'inline-flex',
-  alignItems: 'flex-start'
+  whiteSpace: 'nowrap'
 });
 
 export const footer = style({

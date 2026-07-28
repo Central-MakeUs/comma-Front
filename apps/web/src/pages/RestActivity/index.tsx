@@ -170,6 +170,7 @@ function RestActivity() {
 
   return (
     <RestActivityForm
+      desc={locationState?.selectedRelax?.description ?? ''}
       imagePreview={imagePreview}
       isSubmitting={isSubmitting}
       showReselectModal={showReselectModal}
@@ -178,6 +179,9 @@ function RestActivity() {
       onConfirmReselect={handleConfirmReselect}
       onOpenPhotoPicker={() => setShowPhotoPicker(true)}
       onOpenReselectModal={() => setShowReselectModal(true)}
+      title={
+        locationState?.selectedRelax?.activeMessage ?? locationState?.selectedRelax?.name ?? ''
+      }
     />
   );
 }

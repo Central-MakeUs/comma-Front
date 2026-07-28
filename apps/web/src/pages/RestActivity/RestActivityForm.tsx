@@ -7,12 +7,7 @@ import {
   TextInput
 } from '@comma/design-system';
 import { type KeyboardEvent, useState } from 'react';
-import {
-  COMMENT_MAX_LENGTH,
-  REST_DESCRIPTION,
-  REST_TITLE,
-  TAG_MAX_LENGTH
-} from './RestActivity.constants';
+import { COMMENT_MAX_LENGTH, TAG_MAX_LENGTH } from './RestActivity.constants';
 import * as sharedStyles from './RestActivity.shared.css';
 import * as styles from './RestActivityForm.css';
 import { RestActivityReselectModal } from './RestActivityReselectModal';
@@ -20,6 +15,8 @@ import { RestActivityReselectModal } from './RestActivityReselectModal';
 type RestActivityFormProps = {
   imagePreview?: string;
   isSubmitting?: boolean;
+  title: string;
+  desc: string;
   showReselectModal: boolean;
   onOpenPhotoPicker: () => void;
   onOpenReselectModal: () => void;
@@ -35,6 +32,8 @@ function normalizeTag(value: string) {
 export function RestActivityForm({
   imagePreview,
   isSubmitting = false,
+  title,
+  desc,
   showReselectModal,
   onOpenPhotoPicker,
   onOpenReselectModal,
@@ -126,9 +125,9 @@ export function RestActivityForm({
         <section className={styles.content} aria-labelledby="rest-activity-title">
           <div className={styles.heroText}>
             <h1 className={sharedStyles.title} id="rest-activity-title">
-              {REST_TITLE}
+              {title}
             </h1>
-            <p className={sharedStyles.description}>{REST_DESCRIPTION}</p>
+            <p className={sharedStyles.description}>{desc}</p>
           </div>
 
           <div className={styles.uploadArea}>

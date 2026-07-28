@@ -6,6 +6,7 @@ export interface StoredTokens {
 const ACCESS_TOKEN_KEY = 'comma.accessToken';
 const REFRESH_TOKEN_KEY = 'comma.refreshToken';
 const ONBOARDING_COMPLETED_KEY = 'comma.onboardingCompleted';
+const NICKNAME_KEY = 'comma.nickname';
 const TOKEN_EXPIRY_BUFFER_MS = 60 * 1000;
 
 const canUseLocalStorage = () => typeof window !== 'undefined' && Boolean(window.localStorage);
@@ -34,6 +35,7 @@ export const clearTokens = () => {
   window.localStorage.removeItem(ACCESS_TOKEN_KEY);
   window.localStorage.removeItem(REFRESH_TOKEN_KEY);
   window.localStorage.removeItem(ONBOARDING_COMPLETED_KEY);
+  window.localStorage.removeItem(NICKNAME_KEY);
 };
 
 export const getOnboardingCompleted = () => {
@@ -50,6 +52,18 @@ export const setOnboardingCompleted = (onboardingCompleted: boolean) => {
   if (!canUseLocalStorage()) return;
 
   window.localStorage.setItem(ONBOARDING_COMPLETED_KEY, String(onboardingCompleted));
+};
+
+export const getStoredNickname = () => {
+  if (!canUseLocalStorage()) return null;
+
+  return window.localStorage.getItem(NICKNAME_KEY);
+};
+
+export const setStoredNickname = (nickname: string) => {
+  if (!canUseLocalStorage()) return;
+
+  window.localStorage.setItem(NICKNAME_KEY, nickname);
 };
 
 const decodeBase64Url = (value: string) => {

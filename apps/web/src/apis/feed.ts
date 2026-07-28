@@ -14,6 +14,7 @@ interface feedRequest {
 interface feedResponse {
   items: Array<{
     feedId: number;
+    nickname?: string;
     mood: string;
     timeBudget: string;
     imageUrl: string;

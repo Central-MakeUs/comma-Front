@@ -3,7 +3,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getRandomNickname, updateNickname } from '../apis/user';
-import { setOnboardingCompleted } from '../utils/tokenStorage';
+import { setOnboardingCompleted, setStoredNickname } from '../utils/tokenStorage';
 import * as styles from './Nickname.css';
 
 function Nickname() {
@@ -44,6 +44,7 @@ function Nickname() {
 
       if (res.success && res.data?.nickname) {
         setOnboardingCompleted(true);
+        setStoredNickname(res.data.nickname);
         navigate('/loading', { state: { userName: res.data.nickname } });
         return;
       }

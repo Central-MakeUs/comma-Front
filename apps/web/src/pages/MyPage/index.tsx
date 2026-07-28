@@ -1,8 +1,9 @@
 import { colors, Icon, NavigationBar, SmallButton } from '@comma/design-system';
 import { useQuery } from '@tanstack/react-query';
 import useEmblaCarousel from 'embla-carousel-react';
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getMyFeeds } from '../../apis/feed';
 import {
   type ActivityRank,
   getMyReport,
@@ -11,6 +12,8 @@ import {
 } from '../../apis/mypage';
 import { interpolatePath, lerp } from '../../utils/compute_layout';
 import { navigateToNavigationItem } from '../../utils/navigation';
+import { getStoredNickname, setStoredNickname } from '../../utils/tokenStorage';
+import { transformDate } from '../../utils/transformDate';
 import * as styles from './MyPage.css';
 import MyPageAnswerContainer from './MyPageAnswerContainer';
 import MyPageCard from './MyPageCard';
@@ -93,7 +96,7 @@ function MyPage() {
   ]);
   const [xs, setXs] = useState([0, 0, 0, 0, 0]);
   const [showModal, setShowModal] = useState(false);
-  const [nickname, setNickname] = useState('꿈꾸는 소녀');
+  const [nickname, setNickname] = useState(() => getStoredNickname() ?? '꿈꾸는 소녀');
   const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const reportQuery = useQuery({
@@ -120,6 +123,32 @@ function MyPage() {
     ...activityRanking[index],
     rank: activityRanking[index]?.rank ?? index + 1
   }));
+  const latestMyFeedQuery = useQuery({
+    queryKey: ['feeds', 'me', 'latest'],
+    queryFn: async () => {
+      const response = await getMyFeeds({ size: 1 });
+
+      if (!response.success || !response.data) {
+        throw new Error(response.message ?? '마지막 쉼표를 불러오지 못했습니다.');
+      }
+
+      return response.data.items[0];
+    },
+    staleTime: 1000 * 60
+  });
+  const latestFeed = latestMyFeedQuery.data;
+  const lastCommaLabel = latestMyFeedQuery.isLoading
+    ? '마지막 쉼표 불러오는 중'
+    : latestFeed?.createdAt
+      ? `마지막 쉼표 ${transformDate(latestFeed.createdAt)}`
+      : '아직 쉼표 기록이 없어요';
+
+  useEffect(() => {
+    if (!latestFeed?.nickname) return;
+
+    setNickname(latestFeed.nickname);
+    setStoredNickname(latestFeed.nickname);
+  }, [latestFeed?.nickname]);
 
   useLayoutEffect(() => {
     if (!containerRef.current) return;
@@ -177,6 +206,7 @@ function MyPage() {
           onCancelClick={() => setShowModal(false)}
           onSave={(nextNickname) => {
             setNickname(nextNickname);
+            setStoredNickname(nextNickname);
             setShowModal(false);
           }}
         />
@@ -234,7 +264,7 @@ function MyPage() {
         >
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <span className={styles.title}>{nickname}</span>
-            <span className={styles.desc}>마지막 쉼표 3시간 전</span>
+            <span className={styles.desc}>{lastCommaLabel}</span>
           </div>
           <SmallButton
             label="닉네임 수정"

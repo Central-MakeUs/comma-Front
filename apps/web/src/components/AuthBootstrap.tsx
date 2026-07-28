@@ -14,12 +14,30 @@ interface AuthBootstrapProps {
 }
 
 const redirectToLoginForExpiredSession = () => {
+  if (window.location.pathname === '/') return;
+
   router.navigate('/', {
     replace: true,
     state: {
       reason: 'SESSION_EXPIRED'
     }
   });
+};
+
+const publicPaths = new Set([
+  '/',
+  '/nickname',
+  '/oauth/kakao/callback',
+  '/oauth/google/callback',
+  '/oauth/apple/callback'
+]);
+
+const isPublicPath = (pathname: string) => publicPaths.has(pathname);
+
+const redirectToLoginForMissingSession = () => {
+  if (isPublicPath(window.location.pathname)) return;
+
+  router.navigate('/', { replace: true });
 };
 
 const redirectRootAfterAuth = () => {
@@ -54,6 +72,7 @@ function AuthBootstrap({ children }: AuthBootstrapProps) {
       const tokens = getTokens();
 
       if (!tokens) {
+        redirectToLoginForMissingSession();
         setIsReady(true);
         return;
       }

@@ -1,10 +1,8 @@
 import { colors, radii, typography } from '@comma/design-system';
-import { createVar, style } from '@vanilla-extract/css';
-
-export const backgroundImageVar = createVar();
+import { style } from '@vanilla-extract/css';
 
 export const page = style({
-  width: '100vw',
+  width: '100%',
   minHeight: '100dvh',
   overflowX: 'hidden',
   background: colors.backgroundPrimary
@@ -12,23 +10,20 @@ export const page = style({
 
 export const screen = style({
   position: 'relative',
-  width: '100vw',
+  width: '100%',
   minHeight: '100dvh',
   overflowX: 'hidden',
   color: colors.textPrimary,
-  background: colors.backgroundPrimary,
-  selectors: {
-    '&::before': {
-      content: '',
-      position: 'absolute',
-      inset: 0,
-      zIndex: 0,
-      background: backgroundImageVar,
-      backgroundPosition: 'center',
-      backgroundSize: 'cover',
-      backgroundRepeat: 'no-repeat'
-    }
-  }
+  background: colors.backgroundPrimary
+});
+
+export const backgroundImage = style({
+  position: 'absolute',
+  inset: 0,
+  zIndex: 0,
+  width: '100%',
+  height: '100%',
+  objectFit: 'cover'
 });
 
 export const dimOverlay = style({
@@ -37,8 +32,8 @@ export const dimOverlay = style({
   zIndex: 0,
   display: 'none',
   background: 'rgba(26, 24, 20, 0.5)',
-  backdropFilter: 'blur(5px)',
-  WebkitBackdropFilter: 'blur(5px)'
+  backdropFilter: 'blur(20px)',
+  WebkitBackdropFilter: 'blur(20px)'
 });
 
 export const dimOverlayVisible = style({
@@ -46,7 +41,14 @@ export const dimOverlayVisible = style({
 });
 
 export const topGradient = style({
-  display: 'none'
+  position: 'absolute',
+  top: 0,
+  right: 0,
+  left: 0,
+  zIndex: 0,
+  height: 120,
+  background: 'linear-gradient(180deg, rgba(17, 17, 17, 0.66) 0%, rgba(17, 17, 17, 0) 100%)',
+  pointerEvents: 'none'
 });
 
 export const bottomGradient = style({
@@ -86,8 +88,8 @@ export const description = style({
 });
 
 export const upload = style({
-  width: 'min(345px, calc(100vw - 48px))',
-  height: 'min(438px, calc((100vw - 48px) * 1.27))',
+  width: 'min(345px, calc(var(--app-width) - 48px))',
+  height: 'min(438px, calc((var(--app-width) - 48px) * 1.27))',
   borderRadius: 100
 });
 

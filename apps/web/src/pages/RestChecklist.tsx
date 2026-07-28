@@ -1,10 +1,11 @@
+import { FEED_MOODS, FEED_TIME_BUDGETS, type FeedMood, type FeedTimeBudget } from '@comma/bridge';
 import { NavigationBar, ProgressBar, Question } from '@comma/design-system';
+import { useQuery } from '@tanstack/react-query';
 import { useFunnel } from '@use-funnel/react-router-dom';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getChecklists } from '../apis/checklist';
+import { checklistQueryKey, getChecklistQuestions } from '../apis/checklist';
 import { recommend } from '../apis/relax';
-import type { questionInfo } from '../types/checklist';
 import { navigateToNavigationItem } from '../utils/navigation';
 import * as styles from './RestChecklist.css';
 
@@ -24,12 +25,53 @@ function useSelectedOption() {
   return { selectedKey, setSelectedKey, selectThenMove };
 }
 
+function isFeedMood(value: string): value is FeedMood {
+  return (FEED_MOODS as readonly string[]).includes(value);
+}
+
+function isFeedTimeBudget(value: string): value is FeedTimeBudget {
+  return (FEED_TIME_BUDGETS as readonly string[]).includes(value);
+}
+
+function RestChecklistSkeleton() {
+  return (
+    <div
+      aria-hidden="true"
+      className={styles.skeletonContainer}
+      data-testid="rest-checklist-skeleton"
+    >
+      <div className={styles.skeletonProgress}>
+        <div className={styles.skeletonProgressFill} />
+        <div className={styles.skeletonProgressTrack} />
+      </div>
+      <div className={styles.skeletonQuestion}>
+        <div className={styles.skeletonTopArea} />
+        <div className={styles.skeletonContent}>
+          <div className={styles.skeletonTitleBlock}>
+            <div className={styles.skeletonStep} />
+            <div className={styles.skeletonTitle} />
+          </div>
+          <div className={styles.skeletonOptions}>
+            <div className={styles.skeletonOption} />
+            <div className={styles.skeletonOption} />
+            <div className={styles.skeletonOption} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function RestChecklist() {
   const navigate = useNavigate();
   const { selectedKey, setSelectedKey, selectThenMove } = useSelectedOption();
   const [recommendLoading, setRecommendLoading] = useState(false);
-  const [questionInfo, setQuestionInfo] = useState<questionInfo[]>([]);
-  const [loading, setLoading] = useState(true);
+  const checklistQuery = useQuery({
+    queryKey: checklistQueryKey,
+    queryFn: getChecklistQuestions,
+    staleTime: 1000 * 60 * 10
+  });
+  const questionInfo = checklistQuery.data;
 
   const funnel = useFunnel<RestChecklistFunnel>({
     id: 'rest-checklist',
@@ -40,34 +82,25 @@ function RestChecklist() {
   });
 
   useEffect(() => {
-    const handleInit = async () => {
-      let res: Awaited<ReturnType<typeof getChecklists>> | undefined;
-      try {
-        res = await getChecklists();
-        if (
-          !res?.success ||
-          (res.data?.questions?.length ?? 0) < 2 ||
-          res.data?.questions?.some((q) => (q.options?.length ?? 0) < 2)
-        )
-          throw new Error();
-      } catch (error) {
-        alert('체크리스트를 불러오는 중 오류가 발생했습니다.');
-        console.error(error);
-        navigate(-1);
-      } finally {
-        if (res?.success) {
-          setQuestionInfo([...(res?.data?.questions ?? [])]);
-          setLoading(false);
-        }
-      }
-    };
+    if (!checklistQuery.isError) return;
 
-    handleInit();
-  }, [navigate]);
+    alert('체크리스트를 불러오는 중 오류가 발생했습니다.');
+    console.error(checklistQuery.error);
+    navigate(-1);
+  }, [checklistQuery.error, checklistQuery.isError, navigate]);
 
   return (
     <main className={styles.page}>
       <div className={styles.screen}>
+        <img
+          alt=""
+          aria-hidden="true"
+          className={styles.backgroundImage}
+          decoding="async"
+          fetchPriority="high"
+          loading="eager"
+          src="/images/Home.png"
+        />
         <div aria-hidden="true" className={styles.dimOverlay} />
         <div aria-hidden="true" className={styles.topGradient} />
         <div aria-hidden="true" className={styles.bottomGradient} />
@@ -77,7 +110,9 @@ function RestChecklist() {
             <img alt="comma" className={styles.logo} src="/images/logo_glass.svg" />
           </header>
 
-          {loading ? null : (
+          {!questionInfo ? (
+            <RestChecklistSkeleton />
+          ) : (
             <funnel.Render
               Mood={({ history }) => (
                 <>
@@ -124,10 +159,16 @@ function RestChecklist() {
                         const selectedMoodCode = questionInfo[0].options.filter(
                           (o) => context.mood === o.label
                         )[0].code;
-                        if (!selectedMoodCode) throw new Error();
+                        const selectedTimeBudgetCode = questionInfo[1].options[index].code;
+                        if (
+                          !isFeedMood(selectedMoodCode) ||
+                          !isFeedTimeBudget(selectedTimeBudgetCode)
+                        ) {
+                          throw new Error();
+                        }
                         const res = await recommend({
                           mood: selectedMoodCode,
-                          time: questionInfo[1].options[index].code
+                          time: selectedTimeBudgetCode
                         });
                         if (!res?.success || !res.data?.length) {
                           throw new Error(res.message ?? 'No recommendations found.');
@@ -137,7 +178,9 @@ function RestChecklist() {
                             void history.replace('Time', { ...context, time });
                             void navigate('/rest/loading', {
                               state: {
-                                data: res.data
+                                data: res.data,
+                                mood: selectedMoodCode,
+                                timeBudget: selectedTimeBudgetCode
                               }
                             });
                           });

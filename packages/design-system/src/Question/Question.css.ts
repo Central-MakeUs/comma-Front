@@ -1,11 +1,13 @@
-import { style } from '@vanilla-extract/css';
+import { createVar, fallbackVar, style } from '@vanilla-extract/css';
 import { vars } from '../theme.css';
+
+export const questionTopGap = createVar();
 
 export const question = style({
   width: 393,
   display: 'flex',
   flexDirection: 'column',
-  gap: 32,
+  gap: fallbackVar(questionTopGap, '32px'),
   boxSizing: 'border-box',
   color: vars.color.textPrimary,
   fontFamily: vars.font.body

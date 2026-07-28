@@ -3,7 +3,7 @@ import { style } from '@vanilla-extract/css';
 
 export const screen = style({
   position: 'relative',
-  width: '100vw',
+  width: '100%',
   minHeight: '100dvh',
   overflowX: 'hidden',
   color: colors.textPrimary,
@@ -35,7 +35,7 @@ export const photoGrid = style({
   width: '100%',
   display: 'grid',
   gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-  gridAutoRows: 'calc((100vw - 6px) / 3)',
+  gridAutoRows: 'calc((var(--app-width) - 54px) / 3)',
   gap: 3,
   marginTop: 28,
   paddingBottom: 'max(40px, var(--safe-area-bottom))'

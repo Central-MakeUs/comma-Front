@@ -2,7 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { type fieldType, login, type TokenResponse } from '../apis/auth';
-import { setOnboardingCompleted, setTokens } from '../utils/tokenStorage';
+import { setOnboardingCompleted, setStoredNickname, setTokens } from '../utils/tokenStorage';
 import * as styles from './CallbackPage.css';
 
 const getFieldByPathname = (pathname: string): fieldType | null => {
@@ -66,6 +66,7 @@ function CallbackPage() {
             refreshToken: res.data.refreshToken
           });
           setOnboardingCompleted(res.data.onboardingCompleted);
+          setStoredNickname(res.data.nickname);
           navigate(getPostLoginPath(res.data), { replace: true });
         } else alert(res.message);
       } catch (err) {
@@ -75,7 +76,19 @@ function CallbackPage() {
     };
     handleLogin();
   }, [navigate, pathname, appleCode, location.search, loginMutateAsync]);
-  return <div className={styles.container} />;
+  return (
+    <div className={styles.container}>
+      <img
+        alt=""
+        aria-hidden="true"
+        className={styles.backgroundImage}
+        decoding="async"
+        fetchPriority="high"
+        loading="eager"
+        src="/images/onboardingBackground_blur.png"
+      />
+    </div>
+  );
 }
 
 export default CallbackPage;

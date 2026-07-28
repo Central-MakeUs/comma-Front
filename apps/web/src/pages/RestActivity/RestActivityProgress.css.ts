@@ -24,13 +24,13 @@ export const content = style({
 
 export const heroText = style({
   width: '100%',
-  padding: '0 36px'
+  padding: '0 32px'
 });
 
 export const participantRow = style({
   width: '100%',
   display: 'flex',
-  alignItems: 'flex-end',
+  alignItems: 'baseline',
   gap: 4,
   padding: '0 32px'
 });
@@ -48,18 +48,18 @@ export const participantLabel = style({
   ...typography.headlineR,
   flex: 1,
   minWidth: 0,
-  height: 45,
-  paddingBottom: 7,
   color: colors.textTertiary,
-  display: 'inline-flex',
-  alignItems: 'flex-end'
+  whiteSpace: 'nowrap'
 });
 
 export const footer = style({
   position: 'fixed',
-  right: 0,
+  width: '100%',
+  maxWidth: 'var(--app-max-width)',
+  right: 'auto',
   bottom: 0,
-  left: 0,
+  left: '50%',
+  transform: 'translateX(-50%)',
   zIndex: 3,
   display: 'flex',
   flexDirection: 'column',
@@ -69,4 +69,12 @@ export const footer = style({
     '64px calc(32px + var(--safe-area-right)) max(32px, var(--safe-area-bottom)) calc(32px + var(--safe-area-left))',
   background: 'linear-gradient(to bottom, rgba(26, 24, 20, 0) 0%, #1A1814 46.767%, #1A1814 100%)',
   pointerEvents: 'none'
+});
+
+export const footerMessage = style({
+  ...typography.bodyReadingR,
+  width: '100%',
+  margin: 0,
+  color: colors.textSecondary,
+  textAlign: 'center'
 });

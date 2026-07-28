@@ -46,3 +46,5 @@ app-example
 
 .turbo
 storybook-static
+apps/mobile-shell/builds/
+.gstack/

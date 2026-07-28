@@ -1,6 +1,6 @@
 import { Chip } from '@comma/design-system';
 import type { RefObject } from 'react';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as styles from './Feed.css';
 import CategoryModal from './FeedCategoryModal';
 
@@ -25,6 +25,26 @@ function FeedHeader({ currentFeel, currentBody, onFeelChange, onBodyChange }: IF
     const rect = ref.current?.getBoundingClientRect();
     return rect ? { top: rect.bottom + 8, left: rect.left } : undefined;
   };
+
+  useEffect(() => {
+    if (!feelOpen && !bodyOpen) return;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target;
+
+      if (!(target instanceof Node)) return;
+      if (feelRef.current?.contains(target) || bodyRef.current?.contains(target)) return;
+
+      setFeelOpen(false);
+      setBodyOpen(false);
+    };
+
+    document.addEventListener('pointerdown', handlePointerDown);
+
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+    };
+  }, [feelOpen, bodyOpen]);
 
   return (
     <div style={{ width: '100%' }}>

@@ -29,12 +29,24 @@ export const interpolatePath = (smallPath: string, bigPath: string, progress: nu
   });
 };
 
+const scalePath = (path: string, scale: number) => {
+  const regex = /-?\d*\.?\d+/g;
+
+  return path.replace(regex, (value) => (Number(value) * scale).toFixed(3));
+};
+
 export const computeLoopedLayout = (
   scrollSnaps: number[],
   scrollProgress: number,
   viewportWidth: number,
-  cardCount: number
+  cardCount: number,
+  layoutScale = 1
 ) => {
+  const bigWidth = BIG_WIDTH * layoutScale;
+  const bigHeight = BIG_HEIGHT * layoutScale;
+  const smallWidth = SMALL_WIDTH * layoutScale;
+  const smallHeight = SMALL_HEIGHT * layoutScale;
+  const gap = GAP * layoutScale;
   const offsets = scrollSnaps.map((snap) => {
     let diff = snap - scrollProgress;
     if (diff > 0.5) diff -= 1;
@@ -42,8 +54,8 @@ export const computeLoopedLayout = (
     return diff * cardCount;
   });
   const scales = offsets.map((o) => Math.max(0, 1 - Math.abs(o)));
-  const widths = scales.map((s) => lerp(SMALL_WIDTH, BIG_WIDTH, s));
-  const heights = scales.map((s) => lerp(SMALL_HEIGHT, BIG_HEIGHT, s));
+  const widths = scales.map((s) => lerp(smallWidth, bigWidth, s));
+  const heights = scales.map((s) => lerp(smallHeight, bigHeight, s));
 
   const order = offsets.map((_, i) => i).sort((a, b) => offsets[a] - offsets[b]);
 
@@ -53,7 +65,7 @@ export const computeLoopedLayout = (
       lefts[i] = 0;
     } else {
       const prev = order[k - 1];
-      lefts[i] = lefts[prev] + widths[prev] + GAP;
+      lefts[i] = lefts[prev] + widths[prev] + gap;
     }
   });
   const centerOf = (i: number) => lefts[i] + widths[i] / 2;
@@ -70,7 +82,7 @@ export const computeLoopedLayout = (
   const virtualScrollLeft = focalCenter - viewportWidth / 2;
 
   return {
-    paths: scales.map((s) => interpolatePath(SMALL_PATH, BIG_PATH, s)),
+    paths: scales.map((s) => scalePath(interpolatePath(SMALL_PATH, BIG_PATH, s), layoutScale)),
     sizes: widths.map((w, i) => ({ width: w, height: heights[i] })),
     xs: lefts.map((l) => l - virtualScrollLeft)
   };

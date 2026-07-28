@@ -2,7 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { login, type TokenResponse } from '../apis/auth';
-import { setOnboardingCompleted, setTokens } from '../utils/tokenStorage';
+import { setOnboardingCompleted, setStoredNickname, setTokens } from '../utils/tokenStorage';
 import * as styles from './Login.css';
 
 const REST_API_KEY = import.meta.env.VITE_REST_API_KEY;
@@ -115,6 +115,7 @@ function Login() {
             refreshToken: res.data.refreshToken
           });
           setOnboardingCompleted(res.data.onboardingCompleted);
+          setStoredNickname(res.data.nickname);
           navigate(getPostLoginPath(res.data), { replace: true });
         } else alert('구글 로그인 중 에러 발생');
       } catch (err) {
@@ -158,6 +159,15 @@ function Login() {
 
   return (
     <div className={styles.container}>
+      <img
+        alt=""
+        aria-hidden="true"
+        className={styles.backgroundImage}
+        decoding="async"
+        fetchPriority="high"
+        loading="eager"
+        src="/images/onboardingBackground_blur.png"
+      />
       <div
         style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
       >

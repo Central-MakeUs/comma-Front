@@ -1,9 +1,17 @@
 import { colors, typography } from '@comma/design-system';
 import { style } from '@vanilla-extract/css';
 
+export const gaugeContainer = style({
+  width: '100%',
+  display: 'grid',
+  gridTemplateColumns: 'minmax(0, 1fr) 44px',
+  alignItems: 'center',
+  columnGap: 16
+});
+
 export const gaugeBar = style({
   backgroundColor: colors.lineSecondary,
-  width: 120,
+  width: '100%',
   height: 4,
   borderRadius: 100
 });
@@ -17,5 +25,6 @@ export const gaugeBarInner = style({
 export const gaugeText = style({
   ...typography.bodyNormalR,
   color: colors.textTertiary,
-  marginLeft: 16
+  textAlign: 'right',
+  whiteSpace: 'nowrap'
 });

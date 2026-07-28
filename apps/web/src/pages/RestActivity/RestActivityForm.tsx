@@ -6,26 +6,23 @@ import {
   SecretToggle,
   TextInput
 } from '@comma/design-system';
-import { assignInlineVars } from '@vanilla-extract/dynamic';
 import { type KeyboardEvent, useState } from 'react';
-import {
-  COMMENT_MAX_LENGTH,
-  REST_DESCRIPTION,
-  REST_TITLE,
-  TAG_MAX_LENGTH
-} from './RestActivity.constants';
+import { COMMENT_MAX_LENGTH, TAG_MAX_LENGTH } from './RestActivity.constants';
 import * as sharedStyles from './RestActivity.shared.css';
 import * as styles from './RestActivityForm.css';
 import { RestActivityReselectModal } from './RestActivityReselectModal';
 
 type RestActivityFormProps = {
   imagePreview?: string;
+  isSubmitting?: boolean;
+  title: string;
+  desc: string;
   showReselectModal: boolean;
   onOpenPhotoPicker: () => void;
   onOpenReselectModal: () => void;
   onCancelReselect: () => void;
   onConfirmReselect: () => void;
-  onComplete: () => void;
+  onComplete: (values: { hashtags: string[]; review: string; isPublic: boolean }) => void;
 };
 
 function normalizeTag(value: string) {
@@ -34,6 +31,9 @@ function normalizeTag(value: string) {
 
 export function RestActivityForm({
   imagePreview,
+  isSubmitting = false,
+  title,
+  desc,
   showReselectModal,
   onOpenPhotoPicker,
   onOpenReselectModal,
@@ -82,19 +82,22 @@ export function RestActivityForm({
         : 'default';
   const isComplete =
     Boolean(imagePreview) && tags.length > 0 && comment.trim().length > 0 && !isCommentOverLimit;
+  const isDoneDisabled = !isComplete || isSubmitting;
 
   return (
     <main className={sharedStyles.page}>
-      <div
-        className={sharedStyles.screen}
-        style={
-          imagePreview
-            ? assignInlineVars({
-                [sharedStyles.backgroundImageVar]: `url(${imagePreview})`
-              })
-            : undefined
-        }
-      >
+      <div className={sharedStyles.screen}>
+        {imagePreview ? (
+          <img
+            alt=""
+            aria-hidden="true"
+            className={sharedStyles.backgroundImage}
+            decoding="async"
+            fetchPriority="high"
+            loading="eager"
+            src={imagePreview}
+          />
+        ) : null}
         <div
           aria-hidden="true"
           className={[
@@ -122,9 +125,9 @@ export function RestActivityForm({
         <section className={styles.content} aria-labelledby="rest-activity-title">
           <div className={styles.heroText}>
             <h1 className={sharedStyles.title} id="rest-activity-title">
-              {REST_TITLE}
+              {title}
             </h1>
-            <p className={sharedStyles.description}>{REST_DESCRIPTION}</p>
+            <p className={sharedStyles.description}>{desc}</p>
           </div>
 
           <div className={styles.uploadArea}>
@@ -191,10 +194,16 @@ export function RestActivityForm({
           </div>
           <CtaButton
             className={sharedStyles.doneButton}
-            disabled={!isComplete}
-            onClick={onComplete}
+            disabled={isDoneDisabled}
+            onClick={() =>
+              onComplete({
+                hashtags: tags,
+                review: comment.trim(),
+                isPublic: !isSecret
+              })
+            }
           >
-            휴식 완료
+            {isSubmitting ? '올리는 중' : '휴식 완료'}
           </CtaButton>
         </footer>
 

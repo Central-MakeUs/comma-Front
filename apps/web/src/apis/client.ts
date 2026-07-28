@@ -13,6 +13,7 @@ type RetriableRequestConfig = InternalAxiosRequestConfig & {
 };
 
 export const SESSION_EXPIRED_EVENT = 'comma:session-expired';
+export const SESSION_EXPIRED_ERROR_MESSAGE = 'COMMA_SESSION_EXPIRED';
 
 export const apiClient = axios.create({
   baseURL: import.meta.env.VITE_BASE_URL
@@ -29,10 +30,13 @@ export const publicApiClient = axios.create({
 });
 
 let refreshPromise: Promise<string> | null = null;
+let hasEmittedSessionExpired = false;
 
 const emitSessionExpired = () => {
   if (typeof window === 'undefined') return;
+  if (hasEmittedSessionExpired) return;
 
+  hasEmittedSessionExpired = true;
   window.dispatchEvent(new CustomEvent(SESSION_EXPIRED_EVENT));
 };
 
@@ -42,7 +46,7 @@ export const refreshStoredTokens = async () => {
   if (!tokens?.refreshToken) {
     clearTokens();
     emitSessionExpired();
-    throw new Error('No refresh token found.');
+    throw new Error(SESSION_EXPIRED_ERROR_MESSAGE);
   }
 
   const { data } = await authApiClient.post<ApiResponse<RefreshTokenData>>('/api/auth/reissue', {
@@ -52,7 +56,7 @@ export const refreshStoredTokens = async () => {
   if (!data.success || !data.data?.accessToken) {
     clearTokens();
     emitSessionExpired();
-    throw new Error(data.message ?? 'Failed to refresh token.');
+    throw new Error(SESSION_EXPIRED_ERROR_MESSAGE);
   }
 
   const nextTokens = {
@@ -61,6 +65,7 @@ export const refreshStoredTokens = async () => {
   };
 
   setTokens(nextTokens);
+  hasEmittedSessionExpired = false;
   if (typeof data.data.onboardingCompleted === 'boolean') {
     setOnboardingCompleted(data.data.onboardingCompleted);
   }

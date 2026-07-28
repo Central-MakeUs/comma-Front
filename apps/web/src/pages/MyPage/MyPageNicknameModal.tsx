@@ -1,7 +1,8 @@
 import { CtaButton, TextInput } from '@comma/design-system';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { type FormEvent, useEffect, useState } from 'react';
+import type { FormEvent } from 'react';
 import { getRandomNickname, updateNickname } from '../../apis/user';
+import { useEditableNickname } from '../../hooks/useEditableNickname';
 import * as styles from './MyPageNicknameModal.css';
 
 interface MyPageNicknameModalProps {
@@ -10,7 +11,6 @@ interface MyPageNicknameModalProps {
 }
 
 function MyPageNicknameModal({ onCancelClick, onSave }: MyPageNicknameModalProps) {
-  const [value, setValue] = useState('');
   const randomNicknameQuery = useQuery({
     queryKey: ['user', 'nickname', 'random', 'mypage'],
     queryFn: getRandomNickname
@@ -18,14 +18,9 @@ function MyPageNicknameModal({ onCancelClick, onSave }: MyPageNicknameModalProps
   const updateNicknameMutation = useMutation({
     mutationFn: updateNickname
   });
-
-  useEffect(() => {
-    const randomNickname = randomNicknameQuery.data?.data?.nickname;
-
-    if (!randomNickname || value.length > 0) return;
-
-    setValue(randomNickname);
-  }, [randomNicknameQuery.data?.data?.nickname, value.length]);
+  const { value, handleChange } = useEditableNickname({
+    suggestedValue: randomNicknameQuery.data?.data?.nickname
+  });
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -48,41 +43,54 @@ function MyPageNicknameModal({ onCancelClick, onSave }: MyPageNicknameModalProps
   };
 
   return (
-    <div className={styles.container}>
-      <div className={styles.icon} />
-      <form
-        onSubmit={handleSubmit}
-        style={{
-          width: '100%',
-          flex: 1,
-          paddingBottom: 'max(40px, var(--safe-area-bottom))',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexDirection: 'column'
-        }}
-      >
-        <TextInput
-          variant="field"
-          title="닉네임 수정"
-          maxLength={10}
-          helperText="최대 10자까지 입력할 수 있어요"
-          showFooter={true}
-          value={value}
-          onChange={(val) => setValue(val)}
-          disabled={randomNicknameQuery.isLoading || updateNicknameMutation.isPending}
-        />
-        <div
-          style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+    <div className={styles.overlay}>
+      <button
+        aria-label="닉네임 수정 닫기"
+        className={styles.backdropButton}
+        onClick={onCancelClick}
+        type="button"
+      />
+      <div className={styles.container}>
+        <div className={styles.icon} />
+        <form
+          onSubmit={handleSubmit}
+          style={{
+            width: '100%',
+            flex: 1,
+            paddingBottom: 'max(40px, var(--safe-area-bottom))',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexDirection: 'column'
+          }}
         >
-          <CtaButton label="취소" className={styles.cancelBtn} onClick={onCancelClick} />
-          <CtaButton
-            label="저장하기"
-            state={value.length > 0 && !updateNicknameMutation.isPending ? 'default' : 'disabled'}
-            type="submit"
+          <TextInput
+            variant="field"
+            title="닉네임 수정"
+            maxLength={10}
+            helperText="최대 10자까지 입력할 수 있어요"
+            showFooter={true}
+            value={value}
+            onChange={handleChange}
+            disabled={randomNicknameQuery.isLoading || updateNicknameMutation.isPending}
           />
-        </div>
-      </form>
+          <div
+            style={{
+              width: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center'
+            }}
+          >
+            <CtaButton label="취소" className={styles.cancelBtn} onClick={onCancelClick} />
+            <CtaButton
+              label="저장하기"
+              state={value.length > 0 && !updateNicknameMutation.isPending ? 'default' : 'disabled'}
+              type="submit"
+            />
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

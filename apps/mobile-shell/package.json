@@ -9,6 +9,8 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
+    "android:build": "eas build --platform android --profile production",
+    "android:submit": "eas submit --platform android --profile production",
     "ios:build": "eas build --platform ios --profile production",
     "ios:submit": "eas submit --platform ios --profile production",
     "typecheck": "tsc --noEmit"
@@ -18,6 +20,7 @@
     "@webview-bridge/react-native": "^1.7.9",
     "expo": "~54.0.36",
     "expo-constants": "~18.0.13",
+    "expo-file-system": "~19.0.23",
     "expo-media-library": "~18.2.1",
     "expo-splash-screen": "~31.0.13",
     "expo-status-bar": "^3.0.9",

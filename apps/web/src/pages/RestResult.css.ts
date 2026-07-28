@@ -1,32 +1,37 @@
 import { colors, radii, shadows, typography } from '@comma/design-system';
-import { createVar, style } from '@vanilla-extract/css';
-
-export const backgroundImageVar = createVar();
+import { globalStyle, style } from '@vanilla-extract/css';
 
 export const container = style({
-  width: '100vw',
+  width: '100%',
   height: '100dvh',
   overflow: 'hidden',
   boxSizing: 'border-box',
   position: 'relative',
-  selectors: {
-    '&::before': {
-      content: '',
-      position: 'absolute',
-      inset: 0,
-      background: backgroundImageVar,
-      zIndex: -10
-    },
-    '&::after': {
-      content: '',
-      position: 'absolute',
-      background: `rgba(26, 24, 20, 0.5)`,
-      backdropFilter: 'blur(5px)',
-      WebkitBackdropFilter: 'blur(5px)',
-      inset: 0,
-      zIndex: -1
-    }
-  }
+  isolation: 'isolate',
+  background: colors.backgroundPrimary
+});
+
+globalStyle(`:where(${container} > :not([aria-hidden="true"]))`, {
+  position: 'relative',
+  zIndex: 2
+});
+
+export const backgroundImage = style({
+  position: 'absolute',
+  inset: 0,
+  zIndex: 0,
+  width: '100%',
+  height: '100%',
+  objectFit: 'cover'
+});
+
+export const backgroundOverlay = style({
+  position: 'absolute',
+  inset: 0,
+  zIndex: 1,
+  background: 'rgba(26, 24, 20, 0.5)',
+  backdropFilter: 'blur(5px)',
+  WebkitBackdropFilter: 'blur(5px)'
 });
 
 export const title = style({
@@ -63,12 +68,28 @@ export const dot = style({
 });
 
 export const ctaButtonStyle = style({
-  margin: '0 auto',
+  width: '100%',
+  maxWidth: 329,
   color: colors.textPrimary,
-  position: 'absolute',
-  bottom: 'max(40px, var(--safe-area-bottom))',
+  pointerEvents: 'auto'
+});
+
+export const footer = style({
+  position: 'fixed',
+  width: '100%',
+  maxWidth: 'var(--app-max-width)',
+  right: 'auto',
+  bottom: 0,
   left: '50%',
-  transform: 'translateX(-50%)'
+  transform: 'translateX(-50%)',
+  zIndex: 3,
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  padding:
+    '64px calc(32px + var(--safe-area-right)) max(32px, var(--safe-area-bottom)) calc(32px + var(--safe-area-left))',
+  background: 'linear-gradient(to bottom, rgba(26, 24, 20, 0) 0%, #1A1814 46.767%, #1A1814 100%)',
+  pointerEvents: 'none'
 });
 
 export const navStyle = style({

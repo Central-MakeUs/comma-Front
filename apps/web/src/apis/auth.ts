@@ -1,5 +1,5 @@
 import type { ApiResponse } from '../types/api';
-import { publicApiClient, refreshStoredTokens } from './client';
+import { apiClient, publicApiClient, refreshStoredTokens } from './client';
 
 export type fieldType = 'KAKAO' | 'GOOGLE' | 'APPLE';
 
@@ -17,12 +17,19 @@ export interface TokenResponse {
 }
 
 export type LoginResponse = ApiResponse<TokenResponse>;
+export type LogoutResponse = ApiResponse<void>;
 
 export const login = async ({ field, code, redirectUri }: LoginRequest) => {
   const { data } = await publicApiClient.post<LoginResponse>(`/api/auth/login/${field}`, {
     code,
     redirectUri
   });
+
+  return data;
+};
+
+export const logout = async () => {
+  const { data } = await apiClient.post<LogoutResponse>('/api/auth/logout');
 
   return data;
 };

@@ -1,5 +1,4 @@
 import { CtaButton, colors, Icon, ImageUpload } from '@comma/design-system';
-import { assignInlineVars } from '@vanilla-extract/dynamic';
 import useEmblaCarousel from 'embla-carousel-react';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -8,6 +7,17 @@ import { BIG_HEIGHT, GAP, SMALL_WIDTH } from '../data/cardInfo';
 import type { RelaxActivity, RestResultLocationState } from '../types/relax';
 import { computeLoopedLayout } from '../utils/compute_layout';
 import * as styles from './RestResult.css';
+
+const getCarouselLayoutScale = () => {
+  if (typeof window === 'undefined') return 1;
+
+  const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
+
+  if (viewportHeight <= 700) return 0.84;
+  if (viewportHeight <= 760) return 0.92;
+
+  return 1;
+};
 
 function Modal({ onClose }: { onClose: () => void }) {
   const navigate = useNavigate();
@@ -83,6 +93,7 @@ function RestResult() {
   const [data, setData] = useState<RelaxActivity[] | null>(
     locationState?.data?.length ? locationState.data : null
   );
+  const [carouselLayoutScale, setCarouselLayoutScale] = useState(getCarouselLayoutScale);
 
   const [paths, setPaths] = useState<string[]>([]);
   const [sizes, setSizes] = useState<{ width: number; height: number }[]>([]);
@@ -100,10 +111,14 @@ function RestResult() {
     sizes.length === cardCount &&
     xs.length === cardCount;
   const selectedRelax = data?.[slideIdx];
+  const carouselHeight = BIG_HEIGHT * carouselLayoutScale;
+  const carouselSlideWidth = SMALL_WIDTH * carouselLayoutScale;
+  const carouselGap = GAP * carouselLayoutScale;
+  const isCompactHeight = carouselLayoutScale < 1;
 
   useEffect(() => {
     const nextData = locationState?.data;
-    if (!nextData || nextData.length === 0) {
+    if (!nextData || nextData.length === 0 || !locationState?.mood || !locationState.timeBudget) {
       alert('휴식 추천 중 오류가 발생했습니다. 다시 선택해주세요');
       navigate('/rest/checklist', { replace: true });
       return;
@@ -137,7 +152,9 @@ function RestResult() {
       navigate('/rest/activity', {
         state: {
           data,
-          selectedRelax: nextSelectedRelax
+          selectedRelax: nextSelectedRelax,
+          mood: locationState?.mood,
+          timeBudget: locationState?.timeBudget
         }
       });
     }
@@ -147,14 +164,47 @@ function RestResult() {
     if (!containerRef.current || cardCount === 0) return;
     const viewportWidth = containerRef.current.getBoundingClientRect().width;
     const initialSnaps = Array.from({ length: cardCount }, (_, i) => i / cardCount);
-    const { paths, sizes, xs } = computeLoopedLayout(initialSnaps, 0, viewportWidth, cardCount);
+    const { paths, sizes, xs } = computeLoopedLayout(
+      initialSnaps,
+      0,
+      viewportWidth,
+      cardCount,
+      carouselLayoutScale
+    );
     setPaths(paths);
     setSizes(sizes);
     setXs(xs);
-  }, [cardCount]);
+  }, [cardCount, carouselLayoutScale]);
+
+  useEffect(() => {
+    const updateCarouselLayout = () => {
+      setCarouselLayoutScale(getCarouselLayoutScale());
+      emblaApi?.reInit();
+    };
+
+    const containerNode = containerRef.current;
+    const resizeObserver =
+      typeof ResizeObserver === 'undefined' || !containerNode
+        ? null
+        : new ResizeObserver(updateCarouselLayout);
+
+    if (containerNode) {
+      resizeObserver?.observe(containerNode);
+    }
+    window.addEventListener('resize', updateCarouselLayout);
+    window.visualViewport?.addEventListener('resize', updateCarouselLayout);
+
+    return () => {
+      resizeObserver?.disconnect();
+      window.removeEventListener('resize', updateCarouselLayout);
+      window.visualViewport?.removeEventListener('resize', updateCarouselLayout);
+    };
+  }, [emblaApi]);
 
   useLayoutEffect(() => {
     if (!emblaApi) return;
+    emblaApi.reInit();
+
     const updateCardTransforms = () => {
       const viewportWidth = emblaApi.rootNode().getBoundingClientRect().width;
       const scrollSnaps = emblaApi.scrollSnapList();
@@ -163,7 +213,8 @@ function RestResult() {
         scrollSnaps,
         scrollProgress,
         viewportWidth,
-        cardCount
+        cardCount,
+        carouselLayoutScale
       );
       setPaths(paths);
       setSizes(sizes);
@@ -183,17 +234,24 @@ function RestResult() {
       emblaApi.off('reInit', updateCardTransforms);
       emblaApi.off('select', onSelect);
     };
-  }, [emblaApi, cardCount]);
+  }, [emblaApi, cardCount, carouselLayoutScale]);
 
   if (!data || data.length === 0) return null;
 
+  const backgroundSrc = data[slideIdx].imageUrl || '/images/feed-image.svg';
+
   return (
-    <div
-      className={styles.container}
-      style={assignInlineVars({
-        [styles.backgroundImageVar]: `url(${data[slideIdx].imageUrl || '/images/feed-image.svg'}) center / cover no-repeat`
-      })}
-    >
+    <div className={styles.container}>
+      <img
+        alt=""
+        aria-hidden="true"
+        className={styles.backgroundImage}
+        decoding="async"
+        fetchPriority="high"
+        loading="eager"
+        src={backgroundSrc}
+      />
+      <div aria-hidden="true" className={styles.backgroundOverlay} />
       {showModal ? (
         <div
           style={{
@@ -243,18 +301,23 @@ function RestResult() {
           }}
         >
           <span className={styles.title}>{data[slideIdx].name}</span>
-          <span className={styles.subTitle}>{data[slideIdx].description}</span>
+          <span className={styles.subTitle} style={{ marginBottom: isCompactHeight ? 32 : 64 }}>
+            {data[slideIdx].description}
+          </span>
         </div>
         <div
           ref={(node) => {
             embiaRef(node);
             containerRef.current = node;
           }}
-          style={{ position: 'relative', overflow: 'hidden', height: BIG_HEIGHT }}
+          style={{ position: 'relative', overflow: 'hidden', height: carouselHeight }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: GAP }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: carouselGap }}>
             {data.map((card, _i) => (
-              <div key={card.id} style={{ flex: `0 0 ${SMALL_WIDTH}px`, height: BIG_HEIGHT }} />
+              <div
+                key={card.id}
+                style={{ flex: `0 0 ${carouselSlideWidth}px`, height: carouselHeight }}
+              />
             ))}
           </div>
           <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
@@ -281,8 +344,8 @@ function RestResult() {
             flexDirection: 'row',
             justifyContent: 'space-between',
             margin: '0 auto',
-            marginTop: 16,
-            marginBottom: 24
+            marginTop: isCompactHeight ? 12 : 16,
+            marginBottom: isCompactHeight ? 0 : 24
           }}
         >
           {Array.from({ length: data.length }, (_, idx) => idx + 1).map((i) => (
@@ -296,8 +359,10 @@ function RestResult() {
             />
           ))}
         </div>
-        <CtaButton className={styles.ctaButtonStyle} onClick={handleStartClick} />
       </div>
+      <footer className={styles.footer}>
+        <CtaButton className={styles.ctaButtonStyle} onClick={handleStartClick} />
+      </footer>
     </div>
   );
 }

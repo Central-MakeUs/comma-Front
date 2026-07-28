@@ -39,6 +39,6 @@ export const scrollContainer = style({
   overflowX: 'hidden',
   display: 'flex',
   flexDirection: 'column',
-  gap: 40,
-  paddingBottom: 'calc(104px + var(--safe-area-bottom))'
+  gap: 'clamp(24px, 4.69dvh, 40px)',
+  paddingBottom: 'calc(144px + var(--safe-area-bottom))'
 });

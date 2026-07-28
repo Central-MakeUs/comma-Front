@@ -3,7 +3,12 @@ import { style } from '@vanilla-extract/css';
 
 export const overlay = style({
   position: 'fixed',
-  inset: 0,
+  top: 0,
+  bottom: 0,
+  left: '50%',
+  width: '100%',
+  maxWidth: 'var(--app-max-width)',
+  transform: 'translateX(-50%)',
   zIndex: 10,
   display: 'flex',
   alignItems: 'center',
@@ -14,7 +19,7 @@ export const overlay = style({
 });
 
 export const modal = style({
-  width: 'min(329px, calc(100vw - 64px))',
+  width: 'min(329px, calc(var(--app-width) - 64px))',
   minHeight: 284,
   display: 'flex',
   flexDirection: 'column',

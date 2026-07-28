@@ -1,5 +1,4 @@
 import { CtaButton, colors, Icon } from '@comma/design-system';
-import { assignInlineVars } from '@vanilla-extract/dynamic';
 import {
   ACTIVITY_PROGRESS_COUNT,
   ACTIVITY_PROGRESS_TITLE,
@@ -32,14 +31,20 @@ export function RestActivityProgress({
   imageSrc,
   desc = REST_DESCRIPTION
 }: RestActivityProgressProps) {
+  const backgroundSrc = imageSrc || '/images/feed-image.svg';
+
   return (
     <main className={sharedStyles.page}>
-      <div
-        className={sharedStyles.screen}
-        style={assignInlineVars({
-          [sharedStyles.backgroundImageVar]: `url(${imageSrc || '/images/feed-image.svg'})`
-        })}
-      >
+      <div className={sharedStyles.screen}>
+        <img
+          alt=""
+          aria-hidden="true"
+          className={sharedStyles.backgroundImage}
+          decoding="async"
+          fetchPriority="high"
+          loading="eager"
+          src={backgroundSrc}
+        />
         <div
           aria-hidden="true"
           className={[sharedStyles.dimOverlay, sharedStyles.dimOverlayVisible].join(' ')}
@@ -73,8 +78,9 @@ export function RestActivityProgress({
         </section>
 
         <footer className={styles.footer}>
+          <p className={styles.footerMessage}>완료 후 휴식을 기록해요</p>
           <CtaButton className={sharedStyles.doneButton} onClick={onComplete}>
-            휴식 완료
+            휴식 기록하기
           </CtaButton>
         </footer>
 

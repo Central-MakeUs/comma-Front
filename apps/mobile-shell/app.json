@@ -46,7 +46,8 @@
         "foregroundImage": "./assets/adaptive-icon-foreground.png",
         "backgroundColor": "#303030"
       },
-      "package": "com.anonymous.comma"
+      "package": "com.comma.app",
+      "versionCode": 13
     },
     "extra": {
       "webUrl": "https://comma-front-web.vercel.app/",

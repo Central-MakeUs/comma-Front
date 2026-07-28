@@ -76,12 +76,11 @@ function Feed() {
 
   return (
     <div className={styles.container}>
-      <FeedToast />
+      <FeedToast isVisible={isHeaderVisible} />
       <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
         <FeedHeader
           currentFeel={currentFeel}
           currentBody={currentBody}
-          isHeaderVisible={isHeaderVisible}
           onFeelChange={setCurrentFeel}
           onBodyChange={setCurrentBody}
         />

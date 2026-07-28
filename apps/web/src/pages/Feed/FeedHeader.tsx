@@ -1,25 +1,17 @@
-import { Chip, Icon } from '@comma/design-system';
+import { Chip } from '@comma/design-system';
 import type { RefObject } from 'react';
 import { useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
 import * as styles from './Feed.css';
 import CategoryModal from './FeedCategoryModal';
 
 interface IFeedHeader {
   currentFeel: string;
   currentBody: string;
-  isHeaderVisible: boolean;
   onFeelChange: (feel: string) => void;
   onBodyChange: (body: string) => void;
 }
 
-function FeedHeader({
-  currentFeel,
-  currentBody,
-  isHeaderVisible,
-  onFeelChange,
-  onBodyChange
-}: IFeedHeader) {
+function FeedHeader({ currentFeel, currentBody, onFeelChange, onBodyChange }: IFeedHeader) {
   const [feelOpen, setFeelOpen] = useState(false);
   const [bodyOpen, setBodyOpen] = useState(false);
 
@@ -36,27 +28,6 @@ function FeedHeader({
 
   return (
     <div style={{ width: '100%' }}>
-      <div
-        aria-hidden={!isHeaderVisible}
-        className={[
-          styles.headerContainer,
-          isHeaderVisible ? styles.headerContainerVisible : styles.headerContainerHidden
-        ].join(' ')}
-      >
-        <span className={styles.headerText}>
-          오늘 아직 쉬지 못했어요.
-          <br />
-          잠깐 쉼표 찍으러 갈까요?
-        </span>
-        <Link
-          aria-hidden={!isHeaderVisible}
-          className={styles.headerLink}
-          tabIndex={isHeaderVisible ? undefined : -1}
-          to="/rest/checklist"
-        >
-          휴식하기 <Icon name="rightArrow" />
-        </Link>
-      </div>
       <div className={styles.title}>피드</div>
       <div
         style={{

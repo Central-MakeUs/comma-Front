@@ -9,7 +9,25 @@ export const headerContainer = style({
   padding: '16px 32px',
   justifyContent: 'space-between',
   borderBottom: `1px solid ${colors.lineTertiary}`,
-  backgroundColor: colors.backgroundFill
+  backgroundColor: colors.backgroundFill,
+  overflow: 'hidden',
+  transition:
+    'max-height 220ms ease, padding-top 220ms ease, padding-bottom 220ms ease, opacity 180ms ease, transform 220ms ease'
+});
+
+export const headerContainerVisible = style({
+  maxHeight: 96,
+  opacity: 1,
+  transform: 'translateY(0)'
+});
+
+export const headerContainerHidden = style({
+  maxHeight: 0,
+  paddingTop: 0,
+  paddingBottom: 0,
+  opacity: 0,
+  transform: 'translateY(-12px)',
+  borderBottomColor: 'transparent'
 });
 
 export const headerText = style({

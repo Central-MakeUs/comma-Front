@@ -31,9 +31,13 @@ function Feed() {
   const feedRequestIdRef = useRef(0);
   const queryClient = useQueryClient();
 
-  const onHeartClick = async (feedId: number, isLiked: boolean) => {
+  const onHeartClick = async (feedId: number, isLiked: boolean, nickname:string) => {
     try {
+      const myNickname = localStorage.getItem('comma.nickname');
+      if(myNickname === nickname) return;
+
       const res = await postLikes({ feedId });
+      console.log(res);
       if (res.success) {
         setFeeds((prev) =>
           prev.map((feed) =>
@@ -189,7 +193,9 @@ function Feed() {
                   variant="others"
                   liked={f.isLiked}
                   likeCount={f.likeCount}
-                  onHeartClick={() => onHeartClick(f.feedId, f.isLiked)}
+                  onHeartClick={() => onHeartClick(f.feedId, f.isLiked, f.nickname ?? '')}
+                  title={f.nickname}
+                  imageHeart={f.isLiked}
                 />
               ))}
         </div>

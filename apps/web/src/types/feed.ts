@@ -9,4 +9,5 @@ export interface feedInfo {
   createdAt: string;
   isLiked: boolean;
   likeCount: number;
+  nickname?: string;
 }

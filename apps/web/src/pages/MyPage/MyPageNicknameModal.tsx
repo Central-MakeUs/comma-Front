@@ -19,7 +19,7 @@ function MyPageNicknameModal({ onCancelClick, onSave }: MyPageNicknameModalProps
     mutationFn: updateNickname
   });
   const { value, handleChange } = useEditableNickname({
-    suggestedValue: randomNicknameQuery.data?.data?.nickname
+    suggestedValue: localStorage.getItem('comma.nickname') ?? undefined
   });
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {

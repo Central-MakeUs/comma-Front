@@ -42,3 +42,9 @@ export const scrollContainer = style({
   gap: 'clamp(24px, 4.69dvh, 40px)',
   paddingBottom: 'calc(144px + var(--safe-area-bottom))'
 });
+
+export const alertText = style({
+  ...typography.bodyReadingR,
+  color: colors.textTertiary,
+  margin: 'auto'
+});

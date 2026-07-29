@@ -27,7 +27,7 @@ export type FeedCardProps = Omit<ComponentPropsWithoutRef<'div'>, 'children' | '
   tags?: string[];
   likeCount?: number;
   liked?: boolean;
-  onHeartClick?: MouseEventHandler<SVGSVGElement>;
+  onHeartClick?: MouseEventHandler<HTMLSpanElement>;
 };
 
 function formatTags(tags: string[]): string {
@@ -61,6 +61,7 @@ export function FeedCard({
         heart={imageHeart}
         imageAlt={imageAlt}
         imageSrc={imageSrc}
+        onClick={onHeartClick}
       />
       <div className={body}>
         <div className={metaRow}>
@@ -68,13 +69,7 @@ export function FeedCard({
             <>
               <span className={metaText}>{dateLabel}</span>
               <span className={likeRow}>
-                <Icon
-                  height={18}
-                  name="heart"
-                  variant={liked ? 'on' : 'off'}
-                  width={18}
-                  onClick={onHeartClick}
-                />
+                <Icon height={18} name="heart" variant={liked ? 'on' : 'off'} width={18} />
                 <span>{likeCount}</span>
               </span>
             </>

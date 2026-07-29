@@ -93,3 +93,14 @@ export const navStyle = style({
   WebkitBackdropFilter: 'blur(10px)',
   backgroundColor: '#1A181310'
 });
+
+export const alertText = style({
+  ...typography.bodyReadingR,
+  color: colors.textTertiary,
+  width: '100%',
+  height: '100%',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  textAlign: 'center'
+});

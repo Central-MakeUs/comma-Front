@@ -180,7 +180,11 @@ function Feed() {
         >
           {state === 'loading'
             ? /* TODO: error와 empty 시 화면 UI 반영 */
-              null
+              <span className={styles.alertText}>불러오는 중...</span>
+            : state === 'empty' ?
+              <span className={styles.alertText}>쉼표를 추가해보세요.</span>
+            : state === 'error' ?
+              null 
             : feeds.map((f) => (
                 <FeedCard
                   key={f.feedId}

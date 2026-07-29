@@ -4,19 +4,16 @@ import useEmblaCarousel from 'embla-carousel-react';
 import { useLayoutEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getMyFeeds } from '../../apis/feed';
-import {
-  getMyReport,
-  myReportQueryKey
-} from '../../apis/mypage';
+import { getMyReport, myReportQueryKey } from '../../apis/mypage';
 import { interpolatePath, lerp } from '../../utils/compute_layout';
 import { navigateToNavigationItem } from '../../utils/navigation';
 import { getStoredNickname, setStoredNickname } from '../../utils/tokenStorage';
 import { transformDate } from '../../utils/transformDate';
+import { fallbackMoodRatio } from './MyPage.constant';
 import * as styles from './MyPage.css';
 import MyPageAnswerContainer from './MyPageAnswerContainer';
 import MyPageCard from './MyPageCard';
 import MyPageNicknameModal from './MyPageNicknameModal';
-import { fallbackMoodRatio } from './MyPage.constant';
 
 const backgrounds = [
   '/images/rest_1.png',
@@ -310,8 +307,7 @@ function MyPage() {
             ))}
           </div>
           <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-            {
-              displayActivityRanking.length?
+            {displayActivityRanking.length ? (
               displayActivityRanking.map((activity, index) => (
                 <MyPageCard
                   key={`${activity.rank}-${activity.relaxId}`}
@@ -324,9 +320,10 @@ function MyPage() {
                   height={sizes[index]?.height ?? SMALL_HEIGHT * cardLayoutScale}
                   x={xs[index] ?? 0}
                 />
-            ))
-            : <span className={styles.alertText}>쉼표가 쌓이면 나만의 쉼표 리포트가 생겨요.</span>
-          }
+              ))
+            ) : (
+              <span className={styles.alertText}>쉼표가 쌓이면 나만의 쉼표 리포트가 생겨요.</span>
+            )}
           </div>
         </div>
         <div

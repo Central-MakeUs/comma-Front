@@ -31,10 +31,10 @@ function Feed() {
   const feedRequestIdRef = useRef(0);
   const queryClient = useQueryClient();
 
-  const onHeartClick = async (feedId: number, isLiked: boolean, nickname:string) => {
+  const onHeartClick = async (feedId: number, isLiked: boolean, nickname: string) => {
     try {
       const myNickname = localStorage.getItem('comma.nickname');
-      if(myNickname === nickname) return;
+      if (myNickname === nickname) return;
 
       const res = await postLikes({ feedId });
       console.log(res);
@@ -178,30 +178,30 @@ function Feed() {
             }
           }}
         >
-          {state === 'loading'
-            ? /* TODO: error와 empty 시 화면 UI 반영 */
-              <span className={styles.alertText}>불러오는 중...</span>
-            : state === 'empty' ?
-              <span className={styles.alertText}>쉼표를 추가해보세요.</span>
-            : state === 'error' ?
-              null 
-            : feeds.map((f) => (
-                <FeedCard
-                  key={f.feedId}
-                  id={String(f.feedId)}
-                  imageSrc={f.imageUrl}
-                  imageAlt={`피드 이미지 ${f.feedId}`}
-                  timeLabel={transformDate(f.createdAt)}
-                  tags={[...f.hashtags]}
-                  content={f.review}
-                  variant="others"
-                  liked={f.isLiked}
-                  likeCount={f.likeCount}
-                  onHeartClick={() => onHeartClick(f.feedId, f.isLiked, f.nickname ?? '')}
-                  title={f.nickname}
-                  imageHeart={f.isLiked}
-                />
-              ))}
+          {state === 'loading' ? (
+            /* TODO: error와 empty 시 화면 UI 반영 */
+            <span className={styles.alertText}>불러오는 중...</span>
+          ) : state === 'empty' ? (
+            <span className={styles.alertText}>쉼표를 추가해보세요.</span>
+          ) : state === 'error' ? null : (
+            feeds.map((f) => (
+              <FeedCard
+                key={f.feedId}
+                id={String(f.feedId)}
+                imageSrc={f.imageUrl}
+                imageAlt={`피드 이미지 ${f.feedId}`}
+                timeLabel={transformDate(f.createdAt)}
+                tags={[...f.hashtags]}
+                content={f.review}
+                variant="others"
+                liked={f.isLiked}
+                likeCount={f.likeCount}
+                onHeartClick={() => onHeartClick(f.feedId, f.isLiked, f.nickname ?? '')}
+                title={f.nickname}
+                imageHeart={f.isLiked}
+              />
+            ))
+          )}
         </div>
       </div>
       <NavigationBar

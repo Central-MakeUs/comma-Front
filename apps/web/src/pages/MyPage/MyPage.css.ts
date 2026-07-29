@@ -103,4 +103,4 @@ export const alertText = style({
   alignItems: 'center',
   justifyContent: 'center',
   textAlign: 'center'
-})
+});

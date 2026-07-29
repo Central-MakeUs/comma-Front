@@ -1,7 +1,4 @@
-import {
-  type ActivityRank,
-  type MoodRatio,
-} from '../../apis/mypage';
+import type { ActivityRank, MoodRatio } from '../../apis/mypage';
 
 export const fallbackActivityRanking: ActivityRank[] = [
   { rank: 1, relaxId: 1, name: '가볍게 산책하기', count: 13 },

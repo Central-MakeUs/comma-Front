@@ -3,7 +3,6 @@ import { designAssets } from '../assets';
 import { Icon } from '../Icon';
 import { feedImage, heartIcon, image } from './FeedImage.css';
 
-
 export type FeedImageProps = Omit<ComponentPropsWithoutRef<'div'>, 'children' | 'onClick'> & {
   imageSrc?: string;
   imageAlt?: string;

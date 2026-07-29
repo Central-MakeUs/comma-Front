@@ -30,14 +30,17 @@ function Feed() {
   const isFetchingNextRef = useRef(false);
   const feedRequestIdRef = useRef(0);
   const queryClient = useQueryClient();
+  const pendingLikeIdsRef = useRef(new Set<number>());
 
   const onHeartClick = async (feedId: number, isLiked: boolean, nickname: string) => {
+    if (pendingLikeIdsRef.current.has(feedId)) return;
+    pendingLikeIdsRef.current.add(feedId);
     try {
       const myNickname = localStorage.getItem('comma.nickname');
       if (myNickname === nickname) return;
 
       const res = await postLikes({ feedId });
-      console.log(res);
+
       if (res.success) {
         setFeeds((prev) =>
           prev.map((feed) =>
@@ -53,6 +56,8 @@ function Feed() {
       }
     } catch (error) {
       console.error(error);
+    } finally {
+      pendingLikeIdsRef.current.delete(feedId);
     }
   };
 
@@ -130,7 +135,7 @@ function Feed() {
       if (feedRequestIdRef.current !== requestId) return;
 
       if (!res.success || !res.data) {
-        setState('error');
+        alert('피드를 더 불러오지 못했어요. 다시 시도해주세요.');
         return;
       }
 
@@ -142,8 +147,7 @@ function Feed() {
       if (feedRequestIdRef.current !== requestId) return;
       if (error instanceof Error && error.message === SESSION_EXPIRED_ERROR_MESSAGE) return;
       console.error(error);
-      setState('error');
-      alert('피드 조회 오류 발생');
+      alert('피드를 더 불러오지 못했어요. 다시 시도해주세요.');
     } finally {
       if (feedRequestIdRef.current === requestId) {
         isFetchingNextRef.current = false;
@@ -179,7 +183,6 @@ function Feed() {
           }}
         >
           {state === 'loading' ? (
-            /* TODO: error와 empty 시 화면 UI 반영 */
             <span className={styles.alertText}>불러오는 중...</span>
           ) : state === 'empty' ? (
             <span className={styles.alertText}>쉼표를 추가해보세요.</span>

@@ -7,7 +7,7 @@ const CHECKLIST_REDIRECT_DELAY_MS = 1500;
 function Loading() {
   const navigate = useNavigate();
   const location = useLocation();
-  const userName = (location.state as { userName?: string } | null)?.userName ?? '콤마';
+  const userName = (location.state as { userName?: string } | null)?.userName ?? localStorage.getItem('comma.nickname') ?? '';
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {

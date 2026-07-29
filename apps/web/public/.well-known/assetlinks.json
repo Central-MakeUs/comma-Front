@@ -5,7 +5,8 @@
       "namespace": "android_app",
       "package_name": "com.comma.app",
       "sha256_cert_fingerprints": [
-        "E6:82:18:18:E1:B0:63:11:C3:29:A5:4B:1D:F3:EB:E9:BC:1C:79:DF:0E:C8:AC:80:D2:9C:B0:D4:F7:76:79:3F"
+        "E6:82:18:18:E1:B0:63:11:C3:29:A5:4B:1D:F3:EB:E9:BC:1C:79:DF:0E:C8:AC:80:D2:9C:B0:D4:F7:76:79:3F",
+        "FA:C6:17:45:DC:09:03:78:6F:B9:ED:E6:2A:96:2B:39:9F:73:48:F0:BB:6F:89:9B:83:32:66:75:91:03:3B:9C"
       ]
     }
   }

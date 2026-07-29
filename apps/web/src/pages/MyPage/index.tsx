@@ -5,9 +5,7 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getMyFeeds } from '../../apis/feed';
 import {
-  type ActivityRank,
   getMyReport,
-  type MoodRatio,
   myReportQueryKey
 } from '../../apis/mypage';
 import { interpolatePath, lerp } from '../../utils/compute_layout';
@@ -18,6 +16,7 @@ import * as styles from './MyPage.css';
 import MyPageAnswerContainer from './MyPageAnswerContainer';
 import MyPageCard from './MyPageCard';
 import MyPageNicknameModal from './MyPageNicknameModal';
+import { fallbackMoodRatio } from './MyPage.constant';
 
 const backgrounds = [
   '/images/rest_1.png',
@@ -25,20 +24,6 @@ const backgrounds = [
   '/images/feed-image.svg',
   '/images/feed-image.svg',
   '/images/rest_2.png'
-];
-
-const fallbackActivityRanking: ActivityRank[] = [
-  { rank: 1, relaxId: 1, name: '가볍게 산책하기', count: 13 },
-  { rank: 2, relaxId: 2, name: '가볍게 산책하기', count: 5 },
-  { rank: 3, relaxId: 3, name: '가볍게 산책하기', count: 4 },
-  { rank: 4, relaxId: 4, name: '가볍게 산책하기', count: 3 },
-  { rank: 5, relaxId: 5, name: '가볍게 산책하기', count: 2 }
-];
-
-const fallbackMoodRatio: MoodRatio[] = [
-  { mood: 'A', label: '멍하고 싶어', count: 55, ratio: 55 },
-  { mood: 'B', label: '기분 전환이 필요해', count: 35, ratio: 35 },
-  { mood: 'C', label: '가볍게 해볼 수 있어', count: 10, ratio: 10 }
 ];
 
 const BIG_PATH =
@@ -144,7 +129,7 @@ function MyPage() {
     : fallbackMoodRatio;
   const displayActivityRanking = reportQuery.data?.activityRanking?.length
     ? reportQuery.data.activityRanking
-    : fallbackActivityRanking;
+    : [];
   const activityCardCount = displayActivityRanking.length;
   const latestMyFeedQuery = useQuery({
     queryKey: ['feeds', 'me', 'latest'],
@@ -325,19 +310,23 @@ function MyPage() {
             ))}
           </div>
           <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-            {displayActivityRanking.map((activity, index) => (
-              <MyPageCard
-                key={`${activity.rank}-${activity.relaxId}`}
-                backgroundUrl={backgrounds[index % backgrounds.length]}
-                num={activity.rank}
-                count={activity.count}
-                title={activity.name}
-                path={paths[index]}
-                width={sizes[index]?.width ?? SMALL_WIDTH * cardLayoutScale}
-                height={sizes[index]?.height ?? SMALL_HEIGHT * cardLayoutScale}
-                x={xs[index] ?? 0}
-              />
-            ))}
+            {
+              displayActivityRanking.length?
+              displayActivityRanking.map((activity, index) => (
+                <MyPageCard
+                  key={`${activity.rank}-${activity.relaxId}`}
+                  backgroundUrl={backgrounds[index % backgrounds.length]}
+                  num={activity.rank}
+                  count={activity.count}
+                  title={activity.name}
+                  path={paths[index]}
+                  width={sizes[index]?.width ?? SMALL_WIDTH * cardLayoutScale}
+                  height={sizes[index]?.height ?? SMALL_HEIGHT * cardLayoutScale}
+                  x={xs[index] ?? 0}
+                />
+            ))
+            : <span className={styles.alertText}>쉼표가 쌓이면 나만의 쉼표 리포트가 생겨요.</span>
+          }
           </div>
         </div>
         <div

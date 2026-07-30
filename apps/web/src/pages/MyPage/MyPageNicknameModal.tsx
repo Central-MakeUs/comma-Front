@@ -1,10 +1,10 @@
 import { CtaButton, TextInput } from '@comma/design-system';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import type { FormEvent } from 'react';
-import { getRandomNickname, updateNickname } from '../../apis/user';
+import { updateNickname } from '../../apis/user';
 import { useEditableNickname } from '../../hooks/useEditableNickname';
-import * as styles from './MyPageNicknameModal.css';
 import { getStoredNickname } from '../../utils/tokenStorage';
+import * as styles from './MyPageNicknameModal.css';
 
 interface MyPageNicknameModalProps {
   onCancelClick: () => void;

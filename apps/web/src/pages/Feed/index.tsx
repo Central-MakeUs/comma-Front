@@ -8,12 +8,12 @@ import { getFeeds, postLikes } from '../../apis/feed';
 import type { loadingState } from '../../types/api';
 import type { feedInfo } from '../../types/feed';
 import { navigateToNavigationItem } from '../../utils/navigation';
+import { getStoredNickname } from '../../utils/tokenStorage';
 import { transformDate } from '../../utils/transformDate';
 import { moods, times } from './Feed.constants';
 import * as styles from './Feed.css';
 import FeedHeader from './FeedHeader';
 import FeedToast from './FeedToast';
-import { getStoredNickname } from '../../utils/tokenStorage';
 
 const FEED_PAGE_SIZE = 5;
 const SCROLL_LOAD_THRESHOLD = 160;

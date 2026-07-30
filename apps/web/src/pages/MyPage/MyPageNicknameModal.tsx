@@ -4,6 +4,7 @@ import type { FormEvent } from 'react';
 import { getRandomNickname, updateNickname } from '../../apis/user';
 import { useEditableNickname } from '../../hooks/useEditableNickname';
 import * as styles from './MyPageNicknameModal.css';
+import { getStoredNickname } from '../../utils/tokenStorage';
 
 interface MyPageNicknameModalProps {
   onCancelClick: () => void;
@@ -11,15 +12,11 @@ interface MyPageNicknameModalProps {
 }
 
 function MyPageNicknameModal({ onCancelClick, onSave }: MyPageNicknameModalProps) {
-  const randomNicknameQuery = useQuery({
-    queryKey: ['user', 'nickname', 'random', 'mypage'],
-    queryFn: getRandomNickname
-  });
   const updateNicknameMutation = useMutation({
     mutationFn: updateNickname
   });
   const { value, handleChange } = useEditableNickname({
-    suggestedValue: localStorage.getItem('comma.nickname') ?? undefined
+    suggestedValue: getStoredNickname() ?? undefined
   });
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -72,7 +69,7 @@ function MyPageNicknameModal({ onCancelClick, onSave }: MyPageNicknameModalProps
             showFooter={true}
             value={value}
             onChange={handleChange}
-            disabled={randomNicknameQuery.isLoading || updateNicknameMutation.isPending}
+            disabled={updateNicknameMutation.isPending}
           />
           <div
             style={{

@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import * as styles from './Loading.css';
+import { getStoredNickname } from '../utils/tokenStorage';
 
 const CHECKLIST_REDIRECT_DELAY_MS = 1500;
 
@@ -9,8 +10,8 @@ function Loading() {
   const location = useLocation();
   const userName =
     (location.state as { userName?: string } | null)?.userName ??
-    localStorage.getItem('comma.nickname') ??
-    '';
+    getStoredNickname() ??
+    '콤마';
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {

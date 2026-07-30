@@ -13,6 +13,7 @@ import { moods, times } from './Feed.constants';
 import * as styles from './Feed.css';
 import FeedHeader from './FeedHeader';
 import FeedToast from './FeedToast';
+import { getStoredNickname } from '../../utils/tokenStorage';
 
 const FEED_PAGE_SIZE = 5;
 const SCROLL_LOAD_THRESHOLD = 160;
@@ -36,7 +37,7 @@ function Feed() {
     if (pendingLikeIdsRef.current.has(feedId)) return;
     pendingLikeIdsRef.current.add(feedId);
     try {
-      const myNickname = localStorage.getItem('comma.nickname');
+      const myNickname = getStoredNickname();
       if (myNickname === nickname) return;
 
       const res = await postLikes({ feedId });

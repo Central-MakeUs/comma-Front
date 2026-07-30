@@ -1,8 +1,9 @@
 import { CtaButton, TextInput } from '@comma/design-system';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import type { FormEvent } from 'react';
-import { getRandomNickname, updateNickname } from '../../apis/user';
+import { updateNickname } from '../../apis/user';
 import { useEditableNickname } from '../../hooks/useEditableNickname';
+import { getStoredNickname } from '../../utils/tokenStorage';
 import * as styles from './MyPageNicknameModal.css';
 
 interface MyPageNicknameModalProps {
@@ -11,15 +12,11 @@ interface MyPageNicknameModalProps {
 }
 
 function MyPageNicknameModal({ onCancelClick, onSave }: MyPageNicknameModalProps) {
-  const randomNicknameQuery = useQuery({
-    queryKey: ['user', 'nickname', 'random', 'mypage'],
-    queryFn: getRandomNickname
-  });
   const updateNicknameMutation = useMutation({
     mutationFn: updateNickname
   });
   const { value, handleChange } = useEditableNickname({
-    suggestedValue: randomNicknameQuery.data?.data?.nickname
+    suggestedValue: getStoredNickname() ?? undefined
   });
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -72,7 +69,7 @@ function MyPageNicknameModal({ onCancelClick, onSave }: MyPageNicknameModalProps
             showFooter={true}
             value={value}
             onChange={handleChange}
-            disabled={randomNicknameQuery.isLoading || updateNicknameMutation.isPending}
+            disabled={updateNicknameMutation.isPending}
           />
           <div
             style={{

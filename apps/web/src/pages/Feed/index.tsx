@@ -8,6 +8,7 @@ import { getFeeds, postLikes } from '../../apis/feed';
 import type { loadingState } from '../../types/api';
 import type { feedInfo } from '../../types/feed';
 import { navigateToNavigationItem } from '../../utils/navigation';
+import { getStoredNickname } from '../../utils/tokenStorage';
 import { transformDate } from '../../utils/transformDate';
 import { moods, times } from './Feed.constants';
 import * as styles from './Feed.css';
@@ -36,7 +37,7 @@ function Feed() {
     if (pendingLikeIdsRef.current.has(feedId)) return;
     pendingLikeIdsRef.current.add(feedId);
     try {
-      const myNickname = localStorage.getItem('comma.nickname');
+      const myNickname = getStoredNickname();
       if (myNickname === nickname) return;
 
       const res = await postLikes({ feedId });

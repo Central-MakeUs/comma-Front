@@ -90,7 +90,7 @@ export const postLikes = async ({ feedId }: likeRequest) => {
 };
 
 interface reportRequest {
-  feedId: string
+  feedId: number
 }
 
 interface reportResponse {
@@ -106,7 +106,7 @@ export const reportFeed = async ({feedId}: reportRequest) => {
 }
 
 interface blockRequest {
-  feedId: string
+  feedId: number
 }
 
 interface blockResponse {

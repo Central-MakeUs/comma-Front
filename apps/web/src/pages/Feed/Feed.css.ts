@@ -48,3 +48,11 @@ export const alertText = style({
   color: colors.textTertiary,
   margin: 'auto'
 });
+
+export const toast = style({
+  position: 'fixed',
+  bottom: 120,
+  left: '50%',
+  transform: 'translateX(-50%)',
+  zIndex: 3
+})

@@ -1,10 +1,10 @@
-import { FeedCard, NavigationBar } from '@comma/design-system';
+import { FeedCard, NavigationBar, Toast } from '@comma/design-system';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { checklistQueryKey, getChecklistQuestions } from '../../apis/checklist';
 import { SESSION_EXPIRED_ERROR_MESSAGE } from '../../apis/client';
-import { getFeeds, postLikes } from '../../apis/feed';
+import { getFeeds, postLikes, reportFeed, blockFeed } from '../../apis/feed';
 import type { loadingState } from '../../types/api';
 import type { feedInfo } from '../../types/feed';
 import { navigateToNavigationItem } from '../../utils/navigation';
@@ -28,10 +28,13 @@ function Feed() {
   const [nextCursor, setNextCursor] = useState<number | null>(null);
   const [hasNext, setHasNext] = useState(false);
   const [isFetchingNext, setIsFetchingNext] = useState(false);
+  const [isReported, setIsReported] = useState(false);
+  const [isBlocked, setIsBlocked] = useState(false);
   const isFetchingNextRef = useRef(false);
   const feedRequestIdRef = useRef(0);
   const queryClient = useQueryClient();
   const pendingLikeIdsRef = useRef(new Set<number>());
+  const nickname = getStoredNickname();
 
   const onHeartClick = async (feedId: number, isLiked: boolean, nickname: string) => {
     if (pendingLikeIdsRef.current.has(feedId)) return;
@@ -61,6 +64,36 @@ function Feed() {
       pendingLikeIdsRef.current.delete(feedId);
     }
   };
+
+  const onReportClick = async (feedId: number, userNickname:string) => {
+    if(userNickname === nickname) return;
+    try {
+      const res = await reportFeed({feedId});
+
+      if(res.success) {
+        setIsReported(true);
+      }
+
+    } catch(error) {
+      console.error(error);
+      alert('신고 중 오류가 발생했습니다.');
+    }
+  }
+
+  const onBlockClick = async (feedId:number, userNickname:string) => {
+    if(userNickname === nickname) return;
+    try {
+      const res = await blockFeed({feedId});
+
+      if(res.success) {
+        setIsBlocked(true);
+      }
+
+    } catch(error) {
+      console.error(error);
+      alert('차단 중 오류가 발생했습니다.');
+    }
+  }
 
   useEffect(() => {
     void queryClient.prefetchQuery({
@@ -197,17 +230,25 @@ function Feed() {
                 timeLabel={transformDate(f.createdAt)}
                 tags={[...f.hashtags]}
                 content={f.review}
-                variant="others"
+                variant='others'
                 liked={f.isLiked}
                 likeCount={f.likeCount}
                 onHeartClick={() => onHeartClick(f.feedId, f.isLiked, f.nickname ?? '')}
                 title={f.nickname}
                 imageHeart={f.isLiked}
+                onReportClick={() => onReportClick(f.feedId, f.nickname ?? '')}
+                onBlockClick={() => onBlockClick(f.feedId, f.nickname ?? '')}
               />
             ))
           )}
         </div>
       </div>
+      {
+        isReported? <Toast variant='report' className={styles.toast} onClose={() => setIsReported(false)}/> : null 
+      }
+      {
+        isBlocked? <Toast variant='block' className={styles.toast} onClose={() => setIsBlocked(false)}/> : null
+      }
       <NavigationBar
         active="feed"
         className={styles.navBarStyle}

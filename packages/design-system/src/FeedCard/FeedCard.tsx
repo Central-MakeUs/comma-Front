@@ -61,6 +61,7 @@ export function FeedCard({
 }: FeedCardProps) {
   const rootClassName = [feedCard, className].filter(Boolean).join(' ');
   const tagsLabel = formatTags(tags);
+  const isOther = variant === 'others' && onReportClick && onBlockClick;
   const [clicked, setClicked] = useState(false);
 
   return (
@@ -100,7 +101,7 @@ export function FeedCard({
           }}
         >
           {tagsLabel.length > 0 ? <p className={tagsText}>{tagsLabel}</p> : null}
-          <Icon name="dots" onClick={() => setClicked(true)} />
+          {isOther? <Icon name="dots" onClick={() => setClicked(true)} /> : null}
           {clicked ? (
             <>
               <button
@@ -110,10 +111,16 @@ export function FeedCard({
                 type="button"
               />
               <div className={modal}>
-                <button className={modalText} onClick={onReportClick} type="button">
+                <button className={modalText} onClick={(e) => {
+                  setClicked(false);
+                  onReportClick?.(e);
+                }} type="button">
                   신고
                 </button>
-                <button className={modalText} onClick={onBlockClick} type="button">
+                <button className={modalText} onClick={(e) => {
+                  setClicked(false);
+                  onBlockClick?.(e);
+                }} type="button">
                   차단
                 </button>
               </div>

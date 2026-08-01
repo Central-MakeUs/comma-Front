@@ -234,8 +234,8 @@ function Feed() {
                 onHeartClick={() => onHeartClick(f.feedId, f.isLiked, f.nickname ?? '')}
                 title={f.nickname}
                 imageHeart={f.isLiked}
-                onReportClick={() => onReportClick(f.feedId, f.nickname ?? '')}
-                onBlockClick={() => onBlockClick(f.feedId, f.nickname ?? '')}
+                onReportClick={f.nickname === nickname? undefined : () => onReportClick(f.feedId, f.nickname ?? '')}
+                onBlockClick={f.nickname === nickname? undefined : () => onBlockClick(f.feedId, f.nickname ?? '')}
               />
             ))
           )}

@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { login, type TokenResponse } from '../apis/auth';
 import { PRIVACY_POLICY, TERMS_OF_SERVICE } from '../data/service_url';
 import { setOnboardingCompleted, setStoredNickname, setTokens } from '../utils/tokenStorage';
@@ -209,13 +209,23 @@ function Login() {
         </button>
         <p className={styles.agreementNotice}>
           계속 진행하면{' '}
-          <Link to={TERMS_OF_SERVICE} className={styles.agreementAccent}>
+          <a
+            href={TERMS_OF_SERVICE}
+            className={styles.agreementAccent}
+            target="_blank"
+            rel="noopener"
+          >
             서비스 이용약관
-          </Link>{' '}
+          </a>{' '}
           및<br />
-          <Link to={PRIVACY_POLICY} className={styles.agreementAccent}>
+          <a
+            href={PRIVACY_POLICY}
+            className={styles.agreementAccent}
+            target="_blank"
+            rel="noopener"
+          >
             개인정보처리방침
-          </Link>
+          </a>
           에 동의하는 것으로 간주합니다
         </p>
       </div>

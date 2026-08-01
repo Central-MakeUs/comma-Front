@@ -1,5 +1,6 @@
 import type { ComponentPropsWithoutRef, MouseEventHandler } from 'react';
 import { FeedImage } from '../FeedImage';
+import { useState } from 'react';
 import { Icon } from '../Icon';
 import {
   body,
@@ -9,7 +10,10 @@ import {
   metaRow,
   metaText,
   secondaryMetaText,
-  tagsText
+  tagsText,
+  modal,
+  modalText,
+  modalOverlay
 } from './FeedCard.css';
 
 export type FeedCardVariant = 'others' | 'my';
@@ -28,6 +32,8 @@ export type FeedCardProps = Omit<ComponentPropsWithoutRef<'div'>, 'children' | '
   likeCount?: number;
   liked?: boolean;
   onHeartClick?: MouseEventHandler<HTMLSpanElement>;
+  onReportClick?: MouseEventHandler<HTMLSpanElement>;
+  onBlockClick?: MouseEventHandler<HTMLSpanElement>;
 };
 
 function formatTags(tags: string[]): string {
@@ -48,11 +54,14 @@ export function FeedCard({
   likeCount = 12,
   liked = true,
   onHeartClick,
+  onReportClick,
+  onBlockClick,
   className,
   ...divProps
 }: FeedCardProps) {
   const rootClassName = [feedCard, className].filter(Boolean).join(' ');
   const tagsLabel = formatTags(tags);
+  const [clicked, setClicked] = useState(false);
 
   return (
     <div className={rootClassName} {...divProps}>
@@ -81,7 +90,23 @@ export function FeedCard({
           )}
         </div>
         <p className={contentText}>{content}</p>
-        {tagsLabel.length > 0 ? <p className={tagsText}>{tagsLabel}</p> : null}
+        <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative'}}>
+          {tagsLabel.length > 0 ? <p className={tagsText}>{tagsLabel}</p> : null}
+          <Icon name='dots' onClick={() => setClicked(true)}/>
+            {
+              clicked?
+              (
+                <>
+                  <div className={modalOverlay} onClick={() => setClicked(false)}/>
+                  <div className={modal}>
+                    <span className={modalText} onClick={onReportClick}>신고</span>
+                    <span className={modalText} onClick={onBlockClick}>차단</span>
+                  </div>
+                </>
+              )
+              : null
+            }
+        </div>
       </div>
     </div>
   );

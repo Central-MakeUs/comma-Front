@@ -120,10 +120,10 @@ function Nickname() {
           marginBottom: 40
         }}
       >
-        <label style={{marginBottom: 16}}>
+        <label style={{ marginBottom: 16 }}>
           <input
-            type='checkbox'
-            id='age-confirm'
+            type="checkbox"
+            id="age-confirm"
             className={styles.checkboxInput}
             checked={isChecked}
             onChange={(e) => setIsChecked(e.target.checked)}
@@ -136,7 +136,9 @@ function Nickname() {
           간주합니다
         </p>
         <CtaButton
-          state={isAccepted && !updateNicknameMutation.isPending && isChecked ? 'default' : 'disabled'}
+          state={
+            isAccepted && !updateNicknameMutation.isPending && isChecked ? 'default' : 'disabled'
+          }
           className={isAccepted ? styles.ctaButtonStyle.default : styles.ctaButtonStyle.disabled}
           onClick={handleSubmit}
         />

@@ -127,7 +127,7 @@ function staticIconPath(name: StaticIconName): ReactNode {
             fill="currentColor"
           />
         </g>
-      )
+      );
   }
 }
 

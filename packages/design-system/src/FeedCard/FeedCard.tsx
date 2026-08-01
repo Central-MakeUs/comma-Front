@@ -1,6 +1,6 @@
 import type { ComponentPropsWithoutRef, MouseEventHandler } from 'react';
-import { FeedImage } from '../FeedImage';
 import { useState } from 'react';
+import { FeedImage } from '../FeedImage';
 import { Icon } from '../Icon';
 import {
   body,
@@ -9,11 +9,11 @@ import {
   likeRow,
   metaRow,
   metaText,
-  secondaryMetaText,
-  tagsText,
   modal,
+  modalOverlay,
   modalText,
-  modalOverlay
+  secondaryMetaText,
+  tagsText
 } from './FeedCard.css';
 
 export type FeedCardVariant = 'others' | 'my';
@@ -32,8 +32,8 @@ export type FeedCardProps = Omit<ComponentPropsWithoutRef<'div'>, 'children' | '
   likeCount?: number;
   liked?: boolean;
   onHeartClick?: MouseEventHandler<HTMLSpanElement>;
-  onReportClick?: MouseEventHandler<HTMLSpanElement>;
-  onBlockClick?: MouseEventHandler<HTMLSpanElement>;
+  onReportClick?: MouseEventHandler<HTMLButtonElement>;
+  onBlockClick?: MouseEventHandler<HTMLButtonElement>;
 };
 
 function formatTags(tags: string[]): string {
@@ -90,22 +90,35 @@ export function FeedCard({
           )}
         </div>
         <p className={contentText}>{content}</p>
-        <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative'}}>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            position: 'relative'
+          }}
+        >
           {tagsLabel.length > 0 ? <p className={tagsText}>{tagsLabel}</p> : null}
-          <Icon name='dots' onClick={() => setClicked(true)}/>
-            {
-              clicked?
-              (
-                <>
-                  <div className={modalOverlay} onClick={() => setClicked(false)}/>
-                  <div className={modal}>
-                    <span className={modalText} onClick={onReportClick}>신고</span>
-                    <span className={modalText} onClick={onBlockClick}>차단</span>
-                  </div>
-                </>
-              )
-              : null
-            }
+          <Icon name="dots" onClick={() => setClicked(true)} />
+          {clicked ? (
+            <>
+              <button
+                aria-label="닫기"
+                className={modalOverlay}
+                onClick={() => setClicked(false)}
+                type="button"
+              />
+              <div className={modal}>
+                <button className={modalText} onClick={onReportClick} type="button">
+                  신고
+                </button>
+                <button className={modalText} onClick={onBlockClick} type="button">
+                  차단
+                </button>
+              </div>
+            </>
+          ) : null}
         </div>
       </div>
     </div>

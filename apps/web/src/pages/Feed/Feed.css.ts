@@ -55,4 +55,4 @@ export const toast = style({
   left: '50%',
   transform: 'translateX(-50%)',
   zIndex: 3
-})
+});

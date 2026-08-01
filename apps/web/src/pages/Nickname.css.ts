@@ -97,7 +97,7 @@ export const checkboxInput = style({
   opacity: 0,
   appearance: 'none',
   cursor: 'pointer'
-})
+});
 
 export const checkbox = style({
   ...typography.labelReadingR,
@@ -125,4 +125,4 @@ export const checkbox = style({
       backgroundSize: 'contain'
     }
   }
-})
+});

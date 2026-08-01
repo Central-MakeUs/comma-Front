@@ -92,7 +92,7 @@ export const modal = style({
   right: 0,
   zIndex: 2,
   backdropFilter: 'blur(4px)'
-})
+});
 
 export const modalText = style({
   ...typography.bodyNormalR,
@@ -100,11 +100,20 @@ export const modalText = style({
   width: '100%',
   height: 40,
   display: 'inline-flex',
-  alignItems: 'center'
-})
+  alignItems: 'center',
+  border: 'none',
+  background: 'none',
+  padding: 0,
+  cursor: 'pointer',
+  textAlign: 'left'
+});
 
 export const modalOverlay = style({
   position: 'fixed',
   inset: 0,
-  zIndex: 1
-})
+  zIndex: 1,
+  border: 'none',
+  background: 'none',
+  padding: 0,
+  cursor: 'default'
+});

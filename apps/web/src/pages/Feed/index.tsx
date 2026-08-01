@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { checklistQueryKey, getChecklistQuestions } from '../../apis/checklist';
 import { SESSION_EXPIRED_ERROR_MESSAGE } from '../../apis/client';
-import { getFeeds, postLikes, reportFeed, blockFeed } from '../../apis/feed';
+import { blockFeed, getFeeds, postLikes, reportFeed } from '../../apis/feed';
 import type { loadingState } from '../../types/api';
 import type { feedInfo } from '../../types/feed';
 import { navigateToNavigationItem } from '../../utils/navigation';
@@ -65,35 +65,33 @@ function Feed() {
     }
   };
 
-  const onReportClick = async (feedId: number, userNickname:string) => {
-    if(userNickname === nickname) return;
+  const onReportClick = async (feedId: number, userNickname: string) => {
+    if (userNickname === nickname) return;
     try {
-      const res = await reportFeed({feedId});
+      const res = await reportFeed({ feedId });
 
-      if(res.success) {
+      if (res.success) {
         setIsReported(true);
       }
-
-    } catch(error) {
+    } catch (error) {
       console.error(error);
       alert('신고 중 오류가 발생했습니다.');
     }
-  }
+  };
 
-  const onBlockClick = async (feedId:number, userNickname:string) => {
-    if(userNickname === nickname) return;
+  const onBlockClick = async (feedId: number, userNickname: string) => {
+    if (userNickname === nickname) return;
     try {
-      const res = await blockFeed({feedId});
+      const res = await blockFeed({ feedId });
 
-      if(res.success) {
+      if (res.success) {
         setIsBlocked(true);
       }
-
-    } catch(error) {
+    } catch (error) {
       console.error(error);
       alert('차단 중 오류가 발생했습니다.');
     }
-  }
+  };
 
   useEffect(() => {
     void queryClient.prefetchQuery({
@@ -230,7 +228,7 @@ function Feed() {
                 timeLabel={transformDate(f.createdAt)}
                 tags={[...f.hashtags]}
                 content={f.review}
-                variant='others'
+                variant="others"
                 liked={f.isLiked}
                 likeCount={f.likeCount}
                 onHeartClick={() => onHeartClick(f.feedId, f.isLiked, f.nickname ?? '')}
@@ -243,12 +241,12 @@ function Feed() {
           )}
         </div>
       </div>
-      {
-        isReported? <Toast variant='report' className={styles.toast} onClose={() => setIsReported(false)}/> : null 
-      }
-      {
-        isBlocked? <Toast variant='block' className={styles.toast} onClose={() => setIsBlocked(false)}/> : null
-      }
+      {isReported ? (
+        <Toast variant="report" className={styles.toast} onClose={() => setIsReported(false)} />
+      ) : null}
+      {isBlocked ? (
+        <Toast variant="block" className={styles.toast} onClose={() => setIsBlocked(false)} />
+      ) : null}
       <NavigationBar
         active="feed"
         className={styles.navBarStyle}

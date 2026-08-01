@@ -1,4 +1,5 @@
 import { FeedCard, NavigationBar, Toast } from '@comma/design-system';
+import type { ToastVariant } from '@comma/design-system';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -28,8 +29,7 @@ function Feed() {
   const [nextCursor, setNextCursor] = useState<number | null>(null);
   const [hasNext, setHasNext] = useState(false);
   const [isFetchingNext, setIsFetchingNext] = useState(false);
-  const [isReported, setIsReported] = useState(false);
-  const [isBlocked, setIsBlocked] = useState(false);
+  const [toastVariant, setToastVariant] = useState<ToastVariant | null>(null);
   const isFetchingNextRef = useRef(false);
   const feedRequestIdRef = useRef(0);
   const queryClient = useQueryClient();
@@ -71,7 +71,7 @@ function Feed() {
       const res = await reportFeed({ feedId });
 
       if (res.success) {
-        setIsReported(true);
+        setToastVariant('report');
       }
       else alert(res.message);
 
@@ -87,7 +87,7 @@ function Feed() {
       const res = await blockFeed({ feedId });
 
       if (res.success) {
-        setIsBlocked(true);
+        setToastVariant('block');
         setFeeds([...feeds.filter((f) => f.feedId !== feedId)]);
       }
       else alert(res.message);
@@ -246,11 +246,12 @@ function Feed() {
           )}
         </div>
       </div>
-      {isReported ? (
-        <Toast variant="report" className={styles.toast} onClose={() => setIsReported(false)} />
-      ) : null}
-      {isBlocked ? (
-        <Toast variant="block" className={styles.toast} onClose={() => setIsBlocked(false)} />
+      {toastVariant ? (
+        <Toast
+          variant={toastVariant}
+          className={styles.toast}
+          onClose={() => setToastVariant(null)}
+        />
       ) : null}
       <NavigationBar
         active="feed"

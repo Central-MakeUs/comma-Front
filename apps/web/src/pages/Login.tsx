@@ -212,7 +212,6 @@ function Login() {
           <a
             href={TERMS_OF_SERVICE}
             className={styles.agreementAccent}
-            target="_blank"
             rel="noopener"
           >
             서비스 이용약관
@@ -221,7 +220,6 @@ function Login() {
           <a
             href={PRIVACY_POLICY}
             className={styles.agreementAccent}
-            target="_blank"
             rel="noopener"
           >
             개인정보처리방침

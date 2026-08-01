@@ -293,8 +293,8 @@ function Setting() {
                   : s === '회원 탈퇴'
                     ? onWithdrawClick
                     : s === '서비스 이용약관'
-                      ? () => window.open(TERMS_OF_SERVICE)
-                      : () => window.open(PRIVACY_POLICY)
+                      ? () => window.open(TERMS_OF_SERVICE, "_self")
+                      : () => window.open(PRIVACY_POLICY, "_self")
               }
             />
           ))}

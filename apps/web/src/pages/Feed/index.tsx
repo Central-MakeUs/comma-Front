@@ -1,5 +1,5 @@
-import { FeedCard, NavigationBar, Toast } from '@comma/design-system';
 import type { ToastVariant } from '@comma/design-system';
+import { FeedCard, NavigationBar, Toast } from '@comma/design-system';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -72,9 +72,7 @@ function Feed() {
 
       if (res.success) {
         setToastVariant('report');
-      }
-      else alert(res.message);
-
+      } else alert(res.message);
     } catch (error) {
       console.error(error);
       alert('신고 중 오류가 발생했습니다.');
@@ -89,9 +87,7 @@ function Feed() {
       if (res.success) {
         setToastVariant('block');
         setFeeds([...feeds.filter((f) => f.feedId !== feedId)]);
-      }
-      else alert(res.message);
-
+      } else alert(res.message);
     } catch (error) {
       console.error(error);
       alert('차단 중 오류가 발생했습니다.');
@@ -239,8 +235,16 @@ function Feed() {
                 onHeartClick={() => onHeartClick(f.feedId, f.isLiked, f.nickname ?? '')}
                 title={f.nickname}
                 imageHeart={f.isLiked}
-                onReportClick={f.nickname === nickname? undefined : () => onReportClick(f.feedId, f.nickname ?? '')}
-                onBlockClick={f.nickname === nickname? undefined : () => onBlockClick(f.feedId, f.nickname ?? '')}
+                onReportClick={
+                  f.nickname === nickname
+                    ? undefined
+                    : () => onReportClick(f.feedId, f.nickname ?? '')
+                }
+                onBlockClick={
+                  f.nickname === nickname
+                    ? undefined
+                    : () => onBlockClick(f.feedId, f.nickname ?? '')
+                }
               />
             ))
           )}

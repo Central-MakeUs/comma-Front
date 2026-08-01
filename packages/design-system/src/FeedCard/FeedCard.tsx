@@ -101,7 +101,7 @@ export function FeedCard({
           }}
         >
           {tagsLabel.length > 0 ? <p className={tagsText}>{tagsLabel}</p> : null}
-          {isOther? <Icon name="dots" onClick={() => setClicked(true)} /> : null}
+          {isOther ? <Icon name="dots" onClick={() => setClicked(true)} /> : null}
           {clicked ? (
             <>
               <button
@@ -111,16 +111,24 @@ export function FeedCard({
                 type="button"
               />
               <div className={modal}>
-                <button className={modalText} onClick={(e) => {
-                  setClicked(false);
-                  onReportClick?.(e);
-                }} type="button">
+                <button
+                  className={modalText}
+                  onClick={(e) => {
+                    setClicked(false);
+                    onReportClick?.(e);
+                  }}
+                  type="button"
+                >
                   신고
                 </button>
-                <button className={modalText} onClick={(e) => {
-                  setClicked(false);
-                  onBlockClick?.(e);
-                }} type="button">
+                <button
+                  className={modalText}
+                  onClick={(e) => {
+                    setClicked(false);
+                    onBlockClick?.(e);
+                  }}
+                  type="button"
+                >
                   차단
                 </button>
               </div>

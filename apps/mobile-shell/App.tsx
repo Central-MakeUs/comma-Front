@@ -102,7 +102,7 @@ export default function App() {
   const webViewRef = useRef<BridgeWebView>(null);
   const safeAreaScript = useMemo(() => createSafeAreaScript(insets), [insets]);
   const handleMessage = async (event: WebViewMessageEvent) => {
-    let message: { type?: string } | undefined;
+    let message: { type?: string; url?: string } | undefined;
     try {
       message = JSON.parse(event.nativeEvent.data);
     } catch (error) {
@@ -141,6 +141,13 @@ export default function App() {
             })
           );
           alert(`로그인 중 에러가 발생했습니다: \n${JSON.stringify(error, null, 2)}`);
+        }
+        break;
+      }
+
+      case 'OPEN_EXTERNAL': {
+        if (message.url) {
+          await WebBrowser.openBrowserAsync(message.url);
         }
         break;
       }

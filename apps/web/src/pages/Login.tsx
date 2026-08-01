@@ -71,6 +71,7 @@ const waitForGoogleLogin = (): Promise<IGoogleWait> => {
 function Login() {
   const navigate = useNavigate();
   const location = useLocation();
+  const isWebView = !!window.ReactNativeWebView;
   const googleLoginMutation = useMutation({
     mutationFn: login
   });
@@ -158,6 +159,15 @@ function Login() {
     }
   };
 
+  const onUrlClick = (url: string) => {
+    window.ReactNativeWebView?.postMessage(
+      JSON.stringify({
+        type: 'OPEN_EXTERNAL',
+        url
+      })
+    );
+  };
+
   return (
     <div className={styles.container}>
       <img
@@ -214,6 +224,13 @@ function Login() {
             className={styles.agreementAccent}
             target="_blank"
             rel="noopener"
+            onClick={(e) => {
+              if (isWebView) {
+                e.preventDefault();
+
+                onUrlClick(TERMS_OF_SERVICE);
+              }
+            }}
           >
             서비스 이용약관
           </a>{' '}
@@ -221,8 +238,15 @@ function Login() {
           <a
             href={PRIVACY_POLICY}
             className={styles.agreementAccent}
-            target="_blank"
             rel="noopener"
+            target="_blank"
+            onClick={(e) => {
+              if (isWebView) {
+                e.preventDefault();
+
+                onUrlClick(PRIVACY_POLICY);
+              }
+            }}
           >
             개인정보처리방침
           </a>

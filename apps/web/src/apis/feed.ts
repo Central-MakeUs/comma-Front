@@ -88,3 +88,37 @@ export const postLikes = async ({ feedId }: likeRequest) => {
 
   return data;
 };
+
+interface reportRequest {
+  feedId: string
+}
+
+interface reportResponse {
+  success: boolean,
+  message: string,
+  data: string,
+}
+
+export const reportFeed = async ({feedId}: reportRequest) => {
+  const { data } = await apiClient.post<ApiResponse<reportResponse>>(`/api/feeds/${feedId}/report`);
+
+  return data;
+}
+
+interface blockRequest {
+  feedId: string
+}
+
+interface blockResponse {
+  success: boolean,
+  message: string,
+  data: {
+    blocked: boolean,
+  }
+}
+
+export const blockFeed = async ({feedId}: blockRequest) => {
+  const { data } = await apiClient.post<ApiResponse<blockResponse>>(`/api/feeds/${feedId}/block`);
+
+  return data;
+}

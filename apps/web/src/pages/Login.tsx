@@ -1,10 +1,10 @@
 import { useMutation } from '@tanstack/react-query';
 import { useEffect } from 'react';
-import { useLocation, useNavigate, Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { login, type TokenResponse } from '../apis/auth';
+import { PRIVACY_POLICY, TERMS_OF_SERVICE } from '../data/service_url';
 import { setOnboardingCompleted, setStoredNickname, setTokens } from '../utils/tokenStorage';
 import * as styles from './Login.css';
-import { TERMS_OF_SERVICE, PRIVACY_POLICY } from '../data/service_url';
 
 const REST_API_KEY = import.meta.env.VITE_REST_API_KEY;
 const KAKAO_REDIRECT_URI = import.meta.env.VITE_KAKAO_REDIRECT_URI;
@@ -208,9 +208,15 @@ function Login() {
           Google로 로그인
         </button>
         <p className={styles.agreementNotice}>
-          계속 진행하면 <Link to={TERMS_OF_SERVICE} className={styles.agreementAccent}>서비스 이용약관</Link> 및<br />
-          <Link to={PRIVACY_POLICY} className={styles.agreementAccent}>개인정보처리방침</Link>에 동의하는 것으로
-          간주합니다
+          계속 진행하면{' '}
+          <Link to={TERMS_OF_SERVICE} className={styles.agreementAccent}>
+            서비스 이용약관
+          </Link>{' '}
+          및<br />
+          <Link to={PRIVACY_POLICY} className={styles.agreementAccent}>
+            개인정보처리방침
+          </Link>
+          에 동의하는 것으로 간주합니다
         </p>
       </div>
     </div>

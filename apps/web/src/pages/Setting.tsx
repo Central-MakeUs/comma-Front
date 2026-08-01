@@ -11,9 +11,9 @@ import {
   type UserPlan,
   withdrawUser
 } from '../apis/user';
+import { PRIVACY_POLICY, TERMS_OF_SERVICE } from '../data/service_url';
 import { clearTokens } from '../utils/tokenStorage';
 import * as styles from './Setting.css';
-import { TERMS_OF_SERVICE, PRIVACY_POLICY } from '../data/service_url';
 
 const settings = ['서비스 이용약관', '개인정보 처리방침', '로그아웃', '회원 탈퇴'];
 
@@ -288,7 +288,13 @@ function Setting() {
               text={s}
               key={s}
               onClick={
-                s === '로그아웃' ? onLogOutClick : s === '회원 탈퇴' ? onWithdrawClick : s === '서비스 이용약관' ? () => window.open(TERMS_OF_SERVICE, "_self") : () => window.open(PRIVACY_POLICY, "_self")
+                s === '로그아웃'
+                  ? onLogOutClick
+                  : s === '회원 탈퇴'
+                    ? onWithdrawClick
+                    : s === '서비스 이용약관'
+                      ? () => window.open(TERMS_OF_SERVICE, '_self')
+                      : () => window.open(PRIVACY_POLICY, '_self')
               }
             />
           ))}

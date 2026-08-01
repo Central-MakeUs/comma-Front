@@ -73,6 +73,8 @@ function Feed() {
       if (res.success) {
         setIsReported(true);
       }
+      else alert(res.message);
+
     } catch (error) {
       console.error(error);
       alert('신고 중 오류가 발생했습니다.');
@@ -86,7 +88,10 @@ function Feed() {
 
       if (res.success) {
         setIsBlocked(true);
+        setFeeds([...feeds.filter((f) => f.feedId !== feedId)]);
       }
+      else alert(res.message);
+
     } catch (error) {
       console.error(error);
       alert('차단 중 오류가 발생했습니다.');

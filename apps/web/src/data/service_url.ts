@@ -1,0 +1,2 @@
+export const TERMS_OF_SERVICE = 'https://poised-grape-868.notion.site/3a9895115c8780758014e622548dcc49';
+export const PRIVACY_POLICY = 'https://poised-grape-868.notion.site/3a9895115c8780d0b208d31f209870aa';

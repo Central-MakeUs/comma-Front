@@ -94,6 +94,7 @@ function Setting() {
   const [logOutOpen, setLogOutOpen] = useState(false);
   const [withdrawOpen, setWithdrawOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const isWebView = !!window.ReactNativeWebView;
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const planQuery = useQuery({
@@ -183,6 +184,19 @@ function Setting() {
     setWithdrawOpen(true);
     setLogOutOpen(false);
     setConfirmOpen(false);
+  };
+
+  const onUrlClick = (url: string) => {
+    if (isWebView) {
+      window.ReactNativeWebView?.postMessage(
+        JSON.stringify({
+          type: 'OPEN_EXTERNAL',
+          url
+        })
+      );
+    } else {
+      window.open(url);
+    }
   };
 
   const _onConfirmClick = () => {
@@ -293,8 +307,8 @@ function Setting() {
                   : s === '회원 탈퇴'
                     ? onWithdrawClick
                     : s === '서비스 이용약관'
-                      ? () => window.open(TERMS_OF_SERVICE, "_self")
-                      : () => window.open(PRIVACY_POLICY, "_self")
+                      ? () => onUrlClick(TERMS_OF_SERVICE)
+                      : () => onUrlClick(PRIVACY_POLICY)
               }
             />
           ))}

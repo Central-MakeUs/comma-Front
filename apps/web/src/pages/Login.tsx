@@ -125,6 +125,7 @@ function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const hasStartedNativeGoogleRecovery = useRef(false);
+  const googleLoginAbortControllerRef = useRef<AbortController | null>(null);
   const isGoogleOAuthPendingRef = useRef(false);
   const nextToastIdRef = useRef(0);
   const [isGoogleOAuthPending, setIsGoogleOAuthPending] = useState(false);
@@ -164,6 +165,14 @@ function Login() {
     navigate('.', { replace: true });
   }, [location.state, navigate, showLoginToast]);
 
+  useEffect(
+    () => () => {
+      googleLoginAbortControllerRef.current?.abort();
+      googleLoginAbortControllerRef.current = null;
+    },
+    []
+  );
+
   const onKakaoClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     const state = createWebOAuthState('KAKAO');
@@ -184,7 +193,9 @@ function Login() {
       setIsGoogleOAuthPending(true);
 
       const state = createNativeGoogleOAuthState();
-      const googleLoginResponse = waitForGoogleLogin();
+      const controller = new AbortController();
+      googleLoginAbortControllerRef.current = controller;
+      const googleLoginResponse = waitForGoogleLogin({ signal: controller.signal });
       window.ReactNativeWebView?.postMessage(
         JSON.stringify({
           type: 'GOOGLE_LOGIN',
@@ -198,6 +209,8 @@ function Login() {
           code,
           redirectUri
         });
+        if (controller.signal.aborted) return;
+
         if (res.success && res.data) {
           setTokens({
             accessToken: res.data.accessToken,
@@ -210,6 +223,7 @@ function Login() {
           showLoginToast(res.message ?? '구글 로그인을 완료하지 못했습니다. 다시 시도해 주세요.');
         }
       } catch (err) {
+        if (controller.signal.aborted) return;
         clearNativeGoogleOAuthState();
         showLoginToast(
           err instanceof Error
@@ -217,8 +231,13 @@ function Login() {
             : '구글 로그인을 완료하지 못했습니다. 다시 시도해 주세요.'
         );
       } finally {
-        isGoogleOAuthPendingRef.current = false;
-        setIsGoogleOAuthPending(false);
+        if (googleLoginAbortControllerRef.current === controller) {
+          googleLoginAbortControllerRef.current = null;
+        }
+        if (!controller.signal.aborted) {
+          isGoogleOAuthPendingRef.current = false;
+          setIsGoogleOAuthPending(false);
+        }
       }
       return;
     } else {

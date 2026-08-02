@@ -30,7 +30,7 @@
     "ios": {
       "bundleIdentifier": "com.comma.app",
       "icon": "./assets/icon.png",
-      "buildNumber": "17",
+      "buildNumber": "18",
       "supportsTablet": false,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
@@ -48,7 +48,7 @@
         "backgroundColor": "#303030"
       },
       "package": "app.comma.mobile",
-      "versionCode": 13,
+      "versionCode": 14,
       "intentFilters": [
         {
           "action": "VIEW",

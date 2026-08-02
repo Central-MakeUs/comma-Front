@@ -1,4 +1,4 @@
-type WebOAuthProvider = 'KAKAO' | 'GOOGLE';
+type WebOAuthProvider = 'KAKAO' | 'GOOGLE' | 'APPLE';
 
 const WEB_OAUTH_STATE_PREFIX = 'comma.oauth.state';
 const WEB_OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
@@ -20,42 +20,48 @@ const createRandomState = () => {
 const getWebOAuthStateKey = (provider: WebOAuthProvider) =>
   `${WEB_OAUTH_STATE_PREFIX}.${provider.toLowerCase()}`;
 
+const getFreshState = (storedValue: string | null, ttlMs: number) => {
+  if (!storedValue) return undefined;
+
+  try {
+    const parsed = JSON.parse(storedValue) as Partial<StoredOAuthState>;
+    if (
+      typeof parsed.state === 'string' &&
+      typeof parsed.createdAt === 'number' &&
+      Date.now() >= parsed.createdAt &&
+      Date.now() - parsed.createdAt <= ttlMs
+    ) {
+      return parsed.state;
+    }
+  } catch {
+    return undefined;
+  }
+
+  return undefined;
+};
+
 export const createWebOAuthState = (provider: WebOAuthProvider) => {
   const pendingState: StoredOAuthState = {
     state: createRandomState(),
     createdAt: Date.now()
   };
   const key = getWebOAuthStateKey(provider);
-  window.sessionStorage.setItem(key, pendingState.state);
-  window.localStorage.setItem(key, JSON.stringify(pendingState));
+  const storedState = JSON.stringify(pendingState);
+  window.sessionStorage.setItem(key, storedState);
+  window.localStorage.setItem(key, storedState);
 
   return pendingState.state;
 };
 
 export const consumeWebOAuthState = (provider: WebOAuthProvider, returnedState: string | null) => {
   const key = getWebOAuthStateKey(provider);
-  const sessionState = window.sessionStorage.getItem(key);
+  const sessionValue = window.sessionStorage.getItem(key);
   const persistedValue = window.localStorage.getItem(key);
   window.sessionStorage.removeItem(key);
   window.localStorage.removeItem(key);
 
-  let persistedState: string | undefined;
-  if (persistedValue) {
-    try {
-      const parsed = JSON.parse(persistedValue) as Partial<StoredOAuthState>;
-      if (
-        typeof parsed.state === 'string' &&
-        typeof parsed.createdAt === 'number' &&
-        Date.now() >= parsed.createdAt &&
-        Date.now() - parsed.createdAt <= WEB_OAUTH_STATE_TTL_MS
-      ) {
-        persistedState = parsed.state;
-      }
-    } catch {
-      persistedState = undefined;
-    }
-  }
-
+  const sessionState = getFreshState(sessionValue, WEB_OAUTH_STATE_TTL_MS);
+  const persistedState = getFreshState(persistedValue, WEB_OAUTH_STATE_TTL_MS);
   const expectedState = sessionState ?? persistedState;
   return Boolean(expectedState && returnedState && expectedState === returnedState);
 };

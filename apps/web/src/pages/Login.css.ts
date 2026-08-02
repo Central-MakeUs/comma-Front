@@ -1,5 +1,5 @@
 import { colors, typography } from '@comma/design-system';
-import { globalStyle, style } from '@vanilla-extract/css';
+import { globalStyle, keyframes, style } from '@vanilla-extract/css';
 
 export const container = style({
   position: 'relative',
@@ -21,7 +21,7 @@ export const container = style({
   boxSizing: 'border-box'
 });
 
-globalStyle(`${container} > :not([aria-hidden="true"])`, {
+globalStyle(`${container} > :not([aria-hidden="true"]):not([data-overlay="true"])`, {
   position: 'relative',
   zIndex: 1
 });
@@ -97,3 +97,34 @@ export const googleBtn = style([
     marginBottom: 24
   }
 ]);
+
+const toastEnter = keyframes({
+  from: {
+    opacity: 0,
+    transform: 'translateY(8px)'
+  },
+  to: {
+    opacity: 1,
+    transform: 'translateY(0)'
+  }
+});
+
+export const toastLayer = style({
+  position: 'fixed',
+  left: '50%',
+  bottom: 'max(24px, calc(var(--safe-area-bottom) + 24px))',
+  width: 329,
+  maxWidth: 'calc(100% - 32px)',
+  transform: 'translateX(-50%)',
+  zIndex: 2
+});
+
+export const loginToast = style({
+  width: '100%',
+  animation: `${toastEnter} 220ms cubic-bezier(0.16, 1, 0.3, 1)`,
+  '@media': {
+    '(prefers-reduced-motion: reduce)': {
+      animation: 'none'
+    }
+  }
+});

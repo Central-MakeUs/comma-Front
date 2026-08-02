@@ -1,11 +1,13 @@
+import { Toast } from '@comma/design-system';
 import { useMutation } from '@tanstack/react-query';
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { login, type TokenResponse } from '../apis/auth';
 import { PRIVACY_POLICY, TERMS_OF_SERVICE } from '../data/service_url';
 import {
   clearNativeGoogleOAuthState,
   consumeNativeGoogleOAuthState,
+  consumeWebOAuthState,
   createNativeGoogleOAuthState,
   createWebOAuthState,
   hasPendingNativeGoogleOAuthState
@@ -23,6 +25,7 @@ const APPLE_REDIRECT_URI = import.meta.env.VITE_APPLE_REDIRECT_URI;
 interface IAppleRes {
   authorization: {
     code: string;
+    state?: string;
   };
 }
 
@@ -32,6 +35,12 @@ interface IGoogleWait {
 }
 
 const GOOGLE_LOGIN_TIMEOUT_MS = 60000;
+const LOGIN_TOAST_DURATION_MS = 4000;
+
+interface LoginToastState {
+  id: number;
+  message: string;
+}
 
 const getLoginState = (state: unknown) =>
   typeof state === 'object' &&
@@ -96,25 +105,42 @@ function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const hasStartedNativeGoogleRecovery = useRef(false);
+  const nextToastIdRef = useRef(0);
+  const [loginToast, setLoginToast] = useState<LoginToastState | null>(null);
   const isMobileWebView = typeof window !== 'undefined' && window.ReactNativeWebView !== undefined;
   const isAndroidApp = isMobileWebView && /Android/i.test(window.navigator.userAgent);
   const googleLoginMutation = useMutation({
     mutationFn: login
   });
 
+  const showLoginToast = useCallback((message: string) => {
+    nextToastIdRef.current += 1;
+    setLoginToast({ id: nextToastIdRef.current, message });
+  }, []);
+
+  useEffect(() => {
+    if (!loginToast) return;
+
+    const timeoutId = window.setTimeout(() => {
+      setLoginToast(null);
+    }, LOGIN_TOAST_DURATION_MS);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [loginToast]);
+
   useEffect(() => {
     const loginState = getLoginState(location.state);
     if (!loginState) return;
 
     if (loginState.reason === 'SESSION_EXPIRED') {
-      alert('로그인이 만료되었어요. 다시 로그인해 주세요.');
+      showLoginToast('로그인이 만료되었어요. 다시 로그인해 주세요.');
     } else if (loginState.reason === 'OAUTH_FAILED') {
-      alert(loginState.message ?? '로그인을 완료하지 못했습니다. 다시 시도해 주세요.');
+      showLoginToast(loginState.message ?? '로그인을 완료하지 못했습니다. 다시 시도해 주세요.');
     } else {
       return;
     }
     navigate('.', { replace: true });
-  }, [location.state, navigate]);
+  }, [location.state, navigate, showLoginToast]);
 
   const onKakaoClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -155,10 +181,16 @@ function Login() {
           setOnboardingCompleted(res.data.onboardingCompleted);
           setStoredNickname(res.data.nickname);
           navigate(getPostLoginPath(res.data), { replace: true });
-        } else alert('구글 로그인 중 에러 발생');
+        } else {
+          showLoginToast(res.message ?? '구글 로그인을 완료하지 못했습니다. 다시 시도해 주세요.');
+        }
       } catch (err) {
         clearNativeGoogleOAuthState();
-        alert(err instanceof Error ? err.message : '구글 로그인 중 에러 발생');
+        showLoginToast(
+          err instanceof Error
+            ? err.message
+            : '구글 로그인을 완료하지 못했습니다. 다시 시도해 주세요.'
+        );
       }
       return;
     } else {
@@ -213,25 +245,36 @@ function Login() {
         navigate(getPostLoginPath(res.data), { replace: true });
       } catch (err) {
         clearNativeGoogleOAuthState();
-        alert(err instanceof Error ? err.message : '구글 로그인 중 에러 발생');
+        showLoginToast(
+          err instanceof Error
+            ? err.message
+            : '구글 로그인을 완료하지 못했습니다. 다시 시도해 주세요.'
+        );
       }
     })();
-  }, [googleLoginMutation, isMobileWebView, navigate]);
+  }, [googleLoginMutation, isMobileWebView, navigate, showLoginToast]);
 
   const onAppleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
+    const state = createWebOAuthState('APPLE');
     window.AppleID?.auth.init({
       clientId: APPLE_CLIENT_ID,
       scope: 'email name',
       redirectURI: `${APPLE_REDIRECT_URI}`,
+      state,
       usePopup: true
     });
 
     try {
       const res = (await window.AppleID?.auth.signIn()) as IAppleRes;
+      if (!consumeWebOAuthState('APPLE', res.authorization.state ?? null)) {
+        showLoginToast('Apple 로그인 요청을 확인할 수 없습니다. 다시 시도해 주세요.');
+        return;
+      }
       navigate('/oauth/apple/callback', { state: { code: res.authorization.code } });
     } catch {
-      alert('애플 로그인 중 에러 발생');
+      consumeWebOAuthState('APPLE', null);
+      showLoginToast('Apple 로그인을 완료하지 못했습니다. 다시 시도해 주세요.');
     }
   };
 
@@ -331,6 +374,16 @@ function Login() {
           에 동의하는 것으로 간주합니다
         </p>
       </div>
+      {loginToast ? (
+        <div className={styles.toastLayer} data-overlay="true">
+          <Toast
+            className={styles.loginToast}
+            message={loginToast.message}
+            onClose={() => setLoginToast(null)}
+            variant="login"
+          />
+        </div>
+      ) : null}
     </div>
   );
 }

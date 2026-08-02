@@ -165,6 +165,7 @@ export default function App() {
   const webViewReadyRef = useRef(false);
   const isGoogleLoginInProgressRef = useRef(false);
   const hasHandledGoogleLoginRef = useRef(false);
+  const isGoogleRecoveryReadyRef = useRef(false);
   const pendingGoogleStateRef = useRef<string | undefined>(undefined);
   const googleRedirectPromiseRef = useRef<Promise<boolean> | undefined>(undefined);
   const pendingWebMessageRef = useRef<GoogleLoginResultMessage | undefined>(undefined);
@@ -191,8 +192,12 @@ export default function App() {
       };
 
       hasHandledGoogleLoginRef.current = true;
-      if (isGoogleLoginInProgressRef.current) postWebMessage(message);
-      else pendingWebMessageRef.current = message;
+      if (isGoogleLoginInProgressRef.current || isGoogleRecoveryReadyRef.current) {
+        postWebMessage(message);
+        isGoogleRecoveryReadyRef.current = false;
+      } else {
+        pendingWebMessageRef.current = message;
+      }
       isGoogleLoginInProgressRef.current = false;
     },
     [postWebMessage]
@@ -239,9 +244,11 @@ export default function App() {
 
     switch (message?.type) {
       case 'GOOGLE_LOGIN_RECOVERY_READY': {
+        isGoogleRecoveryReadyRef.current = true;
         if (pendingWebMessageRef.current) {
           webViewRef.current?.postMessage(JSON.stringify(pendingWebMessageRef.current));
           pendingWebMessageRef.current = undefined;
+          isGoogleRecoveryReadyRef.current = false;
         }
         break;
       }
@@ -259,6 +266,7 @@ export default function App() {
         try {
           isGoogleLoginInProgressRef.current = true;
           hasHandledGoogleLoginRef.current = false;
+          isGoogleRecoveryReadyRef.current = false;
           pendingGoogleStateRef.current = loginState;
           await SecureStore.setItemAsync(GOOGLE_OAUTH_PENDING_STATE_KEY, loginState);
           const redirectUri = getGoogleRedirectUri();
@@ -288,7 +296,6 @@ export default function App() {
             error: error instanceof Error ? error.message : '구글 로그인 중 에러가 발생했습니다.',
             state: loginState
           });
-          alert(`로그인 중 에러가 발생했습니다: \n${JSON.stringify(error, null, 2)}`);
         } finally {
           isGoogleLoginInProgressRef.current = false;
           if (!hasHandledGoogleLoginRef.current) {

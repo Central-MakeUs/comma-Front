@@ -6,7 +6,7 @@ function isReactNativeWebView() {
 }
 
 export const appBridge = linkBridge<BridgeStore<AppBridge>, AppPostMessageSchema>({
-  timeout: 20000,
+  timeout: 60000,
   throwOnError: true,
   initialBridge: {
     async openExternalBrowser(url) {

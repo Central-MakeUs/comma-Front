@@ -44,24 +44,24 @@ function wait(ms: number) {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
 }
 
-async function getNativeGalleryPhotos() {
-  let lastError: unknown;
-
+async function waitForNativeGalleryBridge() {
   for (let attempt = 0; attempt <= GALLERY_BRIDGE_RETRY_COUNT; attempt += 1) {
-    try {
-      return await appBridge.getGalleryPhotos(GALLERY_PHOTO_LIMIT);
-    } catch (error) {
-      lastError = error;
+    const appInfo = await appBridge.getAppInfo();
 
-      if (!isReactNativeWebView() || attempt === GALLERY_BRIDGE_RETRY_COUNT) {
-        break;
-      }
-
-      await wait(GALLERY_BRIDGE_RETRY_DELAY_MS);
+    if (appInfo.platform !== 'web') {
+      return;
     }
+
+    if (!isReactNativeWebView() || attempt === GALLERY_BRIDGE_RETRY_COUNT) break;
+    await wait(GALLERY_BRIDGE_RETRY_DELAY_MS);
   }
 
-  throw lastError;
+  throw new Error('Native gallery bridge is not ready yet.');
+}
+
+async function getNativeGalleryPhotos() {
+  await waitForNativeGalleryBridge();
+  return appBridge.getGalleryPhotos(GALLERY_PHOTO_LIMIT);
 }
 
 export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivityPhotoPickerProps) {

@@ -31,6 +31,7 @@ const PREPARED_UPLOAD_WIDTH = 1080;
 const GALLERY_THUMBNAIL_WIDTH = 240;
 const PREPARED_PREVIEW_WIDTH = 690;
 const GALLERY_THUMBNAIL_CONCURRENCY = 3;
+const PREPARED_PHOTO_TTL_MS = 5 * 60 * 1000;
 const ACCESS_TOKEN_KEY = 'comma.accessToken';
 const REFRESH_TOKEN_KEY = 'comma.refreshToken';
 const androidGalleryAssets = new Map<string, MediaLibrary.Asset>();
@@ -40,9 +41,20 @@ type NativePreparedPhoto = {
   mimeType: string;
   width: number;
   height: number;
+  cleanupTimer: ReturnType<typeof setTimeout>;
 };
 const preparedPhotos = new Map<string, NativePreparedPhoto>();
+const photoPreparationPromises = new Map<string, Promise<PreparedGalleryPhoto>>();
 let refreshPromise: Promise<{ accessToken: string; onboardingCompleted?: boolean }> | null = null;
+
+async function deletePreparedPhoto(handle: string) {
+  const photo = preparedPhotos.get(handle);
+  if (!photo) return;
+
+  preparedPhotos.delete(handle);
+  clearTimeout(photo.cleanupTimer);
+  await FileSystem.deleteAsync(photo.uri, { idempotent: true });
+}
 
 async function mapWithConcurrency<T, R>(
   values: readonly T[],
@@ -372,7 +384,7 @@ function getCenteredCrop(width: number, height: number) {
   };
 }
 
-async function prepareGalleryPhoto(assetId: string): Promise<PreparedGalleryPhoto> {
+async function createPreparedGalleryPhoto(assetId: string): Promise<PreparedGalleryPhoto> {
   const image = await getUploadableAsset(assetId);
   const crop = getCenteredCrop(image.width, image.height);
   const actions: ImageManipulator.Action[] = [{ crop }];
@@ -390,13 +402,17 @@ async function prepareGalleryPhoto(assetId: string): Promise<PreparedGalleryPhot
     const previewUri = await createImageDataUri(result.uri, PREPARED_PREVIEW_WIDTH);
     const handle = Crypto.randomUUID();
     const filename = `comma-photo-${Date.now()}.jpg`;
+    const cleanupTimer = setTimeout(() => {
+      void deletePreparedPhoto(handle).catch(() => {});
+    }, PREPARED_PHOTO_TTL_MS);
 
     preparedPhotos.set(handle, {
       uri: result.uri,
       filename,
       mimeType: DEFAULT_IMAGE_MIME_TYPE,
       width: result.width,
-      height: result.height
+      height: result.height,
+      cleanupTimer
     });
 
     return {
@@ -409,6 +425,20 @@ async function prepareGalleryPhoto(assetId: string): Promise<PreparedGalleryPhot
     await FileSystem.deleteAsync(result.uri, { idempotent: true }).catch(() => {});
     throw error;
   }
+}
+
+function prepareGalleryPhoto(assetId: string): Promise<PreparedGalleryPhoto> {
+  const pendingPreparation = photoPreparationPromises.get(assetId);
+  if (pendingPreparation) return pendingPreparation;
+
+  const preparation = createPreparedGalleryPhoto(assetId).finally(() => {
+    if (photoPreparationPromises.get(assetId) === preparation) {
+      photoPreparationPromises.delete(assetId);
+    }
+  });
+
+  photoPreparationPromises.set(assetId, preparation);
+  return preparation;
 }
 
 async function createFeedWithMultipart(
@@ -634,11 +664,7 @@ export const appBridge = bridge<AppBridge>({
     return prepareGalleryPhoto(assetId);
   },
   async deletePreparedGalleryPhoto(handle) {
-    const photo = preparedPhotos.get(handle);
-    if (!photo) return;
-
-    preparedPhotos.delete(handle);
-    await FileSystem.deleteAsync(photo.uri, { idempotent: true });
+    await deletePreparedPhoto(handle);
   },
   async createFeedWithGalleryPhoto(photo, request) {
     return createFeedWithMultipart(photo.uri, request);

@@ -2,6 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { type fieldType, login, type TokenResponse } from '../apis/auth';
+import { consumeWebOAuthState } from '../utils/oauthState';
 import { setOnboardingCompleted, setStoredNickname, setTokens } from '../utils/tokenStorage';
 import * as styles from './CallbackPage.css';
 
@@ -38,16 +39,36 @@ function CallbackPage() {
     hasRun.current = true;
 
     const handleLogin = async () => {
+      const returnToLogin = (message: string) => {
+        navigate('/', {
+          replace: true,
+          state: { reason: 'OAUTH_FAILED', message }
+        });
+      };
       const field = getFieldByPathname(pathname);
       if (!field) {
-        alert('올바른 callback path를 명시해주세요.');
+        returnToLogin('올바르지 않은 로그인 응답입니다. 다시 시도해 주세요.');
         return;
       }
 
-      const queryCode = new URLSearchParams(location.search).get('code');
+      const searchParams = new URLSearchParams(location.search);
+      if (
+        (field === 'KAKAO' || field === 'GOOGLE') &&
+        !consumeWebOAuthState(field, searchParams.get('state'))
+      ) {
+        returnToLogin('로그인 요청을 확인할 수 없습니다. 다시 시도해 주세요.');
+        return;
+      }
+
+      if (searchParams.get('error')) {
+        returnToLogin('로그인이 취소되었거나 인증 제공자에서 거부되었습니다.');
+        return;
+      }
+
+      const queryCode = searchParams.get('code');
       const code = field === 'APPLE' ? (appleCode ?? queryCode) : queryCode;
       if (!code) {
-        alert(
+        returnToLogin(
           field === 'APPLE' ? 'APPLE 코드가 없습니다.' : '로그인 오류: 올바른 정보를 입력하세요.'
         );
         return;
@@ -68,10 +89,11 @@ function CallbackPage() {
           setOnboardingCompleted(res.data.onboardingCompleted);
           setStoredNickname(res.data.nickname);
           navigate(getPostLoginPath(res.data), { replace: true });
-        } else alert(res.message);
+        } else returnToLogin(res.message ?? '로그인을 완료하지 못했습니다. 다시 시도해 주세요.');
       } catch (err) {
-        console.log(err);
-        alert(err instanceof Error ? err.message : '로그인 오류: 올바른 정보를 입력하세요.');
+        returnToLogin(
+          err instanceof Error ? err.message : '로그인 오류: 올바른 정보를 입력하세요.'
+        );
       }
     };
     handleLogin();

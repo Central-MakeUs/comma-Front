@@ -6,7 +6,9 @@
           "JN9K58AUBN.com.comma.app"
         ],
         "paths": [
-          "*"
+          "/oauth/google/callback",
+          "/oauth/kakao/callback",
+          "/oauth/apple/callback"
         ]
       }
     ]

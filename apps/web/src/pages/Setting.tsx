@@ -131,7 +131,11 @@ function PremiumAlertSheet({
           <p className={styles.premiumAlertDescription}>출시 알림을 받을 수단을 입력해주세요.</p>
         </div>
         <div className={styles.premiumAlertForm}>
-          <fieldset aria-label="연락 수단" className={styles.contactTypeToggle}>
+          <fieldset
+            aria-label="연락 수단"
+            className={styles.contactTypeToggle}
+            disabled={isPending}
+          >
             <button
               aria-pressed={contactType === 'EMAIL'}
               className={

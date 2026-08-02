@@ -25,11 +25,8 @@ type GoogleLoginResultMessage = {
 };
 
 const GOOGLE_OAUTH_PENDING_STATE_KEY = 'google-oauth-pending-state';
-const WEB_OAUTH_CALLBACK_PATHS = new Set([
-  '/oauth/kakao/callback',
-  '/oauth/google/callback',
-  '/oauth/apple/callback'
-]);
+const WEB_OAUTH_CALLBACK_PATHS = new Set(['/oauth/kakao/callback', '/oauth/google/callback']);
+const APPLE_AUTH_ORIGINS = new Set(['https://appleid.apple.com']);
 
 const getLanWebUrl = () => {
   const hostUri = Constants.expoConfig?.hostUri;
@@ -146,6 +143,14 @@ const isExternalBrowserUrl = (url: string) => {
   try {
     const protocol = new URL(url).protocol;
     return protocol === 'https:' || protocol === 'http:';
+  } catch {
+    return false;
+  }
+};
+
+const isAppleAuthUrl = (url: string) => {
+  try {
+    return APPLE_AUTH_ORIGINS.has(new URL(url).origin);
   } catch {
     return false;
   }
@@ -409,9 +414,10 @@ export default function App() {
         style={styles.webView}
         source={{ uri: currentWebUrl ?? webUrl }}
         injectedJavaScriptBeforeContentLoaded={safeAreaScript}
-        originWhitelist={[trustedWebOrigin]}
+        originWhitelist={[trustedWebOrigin, ...APPLE_AUTH_ORIGINS]}
         onShouldStartLoadWithRequest={(request) => {
           if (isAllowedWebViewUrl(request.url, trustedWebOrigin)) return true;
+          if (isAppleAuthUrl(request.url)) return true;
           if (request.isTopFrame === false) {
             console.warn('Blocked an external WebView subframe.', request.url);
             return false;

@@ -98,12 +98,6 @@ export const consumeWebOAuthState = (provider: WebOAuthProvider, returnedState: 
   return Boolean(expectedState && returnedState && expectedState === returnedState);
 };
 
-export const clearWebOAuthState = (provider: WebOAuthProvider) => {
-  const key = getWebOAuthStateKey(provider);
-  safeRemoveItem('sessionStorage', key);
-  safeRemoveItem('localStorage', key);
-};
-
 export const createNativeGoogleOAuthState = () => {
   const pendingState: StoredOAuthState = {
     state: createRandomState(),

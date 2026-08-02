@@ -6,7 +6,6 @@ import { login, type TokenResponse } from '../apis/auth';
 import { PRIVACY_POLICY, TERMS_OF_SERVICE } from '../data/service_url';
 import {
   clearNativeGoogleOAuthState,
-  clearWebOAuthState,
   consumeNativeGoogleOAuthState,
   createNativeGoogleOAuthState,
   createWebOAuthState,
@@ -25,7 +24,7 @@ const APPLE_REDIRECT_URI = import.meta.env.VITE_APPLE_REDIRECT_URI;
 interface IAppleRes {
   authorization: {
     code: string;
-    state?: string;
+    id_token: string;
   };
 }
 
@@ -299,25 +298,17 @@ function Login() {
 
   const onAppleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    const state = createWebOAuthState('APPLE');
     window.AppleID?.auth.init({
       clientId: APPLE_CLIENT_ID,
       scope: 'email name',
       redirectURI: `${APPLE_REDIRECT_URI}`,
-      state,
       usePopup: true
     });
 
     try {
       const res = (await window.AppleID?.auth.signIn()) as IAppleRes;
-      navigate('/oauth/apple/callback', {
-        state: {
-          code: res.authorization.code,
-          oauthState: res.authorization.state
-        }
-      });
+      navigate('/oauth/apple/callback', { state: { code: res.authorization.code } });
     } catch {
-      clearWebOAuthState('APPLE');
       showLoginToast('Apple 로그인을 완료하지 못했습니다. 다시 시도해 주세요.');
     }
   };

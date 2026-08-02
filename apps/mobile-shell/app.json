@@ -62,11 +62,6 @@
               "scheme": "https",
               "host": "comma-front-web.vercel.app",
               "path": "/oauth/kakao/callback"
-            },
-            {
-              "scheme": "https",
-              "host": "comma-front-web.vercel.app",
-              "path": "/oauth/apple/callback"
             }
           ],
           "category": ["BROWSABLE", "DEFAULT"]

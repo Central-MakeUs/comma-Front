@@ -645,20 +645,27 @@ export const appBridge = bridge<AppBridge>({
       );
     }
 
-    const photoResults = await Promise.allSettled(
-      assets.assets.map(async (asset) => {
+    const photoResults = await mapWithConcurrency(
+      assets.assets,
+      GALLERY_THUMBNAIL_CONCURRENCY,
+      async (asset) => {
         const assetInfo = await MediaLibrary.getAssetInfoAsync(asset, {
           shouldDownloadFromNetwork: true
         });
+        const localUri = assetInfo.localUri ?? assetInfo.uri;
+
+        if (!localUri || localUri.startsWith('ph://')) {
+          throw new Error('사진의 로컬 파일을 불러오지 못했어요.');
+        }
 
         return {
           id: asset.id,
-          uri: assetInfo.localUri ?? assetInfo.uri,
+          uri: await createImageDataUri(localUri, GALLERY_THUMBNAIL_WIDTH),
           filename: asset.filename,
           width: asset.width,
           height: asset.height
         };
-      })
+      }
     );
 
     return photoResults.flatMap((result) => {

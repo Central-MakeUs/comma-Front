@@ -1,3 +1,5 @@
+import { appBridge } from '../bridge';
+
 export interface StoredTokens {
   accessToken: string;
   refreshToken: string;
@@ -11,6 +13,9 @@ const TOKEN_EXPIRY_BUFFER_MS = 60 * 1000;
 
 const canUseLocalStorage = () => typeof window !== 'undefined' && Boolean(window.localStorage);
 
+export const isNativeApp = () =>
+  typeof window !== 'undefined' && window.ReactNativeWebView !== undefined;
+
 export const getTokens = (): StoredTokens | null => {
   if (!canUseLocalStorage()) return null;
 
@@ -22,20 +27,53 @@ export const getTokens = (): StoredTokens | null => {
   return { accessToken, refreshToken };
 };
 
-export const setTokens = ({ accessToken, refreshToken }: StoredTokens) => {
+export const setTokens = async ({ accessToken, refreshToken }: StoredTokens) => {
+  if (isNativeApp()) {
+    throw new Error('Native auth tokens must be stored by the native login bridge.');
+  }
   if (!canUseLocalStorage()) return;
 
   window.localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
   window.localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
 };
 
-export const clearTokens = () => {
-  if (!canUseLocalStorage()) return;
+export const clearTokens = async () => {
+  let nativeError: unknown;
+  if (isNativeApp()) {
+    try {
+      await appBridge.clearAuthTokens();
+    } catch (error) {
+      nativeError = error;
+    }
+  }
+  if (canUseLocalStorage()) {
+    window.localStorage.removeItem(ACCESS_TOKEN_KEY);
+    window.localStorage.removeItem(REFRESH_TOKEN_KEY);
+    window.localStorage.removeItem(ONBOARDING_COMPLETED_KEY);
+    window.localStorage.removeItem(NICKNAME_KEY);
+  }
+  if (nativeError) throw nativeError;
+};
 
+export const initializeAuthStorage = async () => {
+  if (!isNativeApp()) return;
+
+  const legacyTokens = getTokens();
+  await appBridge.migrateAuthTokens(legacyTokens);
   window.localStorage.removeItem(ACCESS_TOKEN_KEY);
   window.localStorage.removeItem(REFRESH_TOKEN_KEY);
-  window.localStorage.removeItem(ONBOARDING_COMPLETED_KEY);
-  window.localStorage.removeItem(NICKNAME_KEY);
+};
+
+export const getAuthState = async () => {
+  if (isNativeApp()) {
+    return appBridge.getAuthState();
+  }
+
+  const tokens = getTokens();
+  return {
+    hasTokens: Boolean(tokens),
+    accessTokenExpiresAt: tokens ? getJwtExpiryMs(tokens.accessToken) : null
+  };
 };
 
 export const getOnboardingCompleted = () => {
@@ -92,3 +130,6 @@ export const isAccessTokenValid = (token: string) => {
 
   return expiryMs - TOKEN_EXPIRY_BUFFER_MS > Date.now();
 };
+
+export const isAccessTokenExpiryValid = (expiryMs: number | null) =>
+  Boolean(expiryMs && expiryMs - TOKEN_EXPIRY_BUFFER_MS > Date.now());

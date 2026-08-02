@@ -1,8 +1,8 @@
 export {
   type fieldType,
+  type LoginData,
   type LoginRequest,
   type LoginResponse,
   login,
-  refreshToken,
-  type TokenResponse
+  refreshToken
 } from '../apis/auth';

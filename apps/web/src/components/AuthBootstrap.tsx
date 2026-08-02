@@ -1,12 +1,16 @@
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
-import { refreshStoredTokens, SESSION_EXPIRED_EVENT } from '../apis/client';
+import {
+  refreshStoredTokens,
+  SESSION_EXPIRED_ERROR_MESSAGE,
+  SESSION_EXPIRED_EVENT
+} from '../apis/client';
 import { router } from '../router';
 import {
-  clearTokens,
+  getAuthState,
   getOnboardingCompleted,
-  getTokens,
-  isAccessTokenValid
+  initializeAuthStorage,
+  isAccessTokenExpiryValid
 } from '../utils/tokenStorage';
 
 interface AuthBootstrapProps {
@@ -23,6 +27,16 @@ const redirectToLoginForExpiredSession = () => {
     }
   });
 };
+
+const redirectToLoginForAuthError = () => {
+  router.navigate('/', {
+    replace: true,
+    state: { reason: 'OAUTH_FAILED' }
+  });
+};
+
+const isSessionExpiredError = (error: unknown) =>
+  error instanceof Error && error.message.includes(SESSION_EXPIRED_ERROR_MESSAGE);
 
 const publicPaths = new Set([
   '/',
@@ -69,22 +83,23 @@ function AuthBootstrap({ children }: AuthBootstrapProps) {
 
   useEffect(() => {
     const bootstrapAuth = async () => {
-      const tokens = getTokens();
+      await initializeAuthStorage();
+      const authState = await getAuthState();
 
-      if (!tokens) {
+      if (!authState.hasTokens) {
         redirectToLoginForMissingSession();
         setIsReady(true);
         return;
       }
 
-      if (isAccessTokenValid(tokens.accessToken)) {
+      if (isAccessTokenExpiryValid(authState.accessTokenExpiresAt)) {
         try {
           await refreshOnboardingStateForRoot();
           redirectRootAfterAuth();
           setIsReady(true);
-        } catch {
-          clearTokens();
-          redirectToLoginForExpiredSession();
+        } catch (error) {
+          if (isSessionExpiredError(error)) redirectToLoginForExpiredSession();
+          else redirectToLoginForAuthError();
           setIsReady(true);
         }
         return;
@@ -93,15 +108,18 @@ function AuthBootstrap({ children }: AuthBootstrapProps) {
       try {
         await refreshStoredTokens();
         redirectRootAfterAuth();
-      } catch {
-        clearTokens();
-        redirectToLoginForExpiredSession();
+      } catch (error) {
+        if (isSessionExpiredError(error)) redirectToLoginForExpiredSession();
+        else redirectToLoginForAuthError();
       } finally {
         setIsReady(true);
       }
     };
 
-    bootstrapAuth();
+    void bootstrapAuth().catch(() => {
+      redirectToLoginForAuthError();
+      setIsReady(true);
+    });
   }, []);
 
   if (!isReady) return null;

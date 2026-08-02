@@ -32,9 +32,45 @@ export type FeedCreateRequest = {
   isPublic: boolean;
 };
 
-export type NativeFeedUploadAuth = {
+export type AuthTokens = {
   accessToken: string;
-  baseUrl: string;
+  refreshToken: string;
+};
+
+export type AuthState = {
+  hasTokens: boolean;
+  accessTokenExpiresAt: number | null;
+};
+
+export type NativeLoginRequest = {
+  field: 'KAKAO' | 'GOOGLE' | 'APPLE';
+  code: string;
+  redirectUri: string;
+};
+
+export type NativeLoginResult = {
+  success: boolean;
+  message?: string;
+  data?: {
+    onboardingCompleted: boolean;
+    nickname: string;
+  };
+};
+
+export type NativeAuthRefreshResult = {
+  onboardingCompleted?: boolean;
+};
+
+export type NativeApiRequest = {
+  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+  path: string;
+  params?: Record<string, string | number | boolean | null | undefined>;
+  body?: unknown;
+};
+
+export type NativeApiResponse = {
+  status: number;
+  data: unknown;
 };
 
 export type FeedResponse = {
@@ -55,12 +91,14 @@ export type AppBridge = {
   openExternalBrowser(url: string): Promise<void>;
   getAppInfo(): Promise<AppInfo>;
   setStatusBar(style: StatusBarStyle): Promise<void>;
+  migrateAuthTokens(tokens: AuthTokens | null): Promise<AuthState>;
+  getAuthState(): Promise<AuthState>;
+  completeLogin(request: NativeLoginRequest): Promise<NativeLoginResult>;
+  refreshAuthSession(): Promise<NativeAuthRefreshResult>;
+  clearAuthTokens(): Promise<void>;
+  authenticatedRequest(request: NativeApiRequest): Promise<NativeApiResponse>;
   getGalleryPhotos(limit?: number): Promise<GalleryPhoto[]>;
-  createFeedWithGalleryPhoto(
-    assetId: string,
-    request: FeedCreateRequest,
-    auth: NativeFeedUploadAuth
-  ): Promise<FeedResponse>;
+  createFeedWithGalleryPhoto(assetId: string, request: FeedCreateRequest): Promise<FeedResponse>;
 };
 
 export type AppPostMessageSchema = {

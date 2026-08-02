@@ -2,7 +2,7 @@ import { Toast } from '@comma/design-system';
 import { useMutation } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { login, type TokenResponse } from '../apis/auth';
+import { type LoginData, login } from '../apis/auth';
 import { PRIVACY_POLICY, TERMS_OF_SERVICE } from '../data/service_url';
 import {
   clearNativeGoogleOAuthState,
@@ -11,7 +11,7 @@ import {
   createWebOAuthState,
   hasPendingNativeGoogleOAuthState
 } from '../utils/oauthState';
-import { setOnboardingCompleted, setStoredNickname, setTokens } from '../utils/tokenStorage';
+import { setOnboardingCompleted, setStoredNickname } from '../utils/tokenStorage';
 import * as styles from './Login.css';
 
 const REST_API_KEY = import.meta.env.VITE_REST_API_KEY;
@@ -36,6 +36,7 @@ interface IGoogleWait {
 const GOOGLE_LOGIN_TIMEOUT_MS = 60000;
 const GOOGLE_LOGIN_RECOVERY_TIMEOUT_MS = 10000;
 const LOGIN_TOAST_DURATION_MS = 4000;
+const LOGIN_ERROR_MESSAGE = '로그인 에러입니다. 다시 시도해주세요.';
 
 interface LoginToastState {
   id: number;
@@ -53,8 +54,7 @@ const getLoginState = (state: unknown) =>
       }
     : undefined;
 
-const getPostLoginPath = (data: TokenResponse) =>
-  data.onboardingCompleted ? '/loading' : '/nickname';
+const getPostLoginPath = (data: LoginData) => (data.onboardingCompleted ? '/loading' : '/nickname');
 
 const waitForGoogleLogin = ({
   signal,
@@ -158,7 +158,7 @@ function Login() {
     if (loginState.reason === 'SESSION_EXPIRED') {
       showLoginToast('로그인이 만료되었어요. 다시 로그인해 주세요.');
     } else if (loginState.reason === 'OAUTH_FAILED') {
-      showLoginToast(loginState.message ?? '로그인을 완료하지 못했습니다. 다시 시도해 주세요.');
+      showLoginToast(LOGIN_ERROR_MESSAGE);
     } else {
       return;
     }
@@ -212,24 +212,16 @@ function Login() {
         if (controller.signal.aborted) return;
 
         if (res.success && res.data) {
-          setTokens({
-            accessToken: res.data.accessToken,
-            refreshToken: res.data.refreshToken
-          });
           setOnboardingCompleted(res.data.onboardingCompleted);
           setStoredNickname(res.data.nickname);
           navigate(getPostLoginPath(res.data), { replace: true });
         } else {
-          showLoginToast(res.message ?? '구글 로그인을 완료하지 못했습니다. 다시 시도해 주세요.');
+          showLoginToast(LOGIN_ERROR_MESSAGE);
         }
-      } catch (err) {
+      } catch {
         if (controller.signal.aborted) return;
         clearNativeGoogleOAuthState();
-        showLoginToast(
-          err instanceof Error
-            ? err.message
-            : '구글 로그인을 완료하지 못했습니다. 다시 시도해 주세요.'
-        );
+        showLoginToast(LOGIN_ERROR_MESSAGE);
       } finally {
         if (googleLoginAbortControllerRef.current === controller) {
           googleLoginAbortControllerRef.current = null;
@@ -289,21 +281,13 @@ function Login() {
           throw new Error(res.message ?? '구글 로그인 중 에러가 발생했습니다.');
         }
 
-        setTokens({
-          accessToken: res.data.accessToken,
-          refreshToken: res.data.refreshToken
-        });
         setOnboardingCompleted(res.data.onboardingCompleted);
         setStoredNickname(res.data.nickname);
         navigate(getPostLoginPath(res.data), { replace: true });
-      } catch (err) {
+      } catch {
         if (controller.signal.aborted) return;
         clearNativeGoogleOAuthState();
-        showLoginToast(
-          err instanceof Error
-            ? err.message
-            : '구글 로그인을 완료하지 못했습니다. 다시 시도해 주세요.'
-        );
+        showLoginToast(LOGIN_ERROR_MESSAGE);
       } finally {
         if (!controller.signal.aborted) {
           isGoogleOAuthPendingRef.current = false;
@@ -328,7 +312,7 @@ function Login() {
       const res = (await window.AppleID?.auth.signIn()) as IAppleRes;
       navigate('/oauth/apple/callback', { state: { code: res.authorization.code } });
     } catch {
-      showLoginToast('Apple 로그인을 완료하지 못했습니다. 다시 시도해 주세요.');
+      showLoginToast(LOGIN_ERROR_MESSAGE);
     }
   };
 

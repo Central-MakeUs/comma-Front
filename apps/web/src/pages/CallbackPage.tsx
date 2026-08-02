@@ -1,9 +1,9 @@
 import { useMutation } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { type fieldType, login, type TokenResponse } from '../apis/auth';
+import { type fieldType, type LoginData, login } from '../apis/auth';
 import { consumeWebOAuthState } from '../utils/oauthState';
-import { setOnboardingCompleted, setStoredNickname, setTokens } from '../utils/tokenStorage';
+import { setOnboardingCompleted, setStoredNickname } from '../utils/tokenStorage';
 import * as styles from './CallbackPage.css';
 
 const getFieldByPathname = (pathname: string): fieldType | null => {
@@ -21,8 +21,7 @@ const getRedirectUri = (field: fieldType) => {
   return import.meta.env.VITE_APPLE_REDIRECT_URI;
 };
 
-const getPostLoginPath = (data: TokenResponse) =>
-  data.onboardingCompleted ? '/loading' : '/nickname';
+const getPostLoginPath = (data: LoginData) => (data.onboardingCompleted ? '/loading' : '/nickname');
 
 function CallbackPage() {
   const navigate = useNavigate();
@@ -82,10 +81,6 @@ function CallbackPage() {
         });
 
         if (res.success && res.data) {
-          setTokens({
-            accessToken: res.data.accessToken,
-            refreshToken: res.data.refreshToken
-          });
           setOnboardingCompleted(res.data.onboardingCompleted);
           setStoredNickname(res.data.nickname);
           navigate(getPostLoginPath(res.data), { replace: true });

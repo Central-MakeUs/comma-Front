@@ -1,3 +1,4 @@
+import { NATIVE_FEED_UPLOAD_UNAUTHORIZED_ERROR } from '@comma/bridge';
 import axios, {
   type AxiosAdapter,
   AxiosError,
@@ -102,8 +103,11 @@ const emitSessionExpired = () => {
 };
 
 export const expireSession = async () => {
-  await clearTokens();
-  emitSessionExpired();
+  try {
+    await clearTokens();
+  } finally {
+    emitSessionExpired();
+  }
 };
 
 export const resetSessionExpiredState = () => {
@@ -119,9 +123,12 @@ const performStoredTokenRefresh = async () => {
       }
       resetSessionExpiredState();
       return null;
-    } catch {
-      await expireSession();
-      throw new Error(SESSION_EXPIRED_ERROR_MESSAGE);
+    } catch (error) {
+      if (error instanceof Error && error.message.includes(NATIVE_FEED_UPLOAD_UNAUTHORIZED_ERROR)) {
+        await expireSession();
+        throw new Error(SESSION_EXPIRED_ERROR_MESSAGE);
+      }
+      throw error;
     }
   }
 

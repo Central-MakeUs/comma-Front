@@ -1,9 +1,12 @@
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
-import { refreshStoredTokens, SESSION_EXPIRED_EVENT } from '../apis/client';
+import {
+  refreshStoredTokens,
+  SESSION_EXPIRED_ERROR_MESSAGE,
+  SESSION_EXPIRED_EVENT
+} from '../apis/client';
 import { router } from '../router';
 import {
-  clearTokens,
   getAuthState,
   getOnboardingCompleted,
   initializeAuthStorage,
@@ -24,6 +27,16 @@ const redirectToLoginForExpiredSession = () => {
     }
   });
 };
+
+const redirectToLoginForAuthError = () => {
+  router.navigate('/', {
+    replace: true,
+    state: { reason: 'OAUTH_FAILED' }
+  });
+};
+
+const isSessionExpiredError = (error: unknown) =>
+  error instanceof Error && error.message.includes(SESSION_EXPIRED_ERROR_MESSAGE);
 
 const publicPaths = new Set([
   '/',
@@ -84,9 +97,9 @@ function AuthBootstrap({ children }: AuthBootstrapProps) {
           await refreshOnboardingStateForRoot();
           redirectRootAfterAuth();
           setIsReady(true);
-        } catch {
-          await clearTokens();
-          redirectToLoginForExpiredSession();
+        } catch (error) {
+          if (isSessionExpiredError(error)) redirectToLoginForExpiredSession();
+          else redirectToLoginForAuthError();
           setIsReady(true);
         }
         return;
@@ -95,16 +108,16 @@ function AuthBootstrap({ children }: AuthBootstrapProps) {
       try {
         await refreshStoredTokens();
         redirectRootAfterAuth();
-      } catch {
-        await clearTokens();
-        redirectToLoginForExpiredSession();
+      } catch (error) {
+        if (isSessionExpiredError(error)) redirectToLoginForExpiredSession();
+        else redirectToLoginForAuthError();
       } finally {
         setIsReady(true);
       }
     };
 
     void bootstrapAuth().catch(() => {
-      redirectToLoginForExpiredSession();
+      redirectToLoginForAuthError();
       setIsReady(true);
     });
   }, []);

@@ -44,7 +44,9 @@ export const login = async ({ field, code, redirectUri }: LoginRequest) => {
     redirectUri
   });
 
-  if (!data.success || !data.data) return data;
+  if (!data.success || !data.data) {
+    return { success: data.success, message: data.message };
+  }
 
   await setTokens({
     accessToken: data.data.accessToken,

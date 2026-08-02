@@ -20,6 +20,7 @@ import { z } from 'zod';
 const MAX_GALLERY_PHOTOS = 30;
 const DEFAULT_IMAGE_MIME_TYPE = 'image/jpeg';
 const FEED_UPLOAD_TIMEOUT_MS = 18_000;
+const AUTH_REQUEST_TIMEOUT_MS = 10_000;
 const ACCESS_TOKEN_KEY = 'comma.accessToken';
 const REFRESH_TOKEN_KEY = 'comma.refreshToken';
 let refreshPromise: Promise<{ accessToken: string; onboardingCompleted?: boolean }> | null = null;
@@ -103,6 +104,26 @@ async function parseResponseData(response: Response) {
   }
 }
 
+async function fetchAuthApi(input: string, init: RequestInit) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), AUTH_REQUEST_TIMEOUT_MS);
+
+  try {
+    return await fetch(input, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+function isRefreshTokenRejected(response: Response, payload: { success?: boolean } | null) {
+  return (
+    response.status === 400 ||
+    response.status === 401 ||
+    response.status === 403 ||
+    (response.ok && payload?.success === false)
+  );
+}
+
 async function refreshNativeAuthSession() {
   if (refreshPromise) return refreshPromise;
 
@@ -113,7 +134,7 @@ async function refreshNativeAuthSession() {
       throw new Error(NATIVE_FEED_UPLOAD_UNAUTHORIZED_ERROR);
     }
 
-    const response = await fetch(`${getTrustedApiBaseUrl()}/api/auth/reissue`, {
+    const response = await fetchAuthApi(`${getTrustedApiBaseUrl()}/api/auth/reissue`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ refreshToken: tokens.refreshToken })
@@ -127,9 +148,12 @@ async function refreshNativeAuthSession() {
       };
     } | null;
 
-    if (!response.ok || !payload?.success || !payload.data?.accessToken) {
+    if (isRefreshTokenRejected(response, payload)) {
       await deleteAuthTokens();
       throw new Error(NATIVE_FEED_UPLOAD_UNAUTHORIZED_ERROR);
+    }
+    if (!response.ok || !payload?.success || !payload.data?.accessToken) {
+      throw new Error('Native token refresh failed.');
     }
 
     const nextTokens = {
@@ -176,7 +200,7 @@ async function fetchAuthenticatedApi(
     return { status: 401, data: { success: false, message: '로그인이 필요해요.' } };
   }
 
-  const response = await fetch(createTrustedApiUrl(request.path, request.params), {
+  const response = await fetchAuthApi(createTrustedApiUrl(request.path, request.params), {
     method: request.method,
     headers: {
       Authorization: `Bearer ${tokens.accessToken}`,
@@ -189,8 +213,11 @@ async function fetchAuthenticatedApi(
     try {
       await refreshNativeAuthSession();
       return fetchAuthenticatedApi(request, false);
-    } catch {
-      return { status: 401, data: { success: false, message: '로그인이 만료되었어요.' } };
+    } catch (error) {
+      if (error instanceof Error && error.message.includes(NATIVE_FEED_UPLOAD_UNAUTHORIZED_ERROR)) {
+        return { status: 401, data: { success: false, message: '로그인이 만료되었어요.' } };
+      }
+      throw error;
     }
   }
 
@@ -336,7 +363,7 @@ export const appBridge = bridge<AppBridge>({
     return getAuthState();
   },
   async completeLogin(request) {
-    const response = await fetch(
+    const response = await fetchAuthApi(
       `${getTrustedApiBaseUrl()}/api/auth/login/${encodeURIComponent(request.field)}`,
       {
         method: 'POST',

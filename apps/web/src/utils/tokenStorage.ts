@@ -38,15 +38,21 @@ export const setTokens = async ({ accessToken, refreshToken }: StoredTokens) => 
 };
 
 export const clearTokens = async () => {
+  let nativeError: unknown;
   if (isNativeApp()) {
-    await appBridge.clearAuthTokens();
+    try {
+      await appBridge.clearAuthTokens();
+    } catch (error) {
+      nativeError = error;
+    }
   }
-  if (!canUseLocalStorage()) return;
-
-  window.localStorage.removeItem(ACCESS_TOKEN_KEY);
-  window.localStorage.removeItem(REFRESH_TOKEN_KEY);
-  window.localStorage.removeItem(ONBOARDING_COMPLETED_KEY);
-  window.localStorage.removeItem(NICKNAME_KEY);
+  if (canUseLocalStorage()) {
+    window.localStorage.removeItem(ACCESS_TOKEN_KEY);
+    window.localStorage.removeItem(REFRESH_TOKEN_KEY);
+    window.localStorage.removeItem(ONBOARDING_COMPLETED_KEY);
+    window.localStorage.removeItem(NICKNAME_KEY);
+  }
+  if (nativeError) throw nativeError;
 };
 
 export const initializeAuthStorage = async () => {

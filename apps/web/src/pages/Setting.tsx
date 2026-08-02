@@ -230,8 +230,13 @@ function Setting() {
         return;
       }
 
-      await clearTokens();
-      navigate('/', { replace: true });
+      try {
+        await clearTokens();
+      } catch (error) {
+        console.error('Failed to clear tokens after withdrawal.', error);
+      } finally {
+        navigate('/', { replace: true });
+      }
     },
     onError: (err) => {
       alert(err instanceof Error ? err.message : '회원 탈퇴에 실패했습니다.');
@@ -240,9 +245,14 @@ function Setting() {
   const logoutMutation = useMutation({
     mutationFn: logout,
     onSettled: async () => {
-      await clearTokens();
-      queryClient.clear();
-      navigate('/', { replace: true });
+      try {
+        await clearTokens();
+      } catch (error) {
+        console.error('Failed to clear tokens during logout.', error);
+      } finally {
+        queryClient.clear();
+        navigate('/', { replace: true });
+      }
     }
   });
 

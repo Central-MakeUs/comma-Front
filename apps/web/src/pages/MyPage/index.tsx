@@ -9,7 +9,7 @@ import { interpolatePath, lerp } from '../../utils/compute_layout';
 import { navigateToNavigationItem } from '../../utils/navigation';
 import { getStoredNickname, setStoredNickname } from '../../utils/tokenStorage';
 import { transformDate } from '../../utils/transformDate';
-import { fallbackMoodRatio } from './MyPage.constant';
+import { fallbackMoodRatio, fallbackTimeBudgetRatio } from './MyPage.constant';
 import * as styles from './MyPage.css';
 import MyPageAnswerContainer from './MyPageAnswerContainer';
 import MyPageCard from './MyPageCard';
@@ -124,6 +124,9 @@ function MyPage() {
   const moodRatio = reportQuery.data?.moodRatio?.length
     ? reportQuery.data.moodRatio
     : fallbackMoodRatio;
+  const timeBudgetRatio = reportQuery.data?.timeBudgetRatio?.length
+    ? reportQuery.data.timeBudgetRatio
+    : fallbackTimeBudgetRatio;
   const displayActivityRanking = reportQuery.data?.activityRanking?.length
     ? reportQuery.data.activityRanking
     : [];
@@ -352,9 +355,14 @@ function MyPage() {
             <span className={styles.questionNum}>Q2.</span>어느정도 시간이 있어요?
           </div>
           <div>
-            <MyPageAnswerContainer num={1} text={'잠깐(1시간 이내)'} percent={70} />
-            <MyPageAnswerContainer num={2} text={'여유(1-6시간이내)'} percent={25} />
-            <MyPageAnswerContainer num={3} text={'넉넉(6시간이상)'} percent={5} />
+            {timeBudgetRatio.map((timeBudget, index) => (
+              <MyPageAnswerContainer
+                key={timeBudget.timeBudget}
+                num={index + 1}
+                text={timeBudget.label}
+                percent={timeBudget.ratio}
+              />
+            ))}
           </div>
         </div>
         <NavigationBar

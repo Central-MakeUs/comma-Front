@@ -87,6 +87,7 @@ function Feed() {
       if (res.success) {
         setToastVariant('block');
         setFeeds((prev) => [...prev.filter((f) => f.feedId !== feedId)]);
+        if(!feeds.length) setState('empty');
       } else alert(res.message ?? '차단 중 오류가 발생했습니다.');
     } catch (error) {
       console.error(error);

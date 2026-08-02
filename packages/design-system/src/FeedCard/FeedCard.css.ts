@@ -78,6 +78,19 @@ export const tagsText = style({
   letterSpacing: vars.typography.labelNormalR.letterSpacing
 });
 
+export const moreButton = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  border: 'none',
+  background: 'none',
+  padding: 4,
+  margin: -4,
+  borderRadius: 4,
+  color: 'inherit',
+  cursor: 'pointer'
+});
+
 export const modal = style({
   width: 80,
   height: 88,

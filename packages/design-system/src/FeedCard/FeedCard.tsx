@@ -12,6 +12,7 @@ import {
   modal,
   modalOverlay,
   modalText,
+  moreButton,
   secondaryMetaText,
   tagsText
 } from './FeedCard.css';
@@ -101,7 +102,18 @@ export function FeedCard({
           }}
         >
           {tagsLabel.length > 0 ? <p className={tagsText}>{tagsLabel}</p> : null}
-          {isOther ? <Icon name="dots" onClick={() => setClicked(true)} /> : null}
+          {isOther ? (
+            <button
+              aria-expanded={clicked}
+              aria-haspopup="menu"
+              aria-label="신고 및 차단 메뉴 열기"
+              className={moreButton}
+              onClick={() => setClicked(true)}
+              type="button"
+            >
+              <Icon name="dots" />
+            </button>
+          ) : null}
           {clicked ? (
             <>
               <button

@@ -69,7 +69,7 @@
       ]
     },
     "extra": {
-      "apiBaseUrl": "https://comma-production-9c37.up.railway.app",
+      "apiBaseUrl": "https://167-126-10-48.sslip.io",
       "webUrl": "https://comma-front-web.vercel.app/",
       "eas": {
         "projectId": "6769c796-0c29-40a4-8afb-24f4e6df08de"

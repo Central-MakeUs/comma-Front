@@ -9,7 +9,6 @@ import { interpolatePath, lerp } from '../../utils/compute_layout';
 import { navigateToNavigationItem } from '../../utils/navigation';
 import { getStoredNickname, setStoredNickname } from '../../utils/tokenStorage';
 import { transformDate } from '../../utils/transformDate';
-import { fallbackMoodRatio, fallbackTimeBudgetRatio } from './MyPage.constant';
 import * as styles from './MyPage.css';
 import MyPageAnswerContainer from './MyPageAnswerContainer';
 import MyPageCard from './MyPageCard';
@@ -121,12 +120,10 @@ function MyPage() {
     },
     staleTime: 1000 * 60 * 5
   });
-  const moodRatio = reportQuery.data?.moodRatio?.length
-    ? reportQuery.data.moodRatio
-    : fallbackMoodRatio;
-  const timeBudgetRatio = reportQuery.data?.timeBudgetRatio?.length
-    ? reportQuery.data.timeBudgetRatio
-    : fallbackTimeBudgetRatio;
+  const moodRatio = reportQuery.data?.moodRatio ?? [];
+  const timeBudgetRatio = reportQuery.data?.timeBudgetRatio ?? [];
+  const hasQuestionReport = moodRatio.length > 0 || timeBudgetRatio.length > 0;
+  const showQuestionReportError = reportQuery.isError && !reportQuery.data;
   const displayActivityRanking = reportQuery.data?.activityRanking?.length
     ? reportQuery.data.activityRanking
     : [];
@@ -332,38 +329,55 @@ function MyPage() {
         <div
           style={{
             width: '100%',
-            marginTop: 48,
+            marginTop: hasQuestionReport || showQuestionReportError ? 48 : 0,
             paddingBottom: 'calc(155px + var(--safe-area-bottom))',
             paddingLeft: 32,
             paddingRight: 32
           }}
         >
-          <div className={styles.questionContainer}>
-            <span className={styles.questionNum}>Q1.</span>지금 기분이 어때요?
-          </div>
-          <div>
-            {moodRatio.map((mood, index) => (
-              <MyPageAnswerContainer
-                key={mood.mood}
-                num={index + 1}
-                text={mood.label}
-                percent={mood.ratio}
-              />
-            ))}
-          </div>
-          <div className={styles.questionContainer} style={{ marginTop: 40 }}>
-            <span className={styles.questionNum}>Q2.</span>어느정도 시간이 있어요?
-          </div>
-          <div>
-            {timeBudgetRatio.map((timeBudget, index) => (
-              <MyPageAnswerContainer
-                key={timeBudget.timeBudget}
-                num={index + 1}
-                text={timeBudget.label}
-                percent={timeBudget.ratio}
-              />
-            ))}
-          </div>
+          {showQuestionReportError ? (
+            <span className={styles.alertText}>리포트를 불러오지 못했어요.</span>
+          ) : (
+            <>
+              {moodRatio.length > 0 ? (
+                <>
+                  <div className={styles.questionContainer}>
+                    <span className={styles.questionNum}>Q1.</span>지금 기분이 어때요?
+                  </div>
+                  <div>
+                    {moodRatio.map((mood, index) => (
+                      <MyPageAnswerContainer
+                        key={mood.mood}
+                        num={index + 1}
+                        text={mood.label}
+                        percent={mood.ratio}
+                      />
+                    ))}
+                  </div>
+                </>
+              ) : null}
+              {timeBudgetRatio.length > 0 ? (
+                <>
+                  <div
+                    className={styles.questionContainer}
+                    style={{ marginTop: moodRatio.length > 0 ? 40 : 0 }}
+                  >
+                    <span className={styles.questionNum}>Q2.</span>어느정도 시간이 있어요?
+                  </div>
+                  <div>
+                    {timeBudgetRatio.map((timeBudget, index) => (
+                      <MyPageAnswerContainer
+                        key={timeBudget.timeBudget}
+                        num={index + 1}
+                        text={timeBudget.label}
+                        percent={timeBudget.ratio}
+                      />
+                    ))}
+                  </div>
+                </>
+              ) : null}
+            </>
+          )}
         </div>
         <NavigationBar
           active="mypage"

@@ -72,7 +72,7 @@ function Feed() {
 
       if (res.success) {
         setToastVariant('report');
-      } else alert(res.message);
+      } else alert(res.message ?? '신고 중 오류가 발생했습니다.');
     } catch (error) {
       console.error(error);
       alert('신고 중 오류가 발생했습니다.');
@@ -86,8 +86,8 @@ function Feed() {
 
       if (res.success) {
         setToastVariant('block');
-        setFeeds([...feeds.filter((f) => f.feedId !== feedId)]);
-      } else alert(res.message);
+        setFeeds((prev) => [...prev.filter((f) => f.feedId !== feedId)]);
+      } else alert(res.message ?? '차단 중 오류가 발생했습니다.');
     } catch (error) {
       console.error(error);
       alert('차단 중 오류가 발생했습니다.');

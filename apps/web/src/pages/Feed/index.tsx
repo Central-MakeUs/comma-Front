@@ -36,12 +36,12 @@ function Feed() {
   const pendingLikeIdsRef = useRef(new Set<number>());
   const nickname = getStoredNickname();
 
-  const onHeartClick = async (feedId: number, userNickname: string) => {
+  const onHeartClick = async (feedId: number, isLiked: boolean, nickname: string) => {
     if (pendingLikeIdsRef.current.has(feedId)) return;
     pendingLikeIdsRef.current.add(feedId);
     try {
       const myNickname = getStoredNickname();
-      if (myNickname === userNickname) return;
+      if (myNickname === nickname) return;
 
       const res = await postLikes({ feedId });
 
@@ -53,7 +53,7 @@ function Feed() {
                   ...feed,
                   isLiked: res.data?.liked ?? !feed.isLiked,
                   likeCount:
-                    res.data?.likeCount ?? (feed.isLiked ? feed.likeCount - 1 : feed.likeCount + 1)
+                    res.data?.likeCount ?? (isLiked ? feed.likeCount - 1 : feed.likeCount + 1)
                 }
               : feed
           )
@@ -233,7 +233,7 @@ function Feed() {
                 variant="others"
                 liked={f.isLiked}
                 likeCount={f.likeCount}
-                onHeartClick={() => onHeartClick(f.feedId, f.nickname ?? '')}
+                onHeartClick={() => onHeartClick(f.feedId, f.isLiked, f.nickname ?? '')}
                 title={f.nickname}
                 imageHeart={f.isLiked}
                 onReportClick={

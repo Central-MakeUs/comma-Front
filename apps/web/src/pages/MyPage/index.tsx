@@ -121,15 +121,10 @@ function MyPage() {
     staleTime: 1000 * 60 * 5
   });
   const moodRatio = reportQuery.data?.moodRatio ?? [];
-  const displayActivityRanking = reportQuery.data?.activityRanking ?? [];
+  const displayActivityRanking = reportQuery.data?.activityRanking?.length
+    ? reportQuery.data.activityRanking
+    : [];
   const activityCardCount = displayActivityRanking.length;
-  const activityStatusLabel = reportQuery.isLoading
-    ? '활동 리포트를 불러오는 중이에요'
-    : reportQuery.isError
-      ? '활동 리포트를 불러오지 못했어요'
-      : activityCardCount === 0
-        ? '아직 휴식 활동 기록이 없어요'
-        : null;
   const latestMyFeedQuery = useQuery({
     queryKey: ['feeds', 'me', 'latest'],
     queryFn: async () => {
@@ -161,12 +156,6 @@ function MyPage() {
     setXs(xs);
     setCardLayoutScale(layoutScale);
   }, [activityCardCount]);
-
-  useLayoutEffect(() => {
-    if (!emblaApi || activityCardCount === 0) return;
-
-    emblaApi.reInit();
-  }, [emblaApi, activityCardCount]);
 
   useLayoutEffect(() => {
     if (!emblaApi || activityCardCount === 0) return;
@@ -286,51 +275,37 @@ function MyPage() {
             onClick={() => setShowModal(true)}
           />
         </div>
-        {activityStatusLabel ? (
+        <div
+          ref={(node) => {
+            embiaRef(node);
+            containerRef.current = node;
+          }}
+          style={{
+            position: 'relative',
+            overflow: 'hidden',
+            height: BIG_HEIGHT * cardLayoutScale
+          }}
+        >
           <div
-            role={reportQuery.isError ? 'alert' : 'status'}
             style={{
-              minHeight: SMALL_HEIGHT * cardLayoutScale,
               display: 'flex',
-              justifyContent: 'center',
               alignItems: 'center',
-              padding: '0 32px',
-              textAlign: 'center'
+              gap: GAP * cardLayoutScale
             }}
           >
-            <span className={styles.desc}>{activityStatusLabel}</span>
+            {displayActivityRanking.map((activity) => (
+              <div
+                key={`spacer-${activity.rank}-${activity.relaxId}`}
+                style={{
+                  flex: `0 0 ${SMALL_WIDTH * cardLayoutScale}px`,
+                  height: BIG_HEIGHT * cardLayoutScale
+                }}
+              />
+            ))}
           </div>
-        ) : (
-          <div
-            ref={(node) => {
-              embiaRef(node);
-              containerRef.current = node;
-            }}
-            style={{
-              position: 'relative',
-              overflow: 'hidden',
-              height: BIG_HEIGHT * cardLayoutScale
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: GAP * cardLayoutScale
-              }}
-            >
-              {displayActivityRanking.map((activity) => (
-                <div
-                  key={`spacer-${activity.rank}-${activity.relaxId}`}
-                  style={{
-                    flex: `0 0 ${SMALL_WIDTH * cardLayoutScale}px`,
-                    height: BIG_HEIGHT * cardLayoutScale
-                  }}
-                />
-              ))}
-            </div>
-            <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-              {displayActivityRanking.map((activity, index) => (
+          <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+            {displayActivityRanking.length ? (
+              displayActivityRanking.map((activity, index) => (
                 <MyPageCard
                   key={`${activity.rank}-${activity.relaxId}`}
                   backgroundUrl={backgrounds[index % backgrounds.length]}
@@ -342,10 +317,12 @@ function MyPage() {
                   height={sizes[index]?.height ?? SMALL_HEIGHT * cardLayoutScale}
                   x={xs[index] ?? 0}
                 />
-              ))}
-            </div>
+              ))
+            ) : (
+              <span className={styles.alertText}>쉼표가 쌓이면 나만의 쉼표 리포트가 생겨요.</span>
+            )}
           </div>
-        )}
+        </div>
         <div
           style={{
             width: '100%',

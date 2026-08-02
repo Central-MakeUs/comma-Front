@@ -17,6 +17,14 @@ export type GalleryPhoto = {
   height: number;
 };
 
+export type PreparedGalleryPhoto = {
+  /** Opaque native handle. This is not a file URI. */
+  uri: string;
+  previewUri: string;
+  width: number;
+  height: number;
+};
+
 export const FEED_MOODS = ['A', 'B', 'C'] as const;
 export const FEED_TIME_BUDGETS = ['X', 'Y', 'Z'] as const;
 export const NATIVE_FEED_UPLOAD_UNAUTHORIZED_ERROR = 'NATIVE_FEED_UPLOAD_UNAUTHORIZED';
@@ -98,7 +106,13 @@ export type AppBridge = {
   clearAuthTokens(): Promise<void>;
   authenticatedRequest(request: NativeApiRequest): Promise<NativeApiResponse>;
   getGalleryPhotos(limit?: number): Promise<GalleryPhoto[]>;
-  createFeedWithGalleryPhoto(assetId: string, request: FeedCreateRequest): Promise<FeedResponse>;
+  prepareGalleryPhoto(assetId: string): Promise<PreparedGalleryPhoto>;
+  retainPreparedGalleryPhoto(uri: string): Promise<void>;
+  deletePreparedGalleryPhoto(uri: string): Promise<void>;
+  createFeedWithGalleryPhoto(
+    photo: PreparedGalleryPhoto,
+    request: FeedCreateRequest
+  ): Promise<FeedResponse>;
 };
 
 export type AppPostMessageSchema = {

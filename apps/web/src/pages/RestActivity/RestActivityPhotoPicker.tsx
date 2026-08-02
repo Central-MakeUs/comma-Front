@@ -1,3 +1,4 @@
+import type { PreparedGalleryPhoto } from '@comma/bridge';
 import { colors, Icon, ImageUpload } from '@comma/design-system';
 import { type ChangeEvent, useEffect, useRef, useState } from 'react';
 import { appBridge } from '../../bridge';
@@ -19,7 +20,7 @@ export type SelectedActivityPhoto =
   | {
       kind: 'native';
       previewSrc: string;
-      assetId: string;
+      photo: PreparedGalleryPhoto;
     }
   | {
       kind: 'preview';
@@ -43,32 +44,36 @@ function wait(ms: number) {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
 }
 
-async function getNativeGalleryPhotos() {
-  let lastError: unknown;
-
+async function waitForNativeGalleryBridge() {
   for (let attempt = 0; attempt <= GALLERY_BRIDGE_RETRY_COUNT; attempt += 1) {
-    try {
-      return await appBridge.getGalleryPhotos(GALLERY_PHOTO_LIMIT);
-    } catch (error) {
-      lastError = error;
+    const appInfo = await appBridge.getAppInfo();
 
-      if (!isReactNativeWebView() || attempt === GALLERY_BRIDGE_RETRY_COUNT) {
-        break;
-      }
-
-      await wait(GALLERY_BRIDGE_RETRY_DELAY_MS);
+    if (appInfo.platform !== 'web') {
+      return;
     }
+
+    if (!isReactNativeWebView() || attempt === GALLERY_BRIDGE_RETRY_COUNT) break;
+    await wait(GALLERY_BRIDGE_RETRY_DELAY_MS);
   }
 
-  throw lastError;
+  throw new Error('Native gallery bridge is not ready yet.');
+}
+
+async function getNativeGalleryPhotos() {
+  await waitForNativeGalleryBridge();
+  return appBridge.getGalleryPhotos(GALLERY_PHOTO_LIMIT);
 }
 
 export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivityPhotoPickerProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const isActiveRef = useRef(true);
   const [galleryPhotos, setGalleryPhotos] = useState<GalleryPhotoItem[]>([]);
-  const photos = galleryPhotos.length > 0 ? galleryPhotos : PHOTO_PICKER_IMAGES;
+  const [preparingAssetId, setPreparingAssetId] = useState<string>();
+  const isNativeGallery = isReactNativeWebView();
+  const photos =
+    galleryPhotos.length > 0 ? galleryPhotos : isNativeGallery ? [] : PHOTO_PICKER_IMAGES;
   const tileCount = photos.length + 1;
-  const emptyTileCount = (3 - (tileCount % 3)) % 3;
+  const emptyTileCount = isNativeGallery && photos.length === 0 ? 5 : (3 - (tileCount % 3)) % 3;
 
   useEffect(() => {
     let isActive = true;
@@ -96,6 +101,14 @@ export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivity
     };
   }, []);
 
+  useEffect(() => {
+    isActiveRef.current = true;
+
+    return () => {
+      isActiveRef.current = false;
+    };
+  }, []);
+
   const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.currentTarget.files?.[0];
 
@@ -107,6 +120,34 @@ export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivity
       file
     });
     event.currentTarget.value = '';
+  };
+
+  const handleNativePhotoSelect = async (photo: GalleryPhotoItem) => {
+    if (preparingAssetId) return;
+
+    setPreparingAssetId(photo.id);
+
+    try {
+      const preparedPhoto = await appBridge.prepareGalleryPhoto(photo.id);
+      await appBridge.retainPreparedGalleryPhoto(preparedPhoto.uri);
+
+      if (!isActiveRef.current) {
+        await appBridge.deletePreparedGalleryPhoto(preparedPhoto.uri).catch(() => {});
+        return;
+      }
+
+      onPhotoSelect({
+        kind: 'native',
+        previewSrc: preparedPhoto.previewUri,
+        photo: preparedPhoto
+      });
+    } catch (error) {
+      if (!isActiveRef.current) return;
+
+      console.error('Failed to prepare gallery photo.', error);
+      alert(error instanceof Error ? error.message : '사진을 불러오지 못했어요.');
+      setPreparingAssetId(undefined);
+    }
   };
 
   return (
@@ -147,21 +188,19 @@ export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivity
             <button
               aria-label="사진 선택"
               className={styles.photoTile}
+              disabled={Boolean(preparingAssetId)}
               key={photo.id}
-              onClick={() =>
-                onPhotoSelect(
-                  galleryPhotos.length > 0
-                    ? {
-                        kind: 'native',
-                        previewSrc: photo.src,
-                        assetId: photo.id
-                      }
-                    : {
-                        kind: 'preview',
-                        previewSrc: photo.src
-                      }
-                )
-              }
+              onClick={() => {
+                if (galleryPhotos.length > 0) {
+                  void handleNativePhotoSelect(photo);
+                  return;
+                }
+
+                onPhotoSelect({
+                  kind: 'preview',
+                  previewSrc: photo.src
+                });
+              }}
               type="button"
             >
               <img alt="" className={styles.photoTileImage} src={photo.src} />

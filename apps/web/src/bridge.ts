@@ -6,7 +6,7 @@ function isReactNativeWebView() {
 }
 
 export const appBridge = linkBridge<BridgeStore<AppBridge>, AppPostMessageSchema>({
-  timeout: 20000,
+  timeout: 60000,
   throwOnError: true,
   initialBridge: {
     async openExternalBrowser(url) {
@@ -42,6 +42,11 @@ export const appBridge = linkBridge<BridgeStore<AppBridge>, AppPostMessageSchema
 
       return [];
     },
+    async prepareGalleryPhoto() {
+      throw new Error('Native photo preparation is only available in the mobile app.');
+    },
+    async retainPreparedGalleryPhoto() {},
+    async deletePreparedGalleryPhoto() {},
     async createFeedWithGalleryPhoto() {
       throw new Error('Native gallery upload is only available in the mobile app.');
     }

@@ -87,7 +87,6 @@ function Feed() {
       if (res.success) {
         setToastVariant('block');
         setFeeds((prev) => [...prev.filter((f) => f.feedId !== feedId)]);
-        if (!feeds.length) setState('empty');
       } else alert(res.message ?? '차단 중 오류가 발생했습니다.');
     } catch (error) {
       console.error(error);
@@ -218,7 +217,7 @@ function Feed() {
         >
           {state === 'loading' ? (
             <span className={styles.alertText}>불러오는 중...</span>
-          ) : state === 'empty' ? (
+          ) : state === 'empty' || (state === 'success' && !hasNext && feeds.length === 0) ? (
             <span className={styles.alertText}>쉼표를 추가해보세요.</span>
           ) : state === 'error' ? null : (
             feeds.map((f) => (

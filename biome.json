@@ -3,12 +3,19 @@
   "files": {
     "includes": [
       "**",
+      "!**/credentials.json",
       "!**/node_modules",
       "!**/dist",
       "!**/build",
       "!**/storybook-static",
       "!**/.turbo",
       "!**/.expo",
+      "!apps/mobile-shell/android",
+      "!apps/mobile-shell/metadata",
+      "!apps/mobile-shell/.compliance-report",
+      "!apps/mobile-shell/*.apk",
+      "!apps/mobile-shell/*.aab",
+      "!apps/mobile-shell/*.ipa",
       "!**/*.tsbuildinfo",
       "!pnpm-lock.yaml"
     ]

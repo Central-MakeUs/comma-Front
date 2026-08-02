@@ -17,6 +17,7 @@ expo-env.d.ts
 *.p12
 *.key
 *.mobileprovision
+credentials.json
 
 # Metro
 .metro-health-check*
@@ -47,4 +48,11 @@ app-example
 .turbo
 storybook-static
 apps/mobile-shell/builds/
+apps/mobile-shell/android/
+apps/mobile-shell/ios/
+apps/mobile-shell/*.apk
+apps/mobile-shell/*.aab
+apps/mobile-shell/*.ipa
+apps/mobile-shell/metadata/
+apps/mobile-shell/.compliance-report/
 .gstack/

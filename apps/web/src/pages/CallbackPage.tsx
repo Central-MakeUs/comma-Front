@@ -29,6 +29,7 @@ function CallbackPage() {
   const location = useLocation();
   const pathname = location.pathname;
   const appleCode = location.state?.code;
+  const appleOAuthState = location.state?.oauthState;
   const hasRun = useRef(false);
   const { mutateAsync: loginMutateAsync } = useMutation({
     mutationFn: login
@@ -52,10 +53,11 @@ function CallbackPage() {
       }
 
       const searchParams = new URLSearchParams(location.search);
-      if (
-        (field === 'KAKAO' || field === 'GOOGLE') &&
-        !consumeWebOAuthState(field, searchParams.get('state'))
-      ) {
+      const returnedState =
+        field === 'APPLE' && typeof appleOAuthState === 'string'
+          ? appleOAuthState
+          : searchParams.get('state');
+      if (!consumeWebOAuthState(field, returnedState)) {
         returnToLogin('로그인 요청을 확인할 수 없습니다. 다시 시도해 주세요.');
         return;
       }
@@ -97,7 +99,7 @@ function CallbackPage() {
       }
     };
     handleLogin();
-  }, [navigate, pathname, appleCode, location.search, loginMutateAsync]);
+  }, [navigate, pathname, appleCode, appleOAuthState, location.search, loginMutateAsync]);
   return (
     <div className={styles.container}>
       <img

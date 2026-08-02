@@ -46,7 +46,7 @@
         "foregroundImage": "./assets/adaptive-icon-foreground.png",
         "backgroundColor": "#303030"
       },
-      "package": "com.comma.app",
+      "package": "app.comma.mobile",
       "versionCode": 13,
       "intentFilters": [
         {

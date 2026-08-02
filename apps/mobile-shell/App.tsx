@@ -124,6 +124,25 @@ const getGoogleLoginResult = (url: string) => {
 const isValidOAuthState = (state: unknown): state is string =>
   typeof state === 'string' && state.length >= 16 && state.length <= 256;
 
+const isAllowedWebViewUrl = (url: string, webOrigin: string) => {
+  if (url === 'about:blank') return true;
+
+  try {
+    return new URL(url).origin === webOrigin;
+  } catch {
+    return false;
+  }
+};
+
+const isExternalBrowserUrl = (url: string) => {
+  try {
+    const protocol = new URL(url).protocol;
+    return protocol === 'https:' || protocol === 'http:';
+  } catch {
+    return false;
+  }
+};
+
 const isWebOAuthCallbackUrl = (url: string, webOrigin: string) => {
   try {
     const parsedUrl = new URL(url);
@@ -234,6 +253,11 @@ export default function App() {
   );
 
   const handleMessage = async (event: WebViewMessageEvent) => {
+    if (!webOrigin || !isAllowedWebViewUrl(event.nativeEvent.url, webOrigin)) {
+      console.warn('Blocked a WebView message from an untrusted origin.', event.nativeEvent.url);
+      return;
+    }
+
     let message: { type?: string; state?: unknown; url?: string } | undefined;
     try {
       message = JSON.parse(event.nativeEvent.data);
@@ -365,6 +389,8 @@ export default function App() {
     );
   }
 
+  const trustedWebOrigin = webOrigin ?? new URL(webUrl).origin;
+
   return (
     <View style={styles.container}>
       <StatusBar style="auto" translucent backgroundColor="transparent" />
@@ -373,7 +399,18 @@ export default function App() {
         style={styles.webView}
         source={{ uri: currentWebUrl ?? webUrl }}
         injectedJavaScriptBeforeContentLoaded={safeAreaScript}
-        originWhitelist={['*']}
+        originWhitelist={[trustedWebOrigin]}
+        onShouldStartLoadWithRequest={(request) => {
+          if (isAllowedWebViewUrl(request.url, trustedWebOrigin)) return true;
+          if (request.isTopFrame === false) return true;
+
+          if (isExternalBrowserUrl(request.url)) {
+            void WebBrowser.openBrowserAsync(request.url);
+          } else {
+            console.warn('Blocked unsupported WebView navigation.', request.url);
+          }
+          return false;
+        }}
         javaScriptEnabled
         domStorageEnabled
         onError={(event: WebViewErrorEvent) => {

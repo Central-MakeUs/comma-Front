@@ -49,6 +49,7 @@ app-example
 storybook-static
 apps/mobile-shell/builds/
 apps/mobile-shell/android/
+apps/mobile-shell/ios/
 apps/mobile-shell/*.apk
 apps/mobile-shell/*.aab
 apps/mobile-shell/*.ipa

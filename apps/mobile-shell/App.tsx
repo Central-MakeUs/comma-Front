@@ -35,8 +35,17 @@ const getLanWebUrl = () => {
   return host ? `http://${host}:5173` : undefined;
 };
 
-const getDevelopmentWebUrl = () =>
-  Platform.OS === 'android' ? 'http://10.0.2.2:5173' : (getLanWebUrl() ?? 'http://localhost:5173');
+const getDevelopmentWebUrl = () => {
+  const configuredDevWebUrl = process.env.EXPO_PUBLIC_WEB_URL?.trim();
+
+  if (configuredDevWebUrl) {
+    return configuredDevWebUrl;
+  }
+
+  return Platform.OS === 'android'
+    ? 'http://10.0.2.2:5173'
+    : (getLanWebUrl() ?? 'http://localhost:5173');
+};
 
 const getConfiguredWebUrl = () => {
   const envWebUrl = process.env.EXPO_PUBLIC_WEB_URL?.trim();

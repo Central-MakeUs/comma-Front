@@ -80,7 +80,6 @@ export const createWebOAuthState = (provider: WebOAuthProvider) => {
   const key = getWebOAuthStateKey(provider);
   const storedState = JSON.stringify(pendingState);
   safeSetItem('sessionStorage', key, storedState);
-  safeSetItem('localStorage', key, storedState);
 
   return pendingState.state;
 };
@@ -88,13 +87,9 @@ export const createWebOAuthState = (provider: WebOAuthProvider) => {
 export const consumeWebOAuthState = (provider: WebOAuthProvider, returnedState: string | null) => {
   const key = getWebOAuthStateKey(provider);
   const sessionValue = safeGetItem('sessionStorage', key);
-  const persistedValue = safeGetItem('localStorage', key);
   safeRemoveItem('sessionStorage', key);
-  safeRemoveItem('localStorage', key);
 
-  const sessionState = getFreshState(sessionValue, WEB_OAUTH_STATE_TTL_MS);
-  const persistedState = getFreshState(persistedValue, WEB_OAUTH_STATE_TTL_MS);
-  const expectedState = sessionState ?? persistedState;
+  const expectedState = getFreshState(sessionValue, WEB_OAUTH_STATE_TTL_MS);
   return Boolean(expectedState && returnedState && expectedState === returnedState);
 };
 

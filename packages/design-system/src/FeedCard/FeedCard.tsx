@@ -1,4 +1,5 @@
 import type { ComponentPropsWithoutRef, MouseEventHandler } from 'react';
+import { useState } from 'react';
 import { FeedImage } from '../FeedImage';
 import { Icon } from '../Icon';
 import {
@@ -8,6 +9,10 @@ import {
   likeRow,
   metaRow,
   metaText,
+  modal,
+  modalOverlay,
+  modalText,
+  moreButton,
   secondaryMetaText,
   tagsText
 } from './FeedCard.css';
@@ -28,6 +33,8 @@ export type FeedCardProps = Omit<ComponentPropsWithoutRef<'div'>, 'children' | '
   likeCount?: number;
   liked?: boolean;
   onHeartClick?: MouseEventHandler<HTMLSpanElement>;
+  onReportClick?: MouseEventHandler<HTMLButtonElement>;
+  onBlockClick?: MouseEventHandler<HTMLButtonElement>;
 };
 
 function formatTags(tags: string[]): string {
@@ -48,11 +55,15 @@ export function FeedCard({
   likeCount = 12,
   liked = true,
   onHeartClick,
+  onReportClick,
+  onBlockClick,
   className,
   ...divProps
 }: FeedCardProps) {
   const rootClassName = [feedCard, className].filter(Boolean).join(' ');
   const tagsLabel = formatTags(tags);
+  const isOther = variant === 'others' && onReportClick && onBlockClick;
+  const [clicked, setClicked] = useState(false);
 
   return (
     <div className={rootClassName} {...divProps}>
@@ -81,7 +92,61 @@ export function FeedCard({
           )}
         </div>
         <p className={contentText}>{content}</p>
-        {tagsLabel.length > 0 ? <p className={tagsText}>{tagsLabel}</p> : null}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            position: 'relative'
+          }}
+        >
+          {tagsLabel.length > 0 ? <p className={tagsText}>{tagsLabel}</p> : null}
+          {isOther ? (
+            <button
+              aria-expanded={clicked}
+              aria-haspopup="menu"
+              aria-label="신고 및 차단 메뉴 열기"
+              className={moreButton}
+              onClick={() => setClicked(true)}
+              type="button"
+            >
+              <Icon name="dots" />
+            </button>
+          ) : null}
+          {clicked ? (
+            <>
+              <button
+                aria-label="닫기"
+                className={modalOverlay}
+                onClick={() => setClicked(false)}
+                type="button"
+              />
+              <div className={modal}>
+                <button
+                  className={modalText}
+                  onClick={(e) => {
+                    setClicked(false);
+                    onReportClick?.(e);
+                  }}
+                  type="button"
+                >
+                  신고
+                </button>
+                <button
+                  className={modalText}
+                  onClick={(e) => {
+                    setClicked(false);
+                    onBlockClick?.(e);
+                  }}
+                  type="button"
+                >
+                  차단
+                </button>
+              </div>
+            </>
+          ) : null}
+        </div>
       </div>
     </div>
   );

@@ -1,10 +1,11 @@
-import { FeedCard, NavigationBar } from '@comma/design-system';
+import type { ToastVariant } from '@comma/design-system';
+import { FeedCard, NavigationBar, Toast } from '@comma/design-system';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { checklistQueryKey, getChecklistQuestions } from '../../apis/checklist';
 import { SESSION_EXPIRED_ERROR_MESSAGE } from '../../apis/client';
-import { getFeeds, postLikes } from '../../apis/feed';
+import { blockFeed, getFeeds, postLikes, reportFeed } from '../../apis/feed';
 import type { loadingState } from '../../types/api';
 import type { feedInfo } from '../../types/feed';
 import { navigateToNavigationItem } from '../../utils/navigation';
@@ -28,10 +29,12 @@ function Feed() {
   const [nextCursor, setNextCursor] = useState<number | null>(null);
   const [hasNext, setHasNext] = useState(false);
   const [isFetchingNext, setIsFetchingNext] = useState(false);
+  const [toastVariant, setToastVariant] = useState<ToastVariant | null>(null);
   const isFetchingNextRef = useRef(false);
   const feedRequestIdRef = useRef(0);
   const queryClient = useQueryClient();
   const pendingLikeIdsRef = useRef(new Set<number>());
+  const nickname = getStoredNickname();
 
   const onHeartClick = async (feedId: number, isLiked: boolean, nickname: string) => {
     if (pendingLikeIdsRef.current.has(feedId)) return;
@@ -59,6 +62,35 @@ function Feed() {
       console.error(error);
     } finally {
       pendingLikeIdsRef.current.delete(feedId);
+    }
+  };
+
+  const onReportClick = async (feedId: number, userNickname: string) => {
+    if (userNickname === nickname) return;
+    try {
+      const res = await reportFeed({ feedId });
+
+      if (res.success) {
+        setToastVariant('report');
+      } else alert(res.message ?? '신고 중 오류가 발생했습니다.');
+    } catch (error) {
+      console.error(error);
+      alert('신고 중 오류가 발생했습니다.');
+    }
+  };
+
+  const onBlockClick = async (feedId: number, userNickname: string) => {
+    if (userNickname === nickname) return;
+    try {
+      const res = await blockFeed({ feedId });
+
+      if (res.success) {
+        setToastVariant('block');
+        setFeeds((prev) => [...prev.filter((f) => f.feedId !== feedId)]);
+      } else alert(res.message ?? '차단 중 오류가 발생했습니다.');
+    } catch (error) {
+      console.error(error);
+      alert('차단 중 오류가 발생했습니다.');
     }
   };
 
@@ -185,7 +217,7 @@ function Feed() {
         >
           {state === 'loading' ? (
             <span className={styles.alertText}>불러오는 중...</span>
-          ) : state === 'empty' ? (
+          ) : state === 'empty' || (state === 'success' && !hasNext && feeds.length === 0) ? (
             <span className={styles.alertText}>쉼표를 추가해보세요.</span>
           ) : state === 'error' ? null : (
             feeds.map((f) => (
@@ -203,11 +235,28 @@ function Feed() {
                 onHeartClick={() => onHeartClick(f.feedId, f.isLiked, f.nickname ?? '')}
                 title={f.nickname}
                 imageHeart={f.isLiked}
+                onReportClick={
+                  f.nickname === nickname
+                    ? undefined
+                    : () => onReportClick(f.feedId, f.nickname ?? '')
+                }
+                onBlockClick={
+                  f.nickname === nickname
+                    ? undefined
+                    : () => onBlockClick(f.feedId, f.nickname ?? '')
+                }
               />
             ))
           )}
         </div>
       </div>
+      {toastVariant ? (
+        <Toast
+          variant={toastVariant}
+          className={styles.toast}
+          onClose={() => setToastVariant(null)}
+        />
+      ) : null}
       <NavigationBar
         active="feed"
         className={styles.navBarStyle}

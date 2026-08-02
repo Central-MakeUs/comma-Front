@@ -9,7 +9,7 @@ import {
   toastTone
 } from './Toast.css';
 
-export type ToastVariant = 'login' | 'open' | 'lock' | 'edit';
+export type ToastVariant = 'login' | 'open' | 'lock' | 'edit' | 'report' | 'block';
 
 export type ToastProps = {
   variant?: ToastVariant;
@@ -43,6 +43,8 @@ export function Toast({ variant = 'login', className, onClose }: ToastProps) {
           </>
         ) : null}
         {variant === 'login' || variant === 'edit' ? toastMessages[variant] : null}
+        {variant === 'report' ? <span>신고가 정상적으로 접수되었어요.</span> : null}
+        {variant === 'block' ? <span>해당 피드를 차단했어요.</span> : null}
       </p>
       <span className={closeSlot}>
         <button aria-label="토스트 닫기" className={closeButton} onClick={onClose} type="button">

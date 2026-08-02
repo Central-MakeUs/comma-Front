@@ -48,7 +48,8 @@ export const agreementNotice = style({
   ...typography.captionR,
   color: colors.textTertiary,
   textAlign: 'center',
-  marginBottom: 24
+  marginBottom: 24,
+  marginTop: 0
 });
 
 export const agreementAccent = style({
@@ -83,4 +84,50 @@ export const noticeText = style({
 export const noticeAccent = style({
   ...typography.labelReadingB,
   color: colors.textPrimary
+});
+
+export const checkboxInput = style({
+  position: 'absolute',
+  width: 12,
+  height: 12,
+  margin: 0,
+  padding: 0,
+  border: 'none',
+  outline: 'none',
+  opacity: 0,
+  appearance: 'none',
+  cursor: 'pointer'
+});
+
+export const checkbox = style({
+  ...typography.labelReadingR,
+  color: colors.textSecondary,
+  display: 'inline-flex',
+  alignItems: 'center',
+  borderRadius: 4,
+  selectors: {
+    [`${checkboxInput}:focus-visible + &`]: {
+      outline: `2px solid ${colors.textPrimary}`,
+      outlineOffset: 2
+    },
+    '&:before': {
+      content: '',
+      display: 'inline-block',
+      flexShrink: 0,
+      position: 'relative',
+      top: 1,
+      width: 12,
+      height: 12,
+      marginRight: 4.5,
+      border: 'none',
+      backgroundImage: "url('/images/checkbox_off.svg')",
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: 'contain'
+    },
+    [`${checkboxInput}:checked + &:before`]: {
+      backgroundImage: "url('/images/checkbox_on.svg')",
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: 'contain'
+    }
+  }
 });

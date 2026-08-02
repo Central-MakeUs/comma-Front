@@ -10,6 +10,8 @@ import * as styles from './Nickname.css';
 function Nickname() {
   const navigate = useNavigate();
   const [isAccepted, setIsAccepted] = useState(false);
+  const [isChecked, setIsChecked] = useState(false);
+
   const randomNicknameQuery = useQuery({
     queryKey: ['user', 'nickname', 'random'],
     queryFn: getRandomNickname
@@ -26,8 +28,10 @@ function Nickname() {
     else setIsAccepted(false);
   }, [nickname]);
 
+  const isSubmitDisabled = !isAccepted || !isChecked || updateNicknameMutation.isPending;
+
   const handleSubmit = async () => {
-    if (!isAccepted || updateNicknameMutation.isPending) return;
+    if (isSubmitDisabled) return;
 
     try {
       const res = await updateNicknameMutation.mutateAsync({ nickname });
@@ -118,14 +122,26 @@ function Nickname() {
           marginBottom: 40
         }}
       >
+        <label style={{ marginBottom: 16 }}>
+          <input
+            type="checkbox"
+            id="age-confirm"
+            className={styles.checkboxInput}
+            checked={isChecked}
+            onChange={(e) => setIsChecked(e.target.checked)}
+          />
+          <span className={styles.checkbox}>만 14세 이상입니다</span>
+        </label>
         <p className={styles.agreementNotice}>
           계속 진행하면 <span className={styles.agreementAccent}>서비스 이용약관</span> 및<br />
           <span className={styles.agreementAccent}>개인정보처리방침</span>에 동의하는 것으로
           간주합니다
         </p>
         <CtaButton
-          state={isAccepted && !updateNicknameMutation.isPending ? 'default' : 'disabled'}
-          className={isAccepted ? styles.ctaButtonStyle.default : styles.ctaButtonStyle.disabled}
+          state={isSubmitDisabled ? 'disabled' : 'default'}
+          className={
+            isSubmitDisabled ? styles.ctaButtonStyle.disabled : styles.ctaButtonStyle.default
+          }
           onClick={handleSubmit}
         />
       </div>

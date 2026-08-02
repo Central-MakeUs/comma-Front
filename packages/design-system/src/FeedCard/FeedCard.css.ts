@@ -1,5 +1,5 @@
 import { style } from '@vanilla-extract/css';
-import { vars } from '../theme.css';
+import { typography, vars } from '../theme.css';
 
 export const feedCard = style({
   width: '100%',
@@ -76,4 +76,57 @@ export const tagsText = style({
   fontWeight: vars.typography.labelNormalR.fontWeight,
   lineHeight: vars.typography.labelNormalR.lineHeight,
   letterSpacing: vars.typography.labelNormalR.letterSpacing
+});
+
+export const moreButton = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  border: 'none',
+  background: 'none',
+  padding: 4,
+  margin: -4,
+  borderRadius: 4,
+  color: 'inherit',
+  cursor: 'pointer'
+});
+
+export const modal = style({
+  width: 80,
+  height: 88,
+  borderRadius: 20,
+  backgroundColor: '#322E2966',
+  display: 'flex',
+  flexDirection: 'column',
+  paddingLeft: 16,
+  boxSizing: 'border-box',
+  position: 'absolute',
+  top: '100%',
+  right: 0,
+  zIndex: 2,
+  backdropFilter: 'blur(4px)'
+});
+
+export const modalText = style({
+  ...typography.bodyNormalR,
+  color: vars.color.textPrimary,
+  width: '100%',
+  height: 40,
+  display: 'inline-flex',
+  alignItems: 'center',
+  border: 'none',
+  background: 'none',
+  padding: 0,
+  cursor: 'pointer',
+  textAlign: 'left'
+});
+
+export const modalOverlay = style({
+  position: 'fixed',
+  inset: 0,
+  zIndex: 1,
+  border: 'none',
+  background: 'none',
+  padding: 0,
+  cursor: 'default'
 });

@@ -71,5 +71,7 @@ export const toastTone = styleVariants({
   default: {},
   open: {},
   lock: {},
-  edit: {}
+  edit: {},
+  report: {},
+  block: {}
 });

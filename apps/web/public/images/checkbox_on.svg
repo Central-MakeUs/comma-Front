@@ -1,0 +1,12 @@
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<title>체크박스 선택됨</title>
+<g clip-path="url(#clip0_2413_13316)">
+<rect width="16" height="16" rx="2" fill="#322E29"/>
+<path d="M4 8L6.66667 11L12 5" stroke="#C2BFBC" stroke-width="1.5" stroke-linecap="round"/>
+</g>
+<defs>
+<clipPath id="clip0_2413_13316">
+<rect width="16" height="16" fill="white"/>
+</clipPath>
+</defs>
+</svg>

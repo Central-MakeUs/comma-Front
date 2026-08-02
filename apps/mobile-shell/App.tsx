@@ -134,6 +134,14 @@ const isAllowedWebViewUrl = (url: string, webOrigin: string) => {
   }
 };
 
+const isTrustedWebViewMessageUrl = (url: string, webOrigin: string) => {
+  try {
+    return new URL(url).origin === webOrigin;
+  } catch {
+    return false;
+  }
+};
+
 const isExternalBrowserUrl = (url: string) => {
   try {
     const protocol = new URL(url).protocol;
@@ -253,7 +261,7 @@ export default function App() {
   );
 
   const handleMessage = async (event: WebViewMessageEvent) => {
-    if (!webOrigin || !isAllowedWebViewUrl(event.nativeEvent.url, webOrigin)) {
+    if (!webOrigin || !isTrustedWebViewMessageUrl(event.nativeEvent.url, webOrigin)) {
       console.warn('Blocked a WebView message from an untrusted origin.', event.nativeEvent.url);
       return;
     }
@@ -331,8 +339,10 @@ export default function App() {
       }
 
       case 'OPEN_EXTERNAL': {
-        if (message.url) {
+        if (message.url && isExternalBrowserUrl(message.url)) {
           await WebBrowser.openBrowserAsync(message.url);
+        } else {
+          console.warn('Blocked an unsupported external URL.', message.url);
         }
         break;
       }
@@ -402,7 +412,10 @@ export default function App() {
         originWhitelist={[trustedWebOrigin]}
         onShouldStartLoadWithRequest={(request) => {
           if (isAllowedWebViewUrl(request.url, trustedWebOrigin)) return true;
-          if (request.isTopFrame === false) return true;
+          if (request.isTopFrame === false) {
+            console.warn('Blocked an external WebView subframe.', request.url);
+            return false;
+          }
 
           if (isExternalBrowserUrl(request.url)) {
             void WebBrowser.openBrowserAsync(request.url);

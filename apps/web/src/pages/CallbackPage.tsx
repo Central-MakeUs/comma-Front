@@ -57,13 +57,15 @@ function CallbackPage() {
         field === 'APPLE' && typeof appleOAuthState === 'string'
           ? appleOAuthState
           : searchParams.get('state');
-      if (!consumeWebOAuthState(field, returnedState)) {
-        returnToLogin('로그인 요청을 확인할 수 없습니다. 다시 시도해 주세요.');
-        return;
-      }
+      const isStateValid = consumeWebOAuthState(field, returnedState);
 
       if (searchParams.get('error')) {
         returnToLogin('로그인이 취소되었거나 인증 제공자에서 거부되었습니다.');
+        return;
+      }
+
+      if (!isStateValid) {
+        returnToLogin('로그인 요청을 확인할 수 없습니다. 다시 시도해 주세요.');
         return;
       }
 

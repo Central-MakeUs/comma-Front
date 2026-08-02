@@ -10,6 +10,38 @@ interface StoredOAuthState {
   createdAt: number;
 }
 
+type StorageName = 'sessionStorage' | 'localStorage';
+
+const memoryStorage = new Map<string, string>();
+
+const getMemoryKey = (storage: StorageName, key: string) => `${storage}:${key}`;
+
+const safeGetItem = (storage: StorageName, key: string) => {
+  try {
+    return window[storage].getItem(key) ?? memoryStorage.get(getMemoryKey(storage, key)) ?? null;
+  } catch {
+    return memoryStorage.get(getMemoryKey(storage, key)) ?? null;
+  }
+};
+
+const safeSetItem = (storage: StorageName, key: string, value: string) => {
+  memoryStorage.set(getMemoryKey(storage, key), value);
+  try {
+    window[storage].setItem(key, value);
+  } catch {
+    // The in-memory copy keeps popup and same-page flows usable when storage is unavailable.
+  }
+};
+
+const safeRemoveItem = (storage: StorageName, key: string) => {
+  memoryStorage.delete(getMemoryKey(storage, key));
+  try {
+    window[storage].removeItem(key);
+  } catch {
+    // Nothing else to clear when browser storage is unavailable.
+  }
+};
+
 const createRandomState = () => {
   const bytes = new Uint8Array(32);
   window.crypto.getRandomValues(bytes);
@@ -47,18 +79,18 @@ export const createWebOAuthState = (provider: WebOAuthProvider) => {
   };
   const key = getWebOAuthStateKey(provider);
   const storedState = JSON.stringify(pendingState);
-  window.sessionStorage.setItem(key, storedState);
-  window.localStorage.setItem(key, storedState);
+  safeSetItem('sessionStorage', key, storedState);
+  safeSetItem('localStorage', key, storedState);
 
   return pendingState.state;
 };
 
 export const consumeWebOAuthState = (provider: WebOAuthProvider, returnedState: string | null) => {
   const key = getWebOAuthStateKey(provider);
-  const sessionValue = window.sessionStorage.getItem(key);
-  const persistedValue = window.localStorage.getItem(key);
-  window.sessionStorage.removeItem(key);
-  window.localStorage.removeItem(key);
+  const sessionValue = safeGetItem('sessionStorage', key);
+  const persistedValue = safeGetItem('localStorage', key);
+  safeRemoveItem('sessionStorage', key);
+  safeRemoveItem('localStorage', key);
 
   const sessionState = getFreshState(sessionValue, WEB_OAUTH_STATE_TTL_MS);
   const persistedState = getFreshState(persistedValue, WEB_OAUTH_STATE_TTL_MS);
@@ -66,18 +98,24 @@ export const consumeWebOAuthState = (provider: WebOAuthProvider, returnedState: 
   return Boolean(expectedState && returnedState && expectedState === returnedState);
 };
 
+export const clearWebOAuthState = (provider: WebOAuthProvider) => {
+  const key = getWebOAuthStateKey(provider);
+  safeRemoveItem('sessionStorage', key);
+  safeRemoveItem('localStorage', key);
+};
+
 export const createNativeGoogleOAuthState = () => {
   const pendingState: StoredOAuthState = {
     state: createRandomState(),
     createdAt: Date.now()
   };
-  window.localStorage.setItem(NATIVE_GOOGLE_STATE_KEY, JSON.stringify(pendingState));
+  safeSetItem('localStorage', NATIVE_GOOGLE_STATE_KEY, JSON.stringify(pendingState));
 
   return pendingState.state;
 };
 
 export const consumeNativeGoogleOAuthState = (returnedState: string | undefined) => {
-  const storedValue = window.localStorage.getItem(NATIVE_GOOGLE_STATE_KEY);
+  const storedValue = safeGetItem('localStorage', NATIVE_GOOGLE_STATE_KEY);
   if (!storedValue) return false;
 
   try {
@@ -92,20 +130,20 @@ export const consumeNativeGoogleOAuthState = (returnedState: string | undefined)
       pendingState.state === returnedState;
 
     if (isFresh && isMatch) {
-      window.localStorage.removeItem(NATIVE_GOOGLE_STATE_KEY);
+      safeRemoveItem('localStorage', NATIVE_GOOGLE_STATE_KEY);
       return true;
     }
 
-    if (!isFresh) window.localStorage.removeItem(NATIVE_GOOGLE_STATE_KEY);
+    if (!isFresh) safeRemoveItem('localStorage', NATIVE_GOOGLE_STATE_KEY);
     return false;
   } catch {
-    window.localStorage.removeItem(NATIVE_GOOGLE_STATE_KEY);
+    safeRemoveItem('localStorage', NATIVE_GOOGLE_STATE_KEY);
     return false;
   }
 };
 
 export const hasPendingNativeGoogleOAuthState = () => {
-  const storedValue = window.localStorage.getItem(NATIVE_GOOGLE_STATE_KEY);
+  const storedValue = safeGetItem('localStorage', NATIVE_GOOGLE_STATE_KEY);
   if (!storedValue) return false;
 
   try {
@@ -118,14 +156,14 @@ export const hasPendingNativeGoogleOAuthState = () => {
       age >= 0 &&
       age <= NATIVE_GOOGLE_STATE_TTL_MS;
 
-    if (!isFresh) window.localStorage.removeItem(NATIVE_GOOGLE_STATE_KEY);
+    if (!isFresh) safeRemoveItem('localStorage', NATIVE_GOOGLE_STATE_KEY);
     return isFresh;
   } catch {
-    window.localStorage.removeItem(NATIVE_GOOGLE_STATE_KEY);
+    safeRemoveItem('localStorage', NATIVE_GOOGLE_STATE_KEY);
     return false;
   }
 };
 
 export const clearNativeGoogleOAuthState = () => {
-  window.localStorage.removeItem(NATIVE_GOOGLE_STATE_KEY);
+  safeRemoveItem('localStorage', NATIVE_GOOGLE_STATE_KEY);
 };

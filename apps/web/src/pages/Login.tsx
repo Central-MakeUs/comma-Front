@@ -6,8 +6,8 @@ import { login, type TokenResponse } from '../apis/auth';
 import { PRIVACY_POLICY, TERMS_OF_SERVICE } from '../data/service_url';
 import {
   clearNativeGoogleOAuthState,
+  clearWebOAuthState,
   consumeNativeGoogleOAuthState,
-  consumeWebOAuthState,
   createNativeGoogleOAuthState,
   createWebOAuthState,
   hasPendingNativeGoogleOAuthState
@@ -35,6 +35,7 @@ interface IGoogleWait {
 }
 
 const GOOGLE_LOGIN_TIMEOUT_MS = 60000;
+const GOOGLE_LOGIN_RECOVERY_TIMEOUT_MS = 10000;
 const LOGIN_TOAST_DURATION_MS = 4000;
 
 interface LoginToastState {
@@ -56,20 +57,42 @@ const getLoginState = (state: unknown) =>
 const getPostLoginPath = (data: TokenResponse) =>
   data.onboardingCompleted ? '/loading' : '/nickname';
 
-const waitForGoogleLogin = (): Promise<IGoogleWait> => {
+const waitForGoogleLogin = ({
+  signal,
+  timeoutMs = GOOGLE_LOGIN_TIMEOUT_MS
+}: {
+  signal?: AbortSignal;
+  timeoutMs?: number;
+} = {}): Promise<IGoogleWait> => {
   return new Promise((resolve, reject) => {
-    const removeMessageListeners = () => {
+    let isSettled = false;
+
+    function removeMessageListeners() {
       window.removeEventListener('message', handler);
       document.removeEventListener('message', handler as EventListener);
-    };
+      signal?.removeEventListener('abort', onAbort);
+    }
+
+    function finish(callback: () => void) {
+      if (isSettled) return;
+      isSettled = true;
+      window.clearTimeout(timeoutId);
+      removeMessageListeners();
+      callback();
+    }
 
     const timeoutId = window.setTimeout(() => {
-      removeMessageListeners();
-      clearNativeGoogleOAuthState();
-      reject(new Error('구글 로그인 응답 시간이 초과되었습니다.'));
-    }, GOOGLE_LOGIN_TIMEOUT_MS);
+      finish(() => {
+        clearNativeGoogleOAuthState();
+        reject(new Error('구글 로그인 응답 시간이 초과되었습니다.'));
+      });
+    }, timeoutMs);
 
-    const handler = (event: MessageEvent) => {
+    function onAbort() {
+      finish(() => reject(new DOMException('Google login was cancelled.', 'AbortError')));
+    }
+
+    function handler(event: MessageEvent) {
       let message: {
         type?: string;
         code?: string;
@@ -85,19 +108,17 @@ const waitForGoogleLogin = (): Promise<IGoogleWait> => {
 
       if (message.type === 'GOOGLE_LOGIN_SUCCESS') {
         if (!consumeNativeGoogleOAuthState(message.state)) return;
-        window.clearTimeout(timeoutId);
-        removeMessageListeners();
-        resolve({ code: message.code ?? '', redirectUri: message.redirectUri ?? '' });
+        finish(() => resolve({ code: message.code ?? '', redirectUri: message.redirectUri ?? '' }));
       } else if (message.type === 'GOOGLE_LOGIN_FAILED') {
         if (!consumeNativeGoogleOAuthState(message.state)) return;
-        window.clearTimeout(timeoutId);
-        removeMessageListeners();
-        reject(new Error(message.error ?? '구글 로그인 중 에러가 발생했습니다.'));
+        finish(() => reject(new Error(message.error ?? '구글 로그인 중 에러가 발생했습니다.')));
       }
-    };
+    }
 
     window.addEventListener('message', handler);
     document.addEventListener('message', handler as EventListener);
+    if (signal?.aborted) onAbort();
+    else signal?.addEventListener('abort', onAbort, { once: true });
   });
 };
 
@@ -111,7 +132,7 @@ function Login() {
   const [loginToast, setLoginToast] = useState<LoginToastState | null>(null);
   const isMobileWebView = typeof window !== 'undefined' && window.ReactNativeWebView !== undefined;
   const isAndroidApp = isMobileWebView && /Android/i.test(window.navigator.userAgent);
-  const googleLoginMutation = useMutation({
+  const { isPending: isGoogleLoginPending, mutateAsync: googleLoginMutateAsync } = useMutation({
     mutationFn: login
   });
 
@@ -158,7 +179,7 @@ function Login() {
   const onGoogleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     if (isMobileWebView) {
-      if (isGoogleOAuthPendingRef.current || googleLoginMutation.isPending) return;
+      if (isGoogleOAuthPendingRef.current || isGoogleLoginPending) return;
 
       isGoogleOAuthPendingRef.current = true;
       setIsGoogleOAuthPending(true);
@@ -173,7 +194,7 @@ function Login() {
       );
       try {
         const { code, redirectUri } = await googleLoginResponse;
-        const res = await googleLoginMutation.mutateAsync({
+        const res = await googleLoginMutateAsync({
           field: 'GOOGLE',
           code,
           redirectUri
@@ -229,14 +250,18 @@ function Login() {
     hasStartedNativeGoogleRecovery.current = true;
     isGoogleOAuthPendingRef.current = true;
     setIsGoogleOAuthPending(true);
+    const controller = new AbortController();
     void (async () => {
       try {
-        const googleLoginResponse = waitForGoogleLogin();
+        const googleLoginResponse = waitForGoogleLogin({
+          signal: controller.signal,
+          timeoutMs: GOOGLE_LOGIN_RECOVERY_TIMEOUT_MS
+        });
         window.ReactNativeWebView?.postMessage(
           JSON.stringify({ type: 'GOOGLE_LOGIN_RECOVERY_READY' })
         );
         const { code, redirectUri } = await googleLoginResponse;
-        const res = await googleLoginMutation.mutateAsync({
+        const res = await googleLoginMutateAsync({
           field: 'GOOGLE',
           code,
           redirectUri
@@ -254,6 +279,7 @@ function Login() {
         setStoredNickname(res.data.nickname);
         navigate(getPostLoginPath(res.data), { replace: true });
       } catch (err) {
+        if (controller.signal.aborted) return;
         clearNativeGoogleOAuthState();
         showLoginToast(
           err instanceof Error
@@ -261,11 +287,15 @@ function Login() {
             : '구글 로그인을 완료하지 못했습니다. 다시 시도해 주세요.'
         );
       } finally {
-        isGoogleOAuthPendingRef.current = false;
-        setIsGoogleOAuthPending(false);
+        if (!controller.signal.aborted) {
+          isGoogleOAuthPendingRef.current = false;
+          setIsGoogleOAuthPending(false);
+        }
       }
     })();
-  }, [googleLoginMutation, isMobileWebView, navigate, showLoginToast]);
+
+    return () => controller.abort();
+  }, [googleLoginMutateAsync, isMobileWebView, navigate, showLoginToast]);
 
   const onAppleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -287,7 +317,7 @@ function Login() {
         }
       });
     } catch {
-      consumeWebOAuthState('APPLE', null);
+      clearWebOAuthState('APPLE');
       showLoginToast('Apple 로그인을 완료하지 못했습니다. 다시 시도해 주세요.');
     }
   };
@@ -347,7 +377,7 @@ function Login() {
           className={styles.googleBtn}
           type="button"
           onClick={onGoogleClick}
-          disabled={isGoogleOAuthPending || googleLoginMutation.isPending}
+          disabled={isGoogleOAuthPending || isGoogleLoginPending}
         >
           <img src="/images/google_logo.svg" alt="구글 아이콘" width={20} height={20} />
           Google로 로그인

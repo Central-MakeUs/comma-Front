@@ -9,7 +9,6 @@ import { interpolatePath, lerp } from '../../utils/compute_layout';
 import { navigateToNavigationItem } from '../../utils/navigation';
 import { getStoredNickname, setStoredNickname } from '../../utils/tokenStorage';
 import { transformDate } from '../../utils/transformDate';
-import { fallbackMoodRatio } from './MyPage.constant';
 import * as styles from './MyPage.css';
 import MyPageAnswerContainer from './MyPageAnswerContainer';
 import MyPageCard from './MyPageCard';
@@ -121,13 +120,16 @@ function MyPage() {
     },
     staleTime: 1000 * 60 * 5
   });
-  const moodRatio = reportQuery.data?.moodRatio?.length
-    ? reportQuery.data.moodRatio
-    : fallbackMoodRatio;
-  const displayActivityRanking = reportQuery.data?.activityRanking?.length
-    ? reportQuery.data.activityRanking
-    : [];
+  const moodRatio = reportQuery.data?.moodRatio ?? [];
+  const displayActivityRanking = reportQuery.data?.activityRanking ?? [];
   const activityCardCount = displayActivityRanking.length;
+  const activityStatusLabel = reportQuery.isLoading
+    ? '활동 리포트를 불러오는 중이에요'
+    : reportQuery.isError
+      ? '활동 리포트를 불러오지 못했어요'
+      : activityCardCount === 0
+        ? '아직 휴식 활동 기록이 없어요'
+        : null;
   const latestMyFeedQuery = useQuery({
     queryKey: ['feeds', 'me', 'latest'],
     queryFn: async () => {
@@ -159,6 +161,12 @@ function MyPage() {
     setXs(xs);
     setCardLayoutScale(layoutScale);
   }, [activityCardCount]);
+
+  useLayoutEffect(() => {
+    if (!emblaApi || activityCardCount === 0) return;
+
+    emblaApi.reInit();
+  }, [emblaApi, activityCardCount]);
 
   useLayoutEffect(() => {
     if (!emblaApi || activityCardCount === 0) return;
@@ -278,37 +286,51 @@ function MyPage() {
             onClick={() => setShowModal(true)}
           />
         </div>
-        <div
-          ref={(node) => {
-            embiaRef(node);
-            containerRef.current = node;
-          }}
-          style={{
-            position: 'relative',
-            overflow: 'hidden',
-            height: BIG_HEIGHT * cardLayoutScale
-          }}
-        >
+        {activityStatusLabel ? (
           <div
+            role={reportQuery.isError ? 'alert' : 'status'}
             style={{
+              minHeight: SMALL_HEIGHT * cardLayoutScale,
               display: 'flex',
+              justifyContent: 'center',
               alignItems: 'center',
-              gap: GAP * cardLayoutScale
+              padding: '0 32px',
+              textAlign: 'center'
             }}
           >
-            {displayActivityRanking.map((activity) => (
-              <div
-                key={`spacer-${activity.rank}-${activity.relaxId}`}
-                style={{
-                  flex: `0 0 ${SMALL_WIDTH * cardLayoutScale}px`,
-                  height: BIG_HEIGHT * cardLayoutScale
-                }}
-              />
-            ))}
+            <span className={styles.desc}>{activityStatusLabel}</span>
           </div>
-          <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-            {displayActivityRanking.length ? (
-              displayActivityRanking.map((activity, index) => (
+        ) : (
+          <div
+            ref={(node) => {
+              embiaRef(node);
+              containerRef.current = node;
+            }}
+            style={{
+              position: 'relative',
+              overflow: 'hidden',
+              height: BIG_HEIGHT * cardLayoutScale
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: GAP * cardLayoutScale
+              }}
+            >
+              {displayActivityRanking.map((activity) => (
+                <div
+                  key={`spacer-${activity.rank}-${activity.relaxId}`}
+                  style={{
+                    flex: `0 0 ${SMALL_WIDTH * cardLayoutScale}px`,
+                    height: BIG_HEIGHT * cardLayoutScale
+                  }}
+                />
+              ))}
+            </div>
+            <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+              {displayActivityRanking.map((activity, index) => (
                 <MyPageCard
                   key={`${activity.rank}-${activity.relaxId}`}
                   backgroundUrl={backgrounds[index % backgrounds.length]}
@@ -320,12 +342,10 @@ function MyPage() {
                   height={sizes[index]?.height ?? SMALL_HEIGHT * cardLayoutScale}
                   x={xs[index] ?? 0}
                 />
-              ))
-            ) : (
-              <span className={styles.alertText}>쉼표가 쌓이면 나만의 쉼표 리포트가 생겨요.</span>
-            )}
+              ))}
+            </div>
           </div>
-        </div>
+        )}
         <div
           style={{
             width: '100%',
@@ -335,27 +355,25 @@ function MyPage() {
             paddingRight: 32
           }}
         >
-          <div className={styles.questionContainer}>
-            <span className={styles.questionNum}>Q1.</span>지금 기분이 어때요?
-          </div>
-          <div>
-            {moodRatio.map((mood, index) => (
-              <MyPageAnswerContainer
-                key={mood.mood}
-                num={index + 1}
-                text={mood.label}
-                percent={mood.ratio}
-              />
-            ))}
-          </div>
-          <div className={styles.questionContainer} style={{ marginTop: 40 }}>
-            <span className={styles.questionNum}>Q2.</span>어느정도 시간이 있어요?
-          </div>
-          <div>
-            <MyPageAnswerContainer num={1} text={'잠깐(1시간 이내)'} percent={70} />
-            <MyPageAnswerContainer num={2} text={'여유(1-6시간이내)'} percent={25} />
-            <MyPageAnswerContainer num={3} text={'넉넉(6시간이상)'} percent={5} />
-          </div>
+          {moodRatio.length > 0 ? (
+            <>
+              <div className={styles.questionContainer}>
+                <span className={styles.questionNum}>Q1.</span>지금 기분이 어때요?
+              </div>
+              <div>
+                {moodRatio.map((mood, index) => (
+                  <MyPageAnswerContainer
+                    key={mood.mood}
+                    num={index + 1}
+                    text={mood.label}
+                    percent={mood.ratio}
+                  />
+                ))}
+              </div>
+            </>
+          ) : !reportQuery.isLoading && !reportQuery.isError ? (
+            <p className={styles.desc}>아직 기분 기록이 없어요.</p>
+          ) : null}
         </div>
         <NavigationBar
           active="mypage"

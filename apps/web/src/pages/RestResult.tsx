@@ -88,6 +88,8 @@ function RestResult() {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [slideIdx, setSlideIdx] = useState(0);
+  const [isStarting, setIsStarting] = useState(false);
+  const isStartingRef = useRef(false);
   const location = useLocation();
   const locationState = location.state as RestResultLocationState | null;
   const [data, setData] = useState<RelaxActivity[] | null>(
@@ -128,36 +130,54 @@ function RestResult() {
   }, [locationState, navigate]);
 
   const handleStartClick = async () => {
+    if (isStartingRef.current) return;
+
     if (!data?.length || !selectedRelax) {
       alert('휴식 추천 중 오류가 발생했습니다. 다시 선택해주세요');
       navigate('/rest/checklist', { replace: true });
       return;
     }
 
+    isStartingRef.current = true;
+    setIsStarting(true);
+
+    try {
+      const startResponse = await startRelax(selectedRelax.id);
+
+      if (!startResponse.success) {
+        throw new Error(startResponse.message ?? '휴식을 시작하지 못했어요.');
+      }
+    } catch (error) {
+      console.error('Failed to start relax.', error);
+      alert(error instanceof Error ? error.message : '휴식을 시작하지 못했어요.');
+      isStartingRef.current = false;
+      setIsStarting(false);
+      return;
+    }
+
     let nextSelectedRelax = selectedRelax;
 
     try {
-      await startRelax(selectedRelax.id);
       const response = await getRelaxActiveCount(selectedRelax.id);
-      nextSelectedRelax = {
-        ...selectedRelax,
-        activeUserCount:
-          typeof response.data?.count === 'number'
-            ? response.data.count
-            : selectedRelax.activeUserCount
-      };
+
+      if (response.success && typeof response.data?.count === 'number') {
+        nextSelectedRelax = {
+          ...selectedRelax,
+          activeUserCount: response.data.count
+        };
+      }
     } catch (error) {
-      console.error('Failed to start relax or load active count.', error);
-    } finally {
-      navigate('/rest/activity', {
-        state: {
-          data,
-          selectedRelax: nextSelectedRelax,
-          mood: locationState?.mood,
-          timeBudget: locationState?.timeBudget
-        }
-      });
+      console.error('Failed to load active count.', error);
     }
+
+    navigate('/rest/activity', {
+      state: {
+        data,
+        selectedRelax: nextSelectedRelax,
+        mood: locationState?.mood,
+        timeBudget: locationState?.timeBudget
+      }
+    });
   };
 
   useLayoutEffect(() => {
@@ -361,7 +381,13 @@ function RestResult() {
         </div>
       </div>
       <footer className={styles.footer}>
-        <CtaButton className={styles.ctaButtonStyle} onClick={handleStartClick} />
+        <CtaButton
+          className={styles.ctaButtonStyle}
+          disabled={isStarting}
+          onClick={handleStartClick}
+        >
+          {isStarting ? '시작하는 중' : '시작하기'}
+        </CtaButton>
       </footer>
     </div>
   );

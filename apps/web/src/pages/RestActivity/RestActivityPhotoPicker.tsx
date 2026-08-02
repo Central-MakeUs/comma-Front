@@ -129,6 +129,7 @@ export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivity
 
     try {
       const preparedPhoto = await appBridge.prepareGalleryPhoto(photo.id);
+      await appBridge.retainPreparedGalleryPhoto(preparedPhoto.uri);
 
       if (!isActiveRef.current) {
         await appBridge.deletePreparedGalleryPhoto(preparedPhoto.uri).catch(() => {});

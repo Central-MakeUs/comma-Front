@@ -45,6 +45,7 @@ export const appBridge = linkBridge<BridgeStore<AppBridge>, AppPostMessageSchema
     async prepareGalleryPhoto() {
       throw new Error('Native photo preparation is only available in the mobile app.');
     },
+    async retainPreparedGalleryPhoto() {},
     async deletePreparedGalleryPhoto() {},
     async createFeedWithGalleryPhoto() {
       throw new Error('Native gallery upload is only available in the mobile app.');

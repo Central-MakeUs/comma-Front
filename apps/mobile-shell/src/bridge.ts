@@ -41,7 +41,7 @@ type NativePreparedPhoto = {
   mimeType: string;
   width: number;
   height: number;
-  cleanupTimer: ReturnType<typeof setTimeout>;
+  cleanupTimer?: ReturnType<typeof setTimeout>;
 };
 const preparedPhotos = new Map<string, NativePreparedPhoto>();
 const photoPreparationPromises = new Map<string, Promise<PreparedGalleryPhoto>>();
@@ -52,8 +52,18 @@ async function deletePreparedPhoto(handle: string) {
   if (!photo) return;
 
   preparedPhotos.delete(handle);
-  clearTimeout(photo.cleanupTimer);
+  if (photo.cleanupTimer) {
+    clearTimeout(photo.cleanupTimer);
+  }
   await FileSystem.deleteAsync(photo.uri, { idempotent: true });
+}
+
+function retainPreparedPhoto(handle: string) {
+  const photo = preparedPhotos.get(handle);
+  if (!photo?.cleanupTimer) return;
+
+  clearTimeout(photo.cleanupTimer);
+  photo.cleanupTimer = undefined;
 }
 
 async function mapWithConcurrency<T, R>(
@@ -662,6 +672,9 @@ export const appBridge = bridge<AppBridge>({
   },
   async prepareGalleryPhoto(assetId) {
     return prepareGalleryPhoto(assetId);
+  },
+  async retainPreparedGalleryPhoto(handle) {
+    retainPreparedPhoto(handle);
   },
   async deletePreparedGalleryPhoto(handle) {
     await deletePreparedPhoto(handle);

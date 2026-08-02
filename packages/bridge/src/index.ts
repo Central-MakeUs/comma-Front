@@ -107,6 +107,7 @@ export type AppBridge = {
   authenticatedRequest(request: NativeApiRequest): Promise<NativeApiResponse>;
   getGalleryPhotos(limit?: number): Promise<GalleryPhoto[]>;
   prepareGalleryPhoto(assetId: string): Promise<PreparedGalleryPhoto>;
+  retainPreparedGalleryPhoto(uri: string): Promise<void>;
   deletePreparedGalleryPhoto(uri: string): Promise<void>;
   createFeedWithGalleryPhoto(
     photo: PreparedGalleryPhoto,

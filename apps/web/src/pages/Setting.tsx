@@ -1,14 +1,13 @@
-import { CtaButton, colors, Icon, SmallButton } from '@comma/design-system';
+import { CtaButton, colors, Icon, SmallButton, TextInput } from '@comma/design-system';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../apis/auth';
 import {
-  changePlan,
   getPlan,
   type PlanCard,
+  type PremiumAlertContactType,
   requestPremiumAlert,
-  type UserPlan,
   withdrawUser
 } from '../apis/user';
 import { PRIVACY_POLICY, TERMS_OF_SERVICE } from '../data/service_url';
@@ -90,10 +89,103 @@ function SettingList({ text, onClick }: { text: string; onClick?: () => void }) 
   );
 }
 
+function PremiumAlertSheet({
+  contact,
+  contactType,
+  isPending,
+  onClose,
+  onContactChange,
+  onContactTypeChange,
+  onSubmit
+}: {
+  contact: string;
+  contactType: PremiumAlertContactType;
+  isPending: boolean;
+  onClose: () => void;
+  onContactChange: (value: string) => void;
+  onContactTypeChange: (value: PremiumAlertContactType) => void;
+  onSubmit: () => void;
+}) {
+  const [isInputFocused, setIsInputFocused] = useState(false);
+  const isSubmitDisabled = isPending || contact.trim().length === 0;
+
+  return (
+    <div className={styles.modalOverlay}>
+      <button
+        aria-label="출시 알림 신청 닫기"
+        className={styles.backdropButton}
+        onClick={onClose}
+        type="button"
+      />
+      <section
+        aria-labelledby="premium-alert-title"
+        aria-modal="true"
+        className={styles.premiumAlertSheet}
+        role="dialog"
+      >
+        <div className={styles.sheetHandle} />
+        <div className={styles.premiumAlertHeader}>
+          <h2 className={styles.premiumAlertTitle} id="premium-alert-title">
+            프리미엄 정식 출시 알림받기
+          </h2>
+          <p className={styles.premiumAlertDescription}>출시 알림을 받을 수단을 입력해주세요.</p>
+        </div>
+        <div className={styles.premiumAlertForm}>
+          <fieldset aria-label="연락 수단" className={styles.contactTypeToggle}>
+            <button
+              aria-pressed={contactType === 'EMAIL'}
+              className={
+                contactType === 'EMAIL' ? styles.contactTypeSelected : styles.contactTypeButton
+              }
+              onClick={() => onContactTypeChange('EMAIL')}
+              type="button"
+            >
+              이메일
+            </button>
+            <button
+              aria-pressed={contactType === 'PHONE'}
+              className={
+                contactType === 'PHONE' ? styles.contactTypeSelected : styles.contactTypeButton
+              }
+              onClick={() => onContactTypeChange('PHONE')}
+              type="button"
+            >
+              연락처
+            </button>
+          </fieldset>
+          <TextInput
+            className={styles.premiumAlertInput}
+            disabled={isPending}
+            onBlur={() => setIsInputFocused(false)}
+            onChange={onContactChange}
+            onFocus={() => setIsInputFocused(true)}
+            placeholder={
+              contactType === 'EMAIL' ? '이메일을 입력해주세요.' : '연락처를 입력해주세요.'
+            }
+            state={isInputFocused ? 'focus' : contact ? 'filled' : 'default'}
+            value={contact}
+            variant="bar"
+          />
+          <CtaButton
+            className={styles.premiumAlertSubmit}
+            disabled={isSubmitDisabled}
+            label={isPending ? '제출 중' : '제출하기'}
+            onClick={onSubmit}
+          />
+        </div>
+      </section>
+    </div>
+  );
+}
+
 function Setting() {
   const [logOutOpen, setLogOutOpen] = useState(false);
   const [withdrawOpen, setWithdrawOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [premiumAlertOpen, setPremiumAlertOpen] = useState(false);
+  const [premiumAlertContactType, setPremiumAlertContactType] =
+    useState<PremiumAlertContactType>('EMAIL');
+  const [premiumAlertContact, setPremiumAlertContact] = useState('');
   const isWebView = !!window.ReactNativeWebView;
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -109,21 +201,6 @@ function Setting() {
       return response.data;
     }
   });
-  const changePlanMutation = useMutation({
-    mutationFn: changePlan,
-    onSuccess: (res) => {
-      if (!res.success) {
-        alert(res.message ?? '플랜 변경에 실패했습니다.');
-        return;
-      }
-
-      void queryClient.invalidateQueries({ queryKey: ['user', 'plan'] });
-      alert('플랜이 변경되었습니다.');
-    },
-    onError: (err) => {
-      alert(err instanceof Error ? err.message : '플랜 변경에 실패했습니다.');
-    }
-  });
   const premiumAlertMutation = useMutation({
     mutationFn: requestPremiumAlert,
     onSuccess: (res) => {
@@ -132,6 +209,9 @@ function Setting() {
         return;
       }
 
+      setPremiumAlertOpen(false);
+      setPremiumAlertContact('');
+      setPremiumAlertContactType('EMAIL');
       alert('프리미엄 알림을 신청했습니다.');
     },
     onError: (err) => {
@@ -168,8 +248,6 @@ function Setting() {
   const premiumPlan = planData?.plans.find((plan) => plan.plan === 'PREMIUM');
   const currentPlanCard =
     currentPlan === 'PREMIUM' ? premiumPlan : currentPlan === 'FREE' ? freePlan : undefined;
-  const isPlanActionDisabled = !planData || changePlanMutation.isPending;
-
   const getPlanLabel = (plan: PlanCard | undefined, fallback: string) => plan?.label ?? fallback;
   const getPlanDescription = (plan: PlanCard | undefined, fallback: string) =>
     plan?.description ?? fallback;
@@ -205,24 +283,20 @@ function Setting() {
     setWithdrawOpen(false);
   };
 
-  const handlePlanChange = (plan: UserPlan) => {
-    if (!planData || changePlanMutation.isPending || currentPlan === plan) return;
-
-    changePlanMutation.mutate({ plan });
+  const handlePremiumAlertClick = () => {
+    setPremiumAlertOpen(true);
+    setLogOutOpen(false);
+    setWithdrawOpen(false);
+    setConfirmOpen(false);
   };
 
-  const handlePremiumAlertClick = () => {
-    if (premiumAlertMutation.isPending) return;
+  const handlePremiumAlertSubmit = () => {
+    const trimmedContact = premiumAlertContact.trim();
 
-    const contact = window.prompt(
-      '프리미엄 출시 알림을 받을 이메일 또는 전화번호를 입력해 주세요.'
-    );
-    const trimmedContact = contact?.trim();
-
-    if (!trimmedContact) return;
+    if (!trimmedContact || premiumAlertMutation.isPending) return;
 
     premiumAlertMutation.mutate({
-      contactType: trimmedContact.includes('@') ? 'EMAIL' : 'PHONE',
+      contactType: premiumAlertContactType,
       contact: trimmedContact
     });
   };
@@ -230,10 +304,17 @@ function Setting() {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <Icon name="rightArrow" className={styles.leftArrow} onClick={() => navigate(-1)} />
+        <button
+          aria-label="뒤로 가기"
+          className={styles.backButton}
+          onClick={() => navigate(-1)}
+          type="button"
+        >
+          <Icon name="rightArrow" className={styles.leftArrow} />
+        </button>
         <span>설정</span>
       </div>
-      <div style={{ width: '100%', marginTop: 24 }}>
+      <main className={styles.content}>
         <div className={styles.rateContainer} style={{ border: `1px solid ${colors.linePrimary}` }}>
           <div className={styles.rateType}>현재 플랜</div>
           <div className={styles.ratePrice}>
@@ -247,20 +328,6 @@ function Setting() {
             {planQuery.isError
               ? '잠시 후 다시 시도해주세요.'
               : getPlanDescription(currentPlanCard, '기본 활동 추천 27가지')}
-          </div>
-          <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-end' }}>
-            <SmallButton
-              label={
-                currentPlan === 'FREE'
-                  ? '사용 중'
-                  : changePlanMutation.isPending
-                    ? '변경 중'
-                    : '무료로 변경'
-              }
-              className={styles.planActionBtn}
-              disabled={isPlanActionDisabled || currentPlan === 'FREE'}
-              onClick={() => handlePlanChange('FREE')}
-            />
           </div>
         </div>
         <div className={styles.rateContainer} style={{ marginTop: 8 }}>
@@ -277,26 +344,13 @@ function Setting() {
           </div>
           <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
             <SmallButton
-              label={premiumAlertMutation.isPending ? '신청 중' : '알림받기'}
+              label="출시 알림받기"
               className={styles.planActionBtn}
-              disabled={premiumAlertMutation.isPending}
               onClick={handlePremiumAlertClick}
-            />
-            <SmallButton
-              label={
-                currentPlan === 'PREMIUM'
-                  ? '사용 중'
-                  : changePlanMutation.isPending
-                    ? '변경 중'
-                    : '시작하기'
-              }
-              className={styles.startBtn}
-              disabled={isPlanActionDisabled || currentPlan === 'PREMIUM'}
-              onClick={() => handlePlanChange('PREMIUM')}
             />
           </div>
         </div>
-        <div style={{ width: '100%', marginTop: 32 }}>
+        <div className={styles.settingsList}>
           {settings.map((s) => (
             <SettingList
               text={s}
@@ -313,7 +367,8 @@ function Setting() {
             />
           ))}
         </div>
-      </div>
+      </main>
+      <footer className={styles.footer}>버전 1.0.0 | 문의하기: jamkkan2026@gmail.com</footer>
       {logOutOpen ? (
         <Modal
           title={logOutSetting.title}
@@ -344,6 +399,21 @@ function Setting() {
           onConfirmClick={() => {
             if (!withdrawMutation.isPending) withdrawMutation.mutate();
           }}
+        />
+      ) : premiumAlertOpen ? (
+        <PremiumAlertSheet
+          contact={premiumAlertContact}
+          contactType={premiumAlertContactType}
+          isPending={premiumAlertMutation.isPending}
+          onClose={() => {
+            if (!premiumAlertMutation.isPending) setPremiumAlertOpen(false);
+          }}
+          onContactChange={setPremiumAlertContact}
+          onContactTypeChange={(contactType) => {
+            setPremiumAlertContactType(contactType);
+            setPremiumAlertContact('');
+          }}
+          onSubmit={handlePremiumAlertSubmit}
         />
       ) : null}
     </div>

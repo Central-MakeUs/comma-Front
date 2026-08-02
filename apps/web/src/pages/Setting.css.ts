@@ -2,19 +2,35 @@ import { colors, shadows, typography } from '@comma/design-system';
 import { style } from '@vanilla-extract/css';
 
 export const leftArrow = style({
-  transform: 'translateY(-50%) scaleX(-1)',
+  width: 24,
+  height: 24,
+  transform: 'scaleX(-1)',
+  color: colors.iconSecondary
+});
+
+export const backButton = style({
   position: 'absolute',
-  left: 32,
-  top: '50%'
+  left: 22,
+  bottom: 8,
+  width: 44,
+  height: 44,
+  padding: 0,
+  border: 0,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  background: 'transparent',
+  cursor: 'pointer'
 });
 
 export const container = style({
   background: 'linear-gradient(#11111166 0%, #11111100 100%), #322E29',
   width: '100%',
-  height: '100dvh',
+  minHeight: '100dvh',
   display: 'flex',
   flexDirection: 'column',
-  alignItems: 'center'
+  alignItems: 'center',
+  overflowX: 'hidden'
 });
 
 export const header = style({
@@ -27,6 +43,11 @@ export const header = style({
   color: colors.textPrimary,
   ...typography.headlineB,
   position: 'relative'
+});
+
+export const content = style({
+  width: '100%',
+  marginTop: 24
 });
 
 export const rateContainer = style({
@@ -56,23 +77,23 @@ export const rateDesc = style({
   ...typography.labelNormalR
 });
 
-export const startBtn = style({
-  width: 87,
-  height: 36,
-  marginTop: 8
-});
-
 export const planActionBtn = style({
-  minWidth: 87,
+  minWidth: 118,
   width: 'auto',
   height: 36,
   marginTop: 8
 });
 
+export const settingsList = style({
+  width: '100%',
+  marginTop: 32
+});
+
 export const settingContainer = style({
   width: '100%',
   padding: '20px 32px',
-  border: `1px solid ${colors.lineTertiary}`,
+  border: 0,
+  borderTop: `1px solid ${colors.lineTertiary}`,
   color: colors.textPrimary,
   ...typography.bodyNormalB,
   display: 'flex',
@@ -81,7 +102,8 @@ export const settingContainer = style({
   alignItems: 'center',
   backgroundColor: 'transparent',
   cursor: 'pointer',
-  fontFamily: 'inherit'
+  fontFamily: 'inherit',
+  textAlign: 'left'
 });
 
 export const crownIcon = style({
@@ -106,8 +128,19 @@ export const backdropButton = style({
   width: '100%',
   border: 0,
   padding: 0,
-  background: 'transparent',
+  background: 'rgba(26, 24, 20, 0.66)',
   cursor: 'default'
+});
+
+export const footer = style({
+  width: '100%',
+  marginTop: 'auto',
+  padding: '8px 32px calc(8px + var(--safe-area-bottom))',
+  boxSizing: 'border-box',
+  color: colors.textTertiary,
+  ...typography.labelNormalR,
+  textAlign: 'center',
+  whiteSpace: 'nowrap'
 });
 
 export const confirmModal = style({
@@ -157,4 +190,106 @@ export const cancelBtn = style({
 export const confirmBtn = style({
   boxShadow: 'none',
   marginBottom: 'max(40px, var(--safe-area-bottom))'
+});
+
+export const premiumAlertSheet = style({
+  position: 'absolute',
+  left: 0,
+  right: 0,
+  bottom: 0,
+  zIndex: 1,
+  width: '100%',
+  maxHeight: '100dvh',
+  padding: '8px 24px calc(8px + var(--safe-area-bottom))',
+  boxSizing: 'border-box',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  overflowY: 'auto',
+  borderRadius: '36px 36px 0 0',
+  background: 'rgba(194, 191, 188, 0.1)',
+  boxShadow: shadows.glassInset,
+  backdropFilter: 'blur(10px)',
+  WebkitBackdropFilter: 'blur(10px)'
+});
+
+export const sheetHandle = style({
+  width: 36,
+  height: 4,
+  flexShrink: 0,
+  borderRadius: 100,
+  background: colors.iconSecondary
+});
+
+export const premiumAlertHeader = style({
+  width: '100%',
+  marginTop: 24,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 16
+});
+
+export const premiumAlertTitle = style({
+  margin: 0,
+  color: colors.textPrimary,
+  ...typography.headlineB
+});
+
+export const premiumAlertDescription = style({
+  margin: 0,
+  color: colors.textTertiary,
+  ...typography.bodyReadingR
+});
+
+export const premiumAlertForm = style({
+  width: '100%',
+  marginTop: 32,
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center'
+});
+
+export const contactTypeToggle = style({
+  margin: 0,
+  padding: 4,
+  border: 0,
+  minInlineSize: 0,
+  display: 'flex',
+  gap: 4,
+  borderRadius: 100,
+  background: 'rgba(119, 111, 105, 0.15)',
+  backdropFilter: 'blur(5px)',
+  WebkitBackdropFilter: 'blur(5px)'
+});
+
+export const contactTypeButton = style({
+  width: 72,
+  height: 36,
+  padding: '6px 0',
+  border: 0,
+  borderRadius: 100,
+  background: 'transparent',
+  color: colors.textTertiary,
+  ...typography.bodyNormalR,
+  cursor: 'pointer'
+});
+
+export const contactTypeSelected = style([
+  contactTypeButton,
+  {
+    background: 'rgba(194, 191, 188, 0.1)',
+    color: colors.textPrimary,
+    boxShadow: shadows.glassInset,
+    fontWeight: 600
+  }
+]);
+
+export const premiumAlertInput = style({
+  width: '100%',
+  marginTop: 16
+});
+
+export const premiumAlertSubmit = style({
+  width: '100%',
+  marginTop: 32
 });

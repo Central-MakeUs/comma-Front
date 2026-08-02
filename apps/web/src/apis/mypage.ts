@@ -17,9 +17,19 @@ export interface MoodRatio {
   ratio: number;
 }
 
+export type TimeBudget = 'X' | 'Y' | 'Z';
+
+export interface TimeBudgetRatio {
+  timeBudget: TimeBudget;
+  label: string;
+  count: number;
+  ratio: number;
+}
+
 export interface MyReport {
   activityRanking: ActivityRank[];
   moodRatio: MoodRatio[];
+  timeBudgetRatio: TimeBudgetRatio[];
 }
 
 export type MyReportResponse = ApiResponse<MyReport>;

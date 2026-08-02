@@ -36,30 +36,68 @@ function Feed() {
   const pendingLikeIdsRef = useRef(new Set<number>());
   const nickname = getStoredNickname();
 
-  const onHeartClick = async (feedId: number, isLiked: boolean, nickname: string) => {
+  const onHeartClick = async (feedId: number, nickname: string) => {
     if (pendingLikeIdsRef.current.has(feedId)) return;
-    pendingLikeIdsRef.current.add(feedId);
-    try {
-      const myNickname = getStoredNickname();
-      if (myNickname === nickname) return;
+    const myNickname = getStoredNickname();
+    if (myNickname === nickname) return;
 
+    const previousFeed = feeds.find((feed) => feed.feedId === feedId);
+    if (!previousFeed) return;
+
+    const requestId = feedRequestIdRef.current;
+    const rollbackLike = () => {
+      if (feedRequestIdRef.current !== requestId) return;
+
+      setFeeds((prev) =>
+        prev.map((feed) =>
+          feed.feedId === feedId
+            ? {
+                ...feed,
+                isLiked: previousFeed.isLiked,
+                likeCount: previousFeed.likeCount
+              }
+            : feed
+        )
+      );
+    };
+
+    pendingLikeIdsRef.current.add(feedId);
+    setFeeds((prev) =>
+      prev.map((feed) =>
+        feed.feedId === feedId
+          ? {
+              ...feed,
+              isLiked: !previousFeed.isLiked,
+              likeCount: Math.max(0, previousFeed.likeCount + (previousFeed.isLiked ? -1 : 1))
+            }
+          : feed
+      )
+    );
+
+    try {
       const res = await postLikes({ feedId });
 
-      if (res.success) {
-        setFeeds((prev) =>
-          prev.map((feed) =>
-            feed.feedId === feedId
-              ? {
-                  ...feed,
-                  isLiked: !feed.isLiked,
-                  likeCount: isLiked ? feed.likeCount - 1 : feed.likeCount + 1
-                }
-              : feed
-          )
-        );
+      if (!res.success) {
+        rollbackLike();
+        return;
       }
+
+      if (!res.data || feedRequestIdRef.current !== requestId) return;
+
+      setFeeds((prev) =>
+        prev.map((feed) =>
+          feed.feedId === feedId
+            ? {
+                ...feed,
+                isLiked: res.data?.liked ?? feed.isLiked,
+                likeCount: res.data?.likeCount ?? feed.likeCount
+              }
+            : feed
+        )
+      );
     } catch (error) {
       console.error(error);
+      rollbackLike();
     } finally {
       pendingLikeIdsRef.current.delete(feedId);
     }
@@ -232,7 +270,7 @@ function Feed() {
                 variant="others"
                 liked={f.isLiked}
                 likeCount={f.likeCount}
-                onHeartClick={() => onHeartClick(f.feedId, f.isLiked, f.nickname ?? '')}
+                onHeartClick={() => onHeartClick(f.feedId, f.nickname ?? '')}
                 title={f.nickname}
                 imageHeart={f.isLiked}
                 onReportClick={

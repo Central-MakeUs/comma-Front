@@ -9,6 +9,7 @@ import { interpolatePath, lerp } from '../../utils/compute_layout';
 import { navigateToNavigationItem } from '../../utils/navigation';
 import { getStoredNickname, setStoredNickname } from '../../utils/tokenStorage';
 import { transformDate } from '../../utils/transformDate';
+import { fallbackMoodRatio } from './MyPage.constant';
 import * as styles from './MyPage.css';
 import MyPageAnswerContainer from './MyPageAnswerContainer';
 import MyPageCard from './MyPageCard';
@@ -120,7 +121,9 @@ function MyPage() {
     },
     staleTime: 1000 * 60 * 5
   });
-  const moodRatio = reportQuery.data?.moodRatio ?? [];
+  const moodRatio = reportQuery.data?.moodRatio?.length
+    ? reportQuery.data.moodRatio
+    : fallbackMoodRatio;
   const displayActivityRanking = reportQuery.data?.activityRanking?.length
     ? reportQuery.data.activityRanking
     : [];
@@ -332,25 +335,27 @@ function MyPage() {
             paddingRight: 32
           }}
         >
-          {moodRatio.length > 0 ? (
-            <>
-              <div className={styles.questionContainer}>
-                <span className={styles.questionNum}>Q1.</span>지금 기분이 어때요?
-              </div>
-              <div>
-                {moodRatio.map((mood, index) => (
-                  <MyPageAnswerContainer
-                    key={mood.mood}
-                    num={index + 1}
-                    text={mood.label}
-                    percent={mood.ratio}
-                  />
-                ))}
-              </div>
-            </>
-          ) : !reportQuery.isLoading && !reportQuery.isError ? (
-            <p className={styles.desc}>아직 기분 기록이 없어요.</p>
-          ) : null}
+          <div className={styles.questionContainer}>
+            <span className={styles.questionNum}>Q1.</span>지금 기분이 어때요?
+          </div>
+          <div>
+            {moodRatio.map((mood, index) => (
+              <MyPageAnswerContainer
+                key={mood.mood}
+                num={index + 1}
+                text={mood.label}
+                percent={mood.ratio}
+              />
+            ))}
+          </div>
+          <div className={styles.questionContainer} style={{ marginTop: 40 }}>
+            <span className={styles.questionNum}>Q2.</span>어느정도 시간이 있어요?
+          </div>
+          <div>
+            <MyPageAnswerContainer num={1} text={'잠깐(1시간 이내)'} percent={70} />
+            <MyPageAnswerContainer num={2} text={'여유(1-6시간이내)'} percent={25} />
+            <MyPageAnswerContainer num={3} text={'넉넉(6시간이상)'} percent={5} />
+          </div>
         </div>
         <NavigationBar
           active="mypage"

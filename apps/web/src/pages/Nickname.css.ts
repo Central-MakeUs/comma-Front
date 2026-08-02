@@ -104,7 +104,12 @@ export const checkbox = style({
   color: colors.textSecondary,
   display: 'inline-flex',
   alignItems: 'center',
+  borderRadius: 4,
   selectors: {
+    [`${checkboxInput}:focus-visible + &`]: {
+      outline: `2px solid ${colors.textPrimary}`,
+      outlineOffset: 2
+    },
     '&:before': {
       content: '',
       display: 'inline-block',

@@ -28,8 +28,10 @@ function Nickname() {
     else setIsAccepted(false);
   }, [nickname]);
 
+  const isSubmitDisabled = !isAccepted || !isChecked || updateNicknameMutation.isPending;
+
   const handleSubmit = async () => {
-    if (!isAccepted || updateNicknameMutation.isPending) return;
+    if (isSubmitDisabled) return;
 
     try {
       const res = await updateNicknameMutation.mutateAsync({ nickname });
@@ -136,10 +138,10 @@ function Nickname() {
           간주합니다
         </p>
         <CtaButton
-          state={
-            isAccepted && !updateNicknameMutation.isPending && isChecked ? 'default' : 'disabled'
+          state={isSubmitDisabled ? 'disabled' : 'default'}
+          className={
+            isSubmitDisabled ? styles.ctaButtonStyle.disabled : styles.ctaButtonStyle.default
           }
-          className={isAccepted ? styles.ctaButtonStyle.default : styles.ctaButtonStyle.disabled}
           onClick={handleSubmit}
         />
       </div>

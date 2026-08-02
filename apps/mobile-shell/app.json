@@ -46,8 +46,27 @@
         "foregroundImage": "./assets/adaptive-icon-foreground.png",
         "backgroundColor": "#303030"
       },
-      "package": "com.comma.app",
-      "versionCode": 13
+      "package": "app.comma.mobile",
+      "versionCode": 13,
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "comma-front-web.vercel.app",
+              "path": "/oauth/google/callback"
+            },
+            {
+              "scheme": "https",
+              "host": "comma-front-web.vercel.app",
+              "path": "/oauth/kakao/callback"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
     },
     "extra": {
       "webUrl": "https://comma-front-web.vercel.app/",

@@ -1,0 +1,158 @@
+type WebOAuthProvider = 'KAKAO' | 'GOOGLE' | 'APPLE';
+
+const WEB_OAUTH_STATE_PREFIX = 'comma.oauth.state';
+const WEB_OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
+const NATIVE_GOOGLE_STATE_KEY = 'comma.oauth.nativeGoogleState';
+const NATIVE_GOOGLE_STATE_TTL_MS = 10 * 60 * 1000;
+
+interface StoredOAuthState {
+  state: string;
+  createdAt: number;
+}
+
+type StorageName = 'sessionStorage' | 'localStorage';
+
+const memoryStorage = new Map<string, string>();
+
+const getMemoryKey = (storage: StorageName, key: string) => `${storage}:${key}`;
+
+const safeGetItem = (storage: StorageName, key: string) => {
+  try {
+    return window[storage].getItem(key) ?? memoryStorage.get(getMemoryKey(storage, key)) ?? null;
+  } catch {
+    return memoryStorage.get(getMemoryKey(storage, key)) ?? null;
+  }
+};
+
+const safeSetItem = (storage: StorageName, key: string, value: string) => {
+  memoryStorage.set(getMemoryKey(storage, key), value);
+  try {
+    window[storage].setItem(key, value);
+  } catch {
+    // The in-memory copy keeps popup and same-page flows usable when storage is unavailable.
+  }
+};
+
+const safeRemoveItem = (storage: StorageName, key: string) => {
+  memoryStorage.delete(getMemoryKey(storage, key));
+  try {
+    window[storage].removeItem(key);
+  } catch {
+    // Nothing else to clear when browser storage is unavailable.
+  }
+};
+
+const createRandomState = () => {
+  const bytes = new Uint8Array(32);
+  window.crypto.getRandomValues(bytes);
+
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+};
+
+const getWebOAuthStateKey = (provider: WebOAuthProvider) =>
+  `${WEB_OAUTH_STATE_PREFIX}.${provider.toLowerCase()}`;
+
+const getFreshState = (storedValue: string | null, ttlMs: number) => {
+  if (!storedValue) return undefined;
+
+  try {
+    const parsed = JSON.parse(storedValue) as Partial<StoredOAuthState>;
+    if (
+      typeof parsed.state === 'string' &&
+      typeof parsed.createdAt === 'number' &&
+      Date.now() >= parsed.createdAt &&
+      Date.now() - parsed.createdAt <= ttlMs
+    ) {
+      return parsed.state;
+    }
+  } catch {
+    return undefined;
+  }
+
+  return undefined;
+};
+
+export const createWebOAuthState = (provider: WebOAuthProvider) => {
+  const pendingState: StoredOAuthState = {
+    state: createRandomState(),
+    createdAt: Date.now()
+  };
+  const key = getWebOAuthStateKey(provider);
+  const storedState = JSON.stringify(pendingState);
+  safeSetItem('sessionStorage', key, storedState);
+
+  return pendingState.state;
+};
+
+export const consumeWebOAuthState = (provider: WebOAuthProvider, returnedState: string | null) => {
+  const key = getWebOAuthStateKey(provider);
+  const sessionValue = safeGetItem('sessionStorage', key);
+  safeRemoveItem('sessionStorage', key);
+
+  const expectedState = getFreshState(sessionValue, WEB_OAUTH_STATE_TTL_MS);
+  return Boolean(expectedState && returnedState && expectedState === returnedState);
+};
+
+export const createNativeGoogleOAuthState = () => {
+  const pendingState: StoredOAuthState = {
+    state: createRandomState(),
+    createdAt: Date.now()
+  };
+  safeSetItem('localStorage', NATIVE_GOOGLE_STATE_KEY, JSON.stringify(pendingState));
+
+  return pendingState.state;
+};
+
+export const consumeNativeGoogleOAuthState = (returnedState: string | undefined) => {
+  const storedValue = safeGetItem('localStorage', NATIVE_GOOGLE_STATE_KEY);
+  if (!storedValue) return false;
+
+  try {
+    const pendingState = JSON.parse(storedValue) as Partial<StoredOAuthState>;
+    const isFresh =
+      typeof pendingState.createdAt === 'number' &&
+      Date.now() >= pendingState.createdAt &&
+      Date.now() - pendingState.createdAt <= NATIVE_GOOGLE_STATE_TTL_MS;
+    const isMatch =
+      typeof pendingState.state === 'string' &&
+      typeof returnedState === 'string' &&
+      pendingState.state === returnedState;
+
+    if (isFresh && isMatch) {
+      safeRemoveItem('localStorage', NATIVE_GOOGLE_STATE_KEY);
+      return true;
+    }
+
+    if (!isFresh) safeRemoveItem('localStorage', NATIVE_GOOGLE_STATE_KEY);
+    return false;
+  } catch {
+    safeRemoveItem('localStorage', NATIVE_GOOGLE_STATE_KEY);
+    return false;
+  }
+};
+
+export const hasPendingNativeGoogleOAuthState = () => {
+  const storedValue = safeGetItem('localStorage', NATIVE_GOOGLE_STATE_KEY);
+  if (!storedValue) return false;
+
+  try {
+    const pendingState = JSON.parse(storedValue) as Partial<StoredOAuthState>;
+    const age =
+      typeof pendingState.createdAt === 'number' ? Date.now() - pendingState.createdAt : -1;
+    const isFresh =
+      typeof pendingState.state === 'string' &&
+      pendingState.state.length > 0 &&
+      age >= 0 &&
+      age <= NATIVE_GOOGLE_STATE_TTL_MS;
+
+    if (!isFresh) safeRemoveItem('localStorage', NATIVE_GOOGLE_STATE_KEY);
+    return isFresh;
+  } catch {
+    safeRemoveItem('localStorage', NATIVE_GOOGLE_STATE_KEY);
+    return false;
+  }
+};
+
+export const clearNativeGoogleOAuthState = () => {
+  safeRemoveItem('localStorage', NATIVE_GOOGLE_STATE_KEY);
+};

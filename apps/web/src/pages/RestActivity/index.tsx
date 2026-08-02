@@ -1,11 +1,10 @@
 import { type FeedCreateRequest, NATIVE_FEED_UPLOAD_UNAUTHORIZED_ERROR } from '@comma/bridge';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { refreshStoredTokens } from '../../apis/client';
+import { expireSession } from '../../apis/client';
 import { createFeed } from '../../apis/feed';
 import { appBridge } from '../../bridge';
 import type { RestLoadingLocationState } from '../../types/relax';
-import { getTokens, isAccessTokenValid } from '../../utils/tokenStorage';
 import { ACTIVITY_PROGRESS_COUNT } from './RestActivity.constants';
 import { RestActivityForm } from './RestActivityForm';
 import { RestActivityPhotoPicker, type SelectedActivityPhoto } from './RestActivityPhotoPicker';
@@ -46,46 +45,6 @@ function RestActivity() {
 
   const handleConfirmReselect = () => navigate('/rest/checklist');
 
-  const getValidAccessToken = async () => {
-    const tokens = getTokens();
-
-    if (!tokens) {
-      throw new Error('로그인이 필요해요.');
-    }
-
-    if (isAccessTokenValid(tokens.accessToken)) {
-      return tokens.accessToken;
-    }
-
-    return refreshStoredTokens();
-  };
-
-  const createFeedWithNativePhoto = async (
-    assetId: string,
-    request: FeedCreateRequest,
-    baseUrl: string
-  ) => {
-    const accessToken = await getValidAccessToken();
-
-    try {
-      return await appBridge.createFeedWithGalleryPhoto(assetId, request, {
-        accessToken,
-        baseUrl
-      });
-    } catch (error) {
-      if (!isNativeUploadUnauthorizedError(error)) {
-        throw error;
-      }
-
-      const refreshedAccessToken = await refreshStoredTokens();
-
-      return appBridge.createFeedWithGalleryPhoto(assetId, request, {
-        accessToken: refreshedAccessToken,
-        baseUrl
-      });
-    }
-  };
-
   const handleComplete = async (values: {
     hashtags: string[];
     review: string;
@@ -125,17 +84,16 @@ function RestActivity() {
           throw new Error(response.message ?? '피드 업로드에 실패했어요.');
         }
       } else {
-        const baseUrl = import.meta.env.VITE_BASE_URL;
-
-        if (!baseUrl) {
-          throw new Error('API 주소가 설정되어 있지 않아요.');
-        }
-
-        await createFeedWithNativePhoto(selectedPhoto.assetId, request, baseUrl);
+        await appBridge.createFeedWithGalleryPhoto(selectedPhoto.assetId, request);
       }
 
       navigate('/feed');
     } catch (error) {
+      if (isNativeUploadUnauthorizedError(error)) {
+        await expireSession();
+        return;
+      }
+
       console.error('Failed to create feed.', error);
       alert(error instanceof Error ? error.message : '피드 업로드에 실패했어요.');
     } finally {

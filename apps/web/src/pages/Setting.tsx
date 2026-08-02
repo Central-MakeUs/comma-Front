@@ -224,13 +224,13 @@ function Setting() {
   });
   const withdrawMutation = useMutation({
     mutationFn: withdrawUser,
-    onSuccess: (res) => {
+    onSuccess: async (res) => {
       if (!res.success) {
         alert(res.message ?? '회원 탈퇴에 실패했습니다.');
         return;
       }
 
-      clearTokens();
+      await clearTokens();
       navigate('/', { replace: true });
     },
     onError: (err) => {
@@ -239,8 +239,8 @@ function Setting() {
   });
   const logoutMutation = useMutation({
     mutationFn: logout,
-    onSettled: () => {
-      clearTokens();
+    onSettled: async () => {
+      await clearTokens();
       queryClient.clear();
       navigate('/', { replace: true });
     }

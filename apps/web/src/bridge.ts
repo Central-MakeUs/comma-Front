@@ -19,6 +19,22 @@ export const appBridge = linkBridge<BridgeStore<AppBridge>, AppPostMessageSchema
       };
     },
     async setStatusBar() {},
+    async migrateAuthTokens() {
+      return { hasTokens: false, accessTokenExpiresAt: null };
+    },
+    async getAuthState() {
+      return { hasTokens: false, accessTokenExpiresAt: null };
+    },
+    async completeLogin() {
+      throw new Error('Native login is only available in the mobile app.');
+    },
+    async refreshAuthSession() {
+      throw new Error('Native auth refresh is only available in the mobile app.');
+    },
+    async clearAuthTokens() {},
+    async authenticatedRequest() {
+      throw new Error('Native authenticated requests are only available in the mobile app.');
+    },
     async getGalleryPhotos() {
       if (isReactNativeWebView()) {
         throw new Error('Native gallery bridge is not ready yet.');

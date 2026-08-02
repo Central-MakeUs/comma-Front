@@ -4,9 +4,10 @@ import { refreshStoredTokens, SESSION_EXPIRED_EVENT } from '../apis/client';
 import { router } from '../router';
 import {
   clearTokens,
+  getAuthState,
   getOnboardingCompleted,
-  getTokens,
-  isAccessTokenValid
+  initializeAuthStorage,
+  isAccessTokenExpiryValid
 } from '../utils/tokenStorage';
 
 interface AuthBootstrapProps {
@@ -69,21 +70,22 @@ function AuthBootstrap({ children }: AuthBootstrapProps) {
 
   useEffect(() => {
     const bootstrapAuth = async () => {
-      const tokens = getTokens();
+      await initializeAuthStorage();
+      const authState = await getAuthState();
 
-      if (!tokens) {
+      if (!authState.hasTokens) {
         redirectToLoginForMissingSession();
         setIsReady(true);
         return;
       }
 
-      if (isAccessTokenValid(tokens.accessToken)) {
+      if (isAccessTokenExpiryValid(authState.accessTokenExpiresAt)) {
         try {
           await refreshOnboardingStateForRoot();
           redirectRootAfterAuth();
           setIsReady(true);
         } catch {
-          clearTokens();
+          await clearTokens();
           redirectToLoginForExpiredSession();
           setIsReady(true);
         }
@@ -94,14 +96,17 @@ function AuthBootstrap({ children }: AuthBootstrapProps) {
         await refreshStoredTokens();
         redirectRootAfterAuth();
       } catch {
-        clearTokens();
+        await clearTokens();
         redirectToLoginForExpiredSession();
       } finally {
         setIsReady(true);
       }
     };
 
-    bootstrapAuth();
+    void bootstrapAuth().catch(() => {
+      redirectToLoginForExpiredSession();
+      setIsReady(true);
+    });
   }, []);
 
   if (!isReady) return null;

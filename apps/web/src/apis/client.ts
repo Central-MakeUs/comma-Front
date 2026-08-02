@@ -1,6 +1,18 @@
-import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
+import axios, {
+  type AxiosAdapter,
+  AxiosError,
+  type AxiosResponse,
+  type InternalAxiosRequestConfig
+} from 'axios';
+import { appBridge } from '../bridge';
 import type { ApiResponse } from '../types/api';
-import { clearTokens, getTokens, setOnboardingCompleted, setTokens } from '../utils/tokenStorage';
+import {
+  clearTokens,
+  getTokens,
+  isNativeApp,
+  setOnboardingCompleted,
+  setTokens
+} from '../utils/tokenStorage';
 
 interface RefreshTokenData {
   accessToken: string;
@@ -29,8 +41,57 @@ export const publicApiClient = axios.create({
   validateStatus: () => true
 });
 
-let refreshPromise: Promise<string> | null = null;
+let refreshPromise: Promise<string | null> | null = null;
 let hasEmittedSessionExpired = false;
+
+const parseRequestBody = (data: unknown) => {
+  if (typeof data !== 'string') return data;
+
+  try {
+    return JSON.parse(data) as unknown;
+  } catch {
+    return data;
+  }
+};
+
+const nativeApiAdapter: AxiosAdapter = async (config) => {
+  if (config.data instanceof FormData) {
+    throw new Error('Native FormData requests must use a dedicated native bridge method.');
+  }
+
+  const method = config.method?.toUpperCase();
+  if (!method || !['GET', 'POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+    throw new Error(`Unsupported native API method: ${method ?? 'unknown'}`);
+  }
+
+  const result = await appBridge.authenticatedRequest({
+    method: method as 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
+    path: config.url ?? '',
+    params: config.params as
+      | Record<string, string | number | boolean | null | undefined>
+      | undefined,
+    body: config.data === undefined ? undefined : parseRequestBody(config.data)
+  });
+  const response: AxiosResponse = {
+    data: result.data,
+    status: result.status,
+    statusText: String(result.status),
+    headers: {},
+    config
+  };
+
+  if (result.status < 200 || result.status >= 300) {
+    throw new AxiosError(
+      `Request failed with status code ${result.status}`,
+      AxiosError.ERR_BAD_RESPONSE,
+      config,
+      undefined,
+      response
+    );
+  }
+
+  return response;
+};
 
 const emitSessionExpired = () => {
   if (typeof window === 'undefined') return;
@@ -40,12 +101,34 @@ const emitSessionExpired = () => {
   window.dispatchEvent(new CustomEvent(SESSION_EXPIRED_EVENT));
 };
 
-export const refreshStoredTokens = async () => {
+export const expireSession = async () => {
+  await clearTokens();
+  emitSessionExpired();
+};
+
+export const resetSessionExpiredState = () => {
+  hasEmittedSessionExpired = false;
+};
+
+const performStoredTokenRefresh = async () => {
+  if (isNativeApp()) {
+    try {
+      const result = await appBridge.refreshAuthSession();
+      if (typeof result.onboardingCompleted === 'boolean') {
+        setOnboardingCompleted(result.onboardingCompleted);
+      }
+      resetSessionExpiredState();
+      return null;
+    } catch {
+      await expireSession();
+      throw new Error(SESSION_EXPIRED_ERROR_MESSAGE);
+    }
+  }
+
   const tokens = getTokens();
 
   if (!tokens?.refreshToken) {
-    clearTokens();
-    emitSessionExpired();
+    await expireSession();
     throw new Error(SESSION_EXPIRED_ERROR_MESSAGE);
   }
 
@@ -54,8 +137,7 @@ export const refreshStoredTokens = async () => {
   });
 
   if (!data.success || !data.data?.accessToken) {
-    clearTokens();
-    emitSessionExpired();
+    await expireSession();
     throw new Error(SESSION_EXPIRED_ERROR_MESSAGE);
   }
 
@@ -64,8 +146,8 @@ export const refreshStoredTokens = async () => {
     refreshToken: data.data.refreshToken ?? tokens.refreshToken
   };
 
-  setTokens(nextTokens);
-  hasEmittedSessionExpired = false;
+  await setTokens(nextTokens);
+  resetSessionExpiredState();
   if (typeof data.data.onboardingCompleted === 'boolean') {
     setOnboardingCompleted(data.data.onboardingCompleted);
   }
@@ -73,9 +155,9 @@ export const refreshStoredTokens = async () => {
   return nextTokens.accessToken;
 };
 
-const getRefreshPromise = () => {
+export const refreshStoredTokens = () => {
   if (!refreshPromise) {
-    refreshPromise = refreshStoredTokens().finally(() => {
+    refreshPromise = performStoredTokenRefresh().finally(() => {
       refreshPromise = null;
     });
   }
@@ -84,6 +166,11 @@ const getRefreshPromise = () => {
 };
 
 apiClient.interceptors.request.use((config) => {
+  if (isNativeApp()) {
+    config.adapter = nativeApiAdapter;
+    return config;
+  }
+
   const tokens = getTokens();
 
   if (tokens?.accessToken) {
@@ -106,7 +193,13 @@ apiClient.interceptors.response.use(
     originalRequest._retry = true;
 
     try {
-      const accessToken = await getRefreshPromise();
+      if (isNativeApp()) {
+        await expireSession();
+        throw new Error(SESSION_EXPIRED_ERROR_MESSAGE);
+      }
+
+      const accessToken = await refreshStoredTokens();
+      if (!accessToken) throw new Error(SESSION_EXPIRED_ERROR_MESSAGE);
       originalRequest.headers.Authorization = `Bearer ${accessToken}`;
 
       return apiClient(originalRequest);

@@ -2,7 +2,7 @@ import { Toast } from '@comma/design-system';
 import { useMutation } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { login, type TokenResponse } from '../apis/auth';
+import { type LoginData, login } from '../apis/auth';
 import { PRIVACY_POLICY, TERMS_OF_SERVICE } from '../data/service_url';
 import {
   clearNativeGoogleOAuthState,
@@ -11,7 +11,7 @@ import {
   createWebOAuthState,
   hasPendingNativeGoogleOAuthState
 } from '../utils/oauthState';
-import { setOnboardingCompleted, setStoredNickname, setTokens } from '../utils/tokenStorage';
+import { setOnboardingCompleted, setStoredNickname } from '../utils/tokenStorage';
 import * as styles from './Login.css';
 
 const REST_API_KEY = import.meta.env.VITE_REST_API_KEY;
@@ -53,8 +53,7 @@ const getLoginState = (state: unknown) =>
       }
     : undefined;
 
-const getPostLoginPath = (data: TokenResponse) =>
-  data.onboardingCompleted ? '/loading' : '/nickname';
+const getPostLoginPath = (data: LoginData) => (data.onboardingCompleted ? '/loading' : '/nickname');
 
 const waitForGoogleLogin = ({
   signal,
@@ -212,10 +211,6 @@ function Login() {
         if (controller.signal.aborted) return;
 
         if (res.success && res.data) {
-          setTokens({
-            accessToken: res.data.accessToken,
-            refreshToken: res.data.refreshToken
-          });
           setOnboardingCompleted(res.data.onboardingCompleted);
           setStoredNickname(res.data.nickname);
           navigate(getPostLoginPath(res.data), { replace: true });
@@ -289,10 +284,6 @@ function Login() {
           throw new Error(res.message ?? '구글 로그인 중 에러가 발생했습니다.');
         }
 
-        setTokens({
-          accessToken: res.data.accessToken,
-          refreshToken: res.data.refreshToken
-        });
         setOnboardingCompleted(res.data.onboardingCompleted);
         setStoredNickname(res.data.nickname);
         navigate(getPostLoginPath(res.data), { replace: true });

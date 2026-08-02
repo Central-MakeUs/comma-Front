@@ -6,23 +6,32 @@ import {
   SecretToggle,
   TextInput
 } from '@comma/design-system';
-import { type KeyboardEvent, useState } from 'react';
+import { type Dispatch, type KeyboardEvent, type SetStateAction, useState } from 'react';
 import { COMMENT_MAX_LENGTH, TAG_MAX_LENGTH } from './RestActivity.constants';
 import * as sharedStyles from './RestActivity.shared.css';
 import * as styles from './RestActivityForm.css';
 import { RestActivityReselectModal } from './RestActivityReselectModal';
 
 type RestActivityFormProps = {
+  draft: RestActivityDraft;
   imagePreview?: string;
   isSubmitting?: boolean;
   title: string;
   desc: string;
   showReselectModal: boolean;
   onOpenPhotoPicker: () => void;
+  onDraftChange: Dispatch<SetStateAction<RestActivityDraft>>;
   onOpenReselectModal: () => void;
   onCancelReselect: () => void;
   onConfirmReselect: () => void;
   onComplete: (values: { hashtags: string[]; review: string; isPublic: boolean }) => void;
+};
+
+export type RestActivityDraft = {
+  tagInput: string;
+  tags: string[];
+  comment: string;
+  isSecret: boolean;
 };
 
 function normalizeTag(value: string) {
@@ -30,30 +39,38 @@ function normalizeTag(value: string) {
 }
 
 export function RestActivityForm({
+  draft,
   imagePreview,
   isSubmitting = false,
   title,
   desc,
   showReselectModal,
   onOpenPhotoPicker,
+  onDraftChange,
   onOpenReselectModal,
   onCancelReselect,
   onConfirmReselect,
   onComplete
 }: RestActivityFormProps) {
-  const [tagInput, setTagInput] = useState('');
-  const [tags, setTags] = useState<string[]>([]);
-  const [comment, setComment] = useState('');
   const [focusedInput, setFocusedInput] = useState<'tag' | 'comment'>();
-  const [isSecret, setIsSecret] = useState(false);
+  const { tagInput, tags, comment, isSecret } = draft;
 
   const handleAddTag = () => {
     const nextTag = normalizeTag(tagInput);
 
-    if (!nextTag || tags.includes(nextTag)) return;
+    if (!nextTag) return;
 
-    setTags((currentTags) => [...currentTags, nextTag]);
-    setTagInput('');
+    onDraftChange((currentDraft) => {
+      if (currentDraft.tags.includes(nextTag) || currentDraft.tags.length >= 2) {
+        return currentDraft;
+      }
+
+      return {
+        ...currentDraft,
+        tagInput: '',
+        tags: [...currentDraft.tags, nextTag]
+      };
+    });
   };
 
   const handleTagKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
@@ -146,7 +163,9 @@ export function RestActivityForm({
                 className={styles.input}
                 maxLength={TAG_MAX_LENGTH}
                 onBlur={() => setFocusedInput(undefined)}
-                onChange={setTagInput}
+                onChange={(tagInput) =>
+                  onDraftChange((currentDraft) => ({ ...currentDraft, tagInput }))
+                }
                 onFocus={() => setFocusedInput('tag')}
                 onKeyDown={handleTagKeyDown}
                 onPlusClick={handleAddTag}
@@ -175,7 +194,9 @@ export function RestActivityForm({
               helperTone={isCommentOverLimit ? 'error' : 'default'}
               maxLength={COMMENT_MAX_LENGTH}
               onBlur={() => setFocusedInput(undefined)}
-              onChange={setComment}
+              onChange={(comment) =>
+                onDraftChange((currentDraft) => ({ ...currentDraft, comment }))
+              }
               onFocus={() => setFocusedInput('comment')}
               placeholder="예) 오랜만에 바람 쐬니 좋네요"
               showFooter={comment.length > 0}
@@ -190,7 +211,12 @@ export function RestActivityForm({
         <footer className={styles.footer}>
           <div className={styles.visibilityRow}>
             <span className={styles.visibilityLabel}>공개 여부</span>
-            <SecretToggle checked={isSecret} onCheckedChange={setIsSecret} />
+            <SecretToggle
+              checked={isSecret}
+              onCheckedChange={(isSecret) =>
+                onDraftChange((currentDraft) => ({ ...currentDraft, isSecret }))
+              }
+            />
           </div>
           <CtaButton
             className={sharedStyles.doneButton}

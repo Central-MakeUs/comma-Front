@@ -6,12 +6,15 @@ import type {
   FeedCreateRequest,
   FeedResponse,
   NativeApiRequest,
-  NativeApiResponse
+  NativeApiResponse,
+  PreparedGalleryPhoto
 } from '@comma/bridge';
 import { NATIVE_FEED_UPLOAD_UNAUTHORIZED_ERROR, POST_MESSAGE_EVENT } from '@comma/bridge';
 import { bridge, createWebView, postMessageSchema } from '@webview-bridge/react-native';
 import Constants from 'expo-constants';
+import * as Crypto from 'expo-crypto';
 import * as FileSystem from 'expo-file-system/legacy';
+import * as ImageManipulator from 'expo-image-manipulator';
 import * as MediaLibrary from 'expo-media-library';
 import * as SecureStore from 'expo-secure-store';
 import { Linking, Platform } from 'react-native';
@@ -21,9 +24,50 @@ const MAX_GALLERY_PHOTOS = 30;
 const DEFAULT_IMAGE_MIME_TYPE = 'image/jpeg';
 const FEED_UPLOAD_TIMEOUT_MS = 18_000;
 const AUTH_REQUEST_TIMEOUT_MS = 10_000;
+const UPLOAD_FRAME_WIDTH = 345;
+const UPLOAD_FRAME_HEIGHT = 438;
+const UPLOAD_FRAME_RATIO = UPLOAD_FRAME_WIDTH / UPLOAD_FRAME_HEIGHT;
+const PREPARED_UPLOAD_WIDTH = 1080;
+const GALLERY_THUMBNAIL_WIDTH = 240;
+const PREPARED_PREVIEW_WIDTH = 690;
+const GALLERY_THUMBNAIL_CONCURRENCY = 3;
 const ACCESS_TOKEN_KEY = 'comma.accessToken';
 const REFRESH_TOKEN_KEY = 'comma.refreshToken';
+const androidGalleryAssets = new Map<string, MediaLibrary.Asset>();
+type NativePreparedPhoto = {
+  uri: string;
+  filename: string;
+  mimeType: string;
+  width: number;
+  height: number;
+};
+const preparedPhotos = new Map<string, NativePreparedPhoto>();
 let refreshPromise: Promise<{ accessToken: string; onboardingCompleted?: boolean }> | null = null;
+
+async function mapWithConcurrency<T, R>(
+  values: readonly T[],
+  concurrency: number,
+  mapper: (value: T) => Promise<R>
+): Promise<PromiseSettledResult<R>[]> {
+  const results = new Array<PromiseSettledResult<R>>(values.length);
+  let nextIndex = 0;
+
+  const worker = async () => {
+    while (nextIndex < values.length) {
+      const index = nextIndex;
+      nextIndex += 1;
+
+      try {
+        results[index] = { status: 'fulfilled', value: await mapper(values[index]) };
+      } catch (reason) {
+        results[index] = { status: 'rejected', reason };
+      }
+    }
+  };
+
+  await Promise.all(Array.from({ length: Math.min(concurrency, values.length) }, () => worker()));
+  return results;
+}
 
 function getTrustedApiBaseUrl() {
   const envUrl = process.env.EXPO_PUBLIC_API_BASE_URL?.trim();
@@ -249,7 +293,40 @@ function getMimeType(filename: string) {
   return DEFAULT_IMAGE_MIME_TYPE;
 }
 
+async function createImageDataUri(uri: string, width: number) {
+  const thumbnail = await ImageManipulator.manipulateAsync(uri, [{ resize: { width } }], {
+    compress: 0.7,
+    format: ImageManipulator.SaveFormat.JPEG
+  });
+
+  try {
+    const base64 = await FileSystem.readAsStringAsync(thumbnail.uri, {
+      encoding: FileSystem.EncodingType.Base64
+    });
+
+    return `data:${DEFAULT_IMAGE_MIME_TYPE};base64,${base64}`;
+  } finally {
+    await FileSystem.deleteAsync(thumbnail.uri, { idempotent: true }).catch(() => {});
+  }
+}
+
 async function getUploadableAsset(assetId: string) {
+  if (Platform.OS === 'android') {
+    const asset = androidGalleryAssets.get(assetId);
+
+    if (!asset?.uri) {
+      throw new Error('선택한 사진 정보를 불러오지 못했어요. 사진을 다시 선택해 주세요.');
+    }
+
+    return {
+      uri: asset.uri,
+      name: asset.filename ?? getFilenameFromUri(asset.uri, `${asset.id}.jpg`),
+      type: getMimeType(asset.filename),
+      width: asset.width,
+      height: asset.height
+    };
+  }
+
   const assetInfo = await MediaLibrary.getAssetInfoAsync(assetId, {
     shouldDownloadFromNetwork: true
   });
@@ -265,16 +342,84 @@ async function getUploadableAsset(assetId: string) {
   return {
     uri,
     name,
-    type: getMimeType(name)
+    type: getMimeType(name),
+    width: assetInfo.width,
+    height: assetInfo.height
   };
 }
 
+function getCenteredCrop(width: number, height: number) {
+  const sourceRatio = width / height;
+
+  if (sourceRatio > UPLOAD_FRAME_RATIO) {
+    const cropWidth = Math.round(height * UPLOAD_FRAME_RATIO);
+
+    return {
+      originX: Math.round((width - cropWidth) / 2),
+      originY: 0,
+      width: cropWidth,
+      height
+    };
+  }
+
+  const cropHeight = Math.round(width / UPLOAD_FRAME_RATIO);
+
+  return {
+    originX: 0,
+    originY: Math.round((height - cropHeight) / 2),
+    width,
+    height: cropHeight
+  };
+}
+
+async function prepareGalleryPhoto(assetId: string): Promise<PreparedGalleryPhoto> {
+  const image = await getUploadableAsset(assetId);
+  const crop = getCenteredCrop(image.width, image.height);
+  const actions: ImageManipulator.Action[] = [{ crop }];
+
+  if (crop.width > PREPARED_UPLOAD_WIDTH) {
+    actions.push({ resize: { width: PREPARED_UPLOAD_WIDTH } });
+  }
+
+  const result = await ImageManipulator.manipulateAsync(image.uri, actions, {
+    compress: 0.88,
+    format: ImageManipulator.SaveFormat.JPEG
+  });
+
+  try {
+    const previewUri = await createImageDataUri(result.uri, PREPARED_PREVIEW_WIDTH);
+    const handle = Crypto.randomUUID();
+    const filename = `comma-photo-${Date.now()}.jpg`;
+
+    preparedPhotos.set(handle, {
+      uri: result.uri,
+      filename,
+      mimeType: DEFAULT_IMAGE_MIME_TYPE,
+      width: result.width,
+      height: result.height
+    });
+
+    return {
+      uri: handle,
+      previewUri,
+      width: result.width,
+      height: result.height
+    };
+  } catch (error) {
+    await FileSystem.deleteAsync(result.uri, { idempotent: true }).catch(() => {});
+    throw error;
+  }
+}
+
 async function createFeedWithMultipart(
-  assetId: string,
+  photoHandle: string,
   request: FeedCreateRequest,
   allowRefresh = true
 ) {
-  const image = await getUploadableAsset(assetId);
+  const image = preparedPhotos.get(photoHandle);
+  if (!image) {
+    throw new Error('준비된 사진이 만료되었어요. 사진을 다시 선택해 주세요.');
+  }
   const formData = new FormData();
 
   if (!FileSystem.cacheDirectory) {
@@ -285,7 +430,11 @@ async function createFeedWithMultipart(
 
   await FileSystem.writeAsStringAsync(requestFileUri, JSON.stringify(request));
 
-  formData.append('image', image as unknown as Blob);
+  formData.append('image', {
+    uri: image.uri,
+    name: image.filename,
+    type: image.mimeType
+  } as unknown as Blob);
   formData.append('request', {
     uri: requestFileUri,
     name: 'request.json',
@@ -318,7 +467,7 @@ async function createFeedWithMultipart(
     if (response.status === 401) {
       if (allowRefresh) {
         await refreshNativeAuthSession();
-        return createFeedWithMultipart(assetId, request, false);
+        return createFeedWithMultipart(photoHandle, request, false);
       }
       throw new Error(NATIVE_FEED_UPLOAD_UNAUTHORIZED_ERROR);
     }
@@ -432,6 +581,30 @@ export const appBridge = bridge<AppBridge>({
       sortBy: [[MediaLibrary.SortBy.creationTime, false]]
     });
 
+    if (Platform.OS === 'android') {
+      androidGalleryAssets.clear();
+
+      const photoResults = await mapWithConcurrency(
+        assets.assets,
+        GALLERY_THUMBNAIL_CONCURRENCY,
+        async (asset) => {
+          androidGalleryAssets.set(asset.id, asset);
+
+          return {
+            id: asset.id,
+            uri: await createImageDataUri(asset.uri, GALLERY_THUMBNAIL_WIDTH),
+            filename: asset.filename,
+            width: asset.width,
+            height: asset.height
+          };
+        }
+      );
+
+      return photoResults.flatMap((result) =>
+        result.status === 'fulfilled' ? [result.value] : []
+      );
+    }
+
     const photoResults = await Promise.allSettled(
       assets.assets.map(async (asset) => {
         const assetInfo = await MediaLibrary.getAssetInfoAsync(asset, {
@@ -457,8 +630,18 @@ export const appBridge = bridge<AppBridge>({
       return [];
     });
   },
-  async createFeedWithGalleryPhoto(assetId, request) {
-    return createFeedWithMultipart(assetId, request);
+  async prepareGalleryPhoto(assetId) {
+    return prepareGalleryPhoto(assetId);
+  },
+  async deletePreparedGalleryPhoto(handle) {
+    const photo = preparedPhotos.get(handle);
+    if (!photo) return;
+
+    preparedPhotos.delete(handle);
+    await FileSystem.deleteAsync(photo.uri, { idempotent: true });
+  },
+  async createFeedWithGalleryPhoto(photo, request) {
+    return createFeedWithMultipart(photo.uri, request);
   }
 });
 

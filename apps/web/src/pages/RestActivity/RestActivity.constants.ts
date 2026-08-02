@@ -13,4 +13,4 @@ export const PHOTO_PICKER_IMAGES = [
   { id: 'rest-1-repeat', src: '/images/rest_1.png' }
 ];
 
-export const EMPTY_PHOTO_TILES = ['empty-1', 'empty-2'];
+export const EMPTY_PHOTO_TILES = ['empty-1', 'empty-2', 'empty-3', 'empty-4', 'empty-5'];

@@ -1,12 +1,16 @@
-import { type FeedCreateRequest, NATIVE_FEED_UPLOAD_UNAUTHORIZED_ERROR } from '@comma/bridge';
-import { useEffect, useState } from 'react';
+import {
+  type FeedCreateRequest,
+  NATIVE_FEED_UPLOAD_UNAUTHORIZED_ERROR,
+  type PreparedGalleryPhoto
+} from '@comma/bridge';
+import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { expireSession } from '../../apis/client';
 import { createFeed } from '../../apis/feed';
 import { appBridge } from '../../bridge';
 import type { RestLoadingLocationState } from '../../types/relax';
 import { ACTIVITY_PROGRESS_COUNT } from './RestActivity.constants';
-import { RestActivityForm } from './RestActivityForm';
+import { type RestActivityDraft, RestActivityForm } from './RestActivityForm';
 import { RestActivityPhotoPicker, type SelectedActivityPhoto } from './RestActivityPhotoPicker';
 import { RestActivityProgress } from './RestActivityProgress';
 
@@ -22,21 +26,44 @@ function RestActivity() {
   const navigate = useNavigate();
   const location = useLocation();
   const locationState = location.state as RestLoadingLocationState | null;
+  const hasValidLocationState = Boolean(
+    locationState?.mood && locationState.timeBudget && locationState.selectedRelax
+  );
+  const invalidStateHandledRef = useRef(false);
   const participantCount = locationState?.selectedRelax?.activeUserCount ?? ACTIVITY_PROGRESS_COUNT;
   const [showReselectModal, setShowReselectModal] = useState(false);
   const [showPhotoPicker, setShowPhotoPicker] = useState(false);
   const [isWritingStarted, setIsWritingStarted] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState<SelectedActivityPhoto>();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const imagePreview = selectedPhoto?.previewSrc;
+  const [draft, setDraft] = useState<RestActivityDraft>({
+    tagInput: '',
+    tags: [],
+    comment: '',
+    isSecret: false
+  });
+
+  useEffect(() => {
+    if (hasValidLocationState || invalidStateHandledRef.current) return;
+
+    invalidStateHandledRef.current = true;
+    alert('휴식 정보가 없어 다시 선택해주세요.');
+    navigate('/rest/checklist', { replace: true });
+  }, [hasValidLocationState, navigate]);
 
   useEffect(() => {
     return () => {
-      if (imagePreview && isObjectUrl(imagePreview)) {
-        URL.revokeObjectURL(imagePreview);
+      if (selectedPhoto?.kind === 'file' && isObjectUrl(selectedPhoto.previewSrc)) {
+        URL.revokeObjectURL(selectedPhoto.previewSrc);
+      }
+
+      if (selectedPhoto?.kind === 'native') {
+        void appBridge.deletePreparedGalleryPhoto(selectedPhoto.photo.uri).catch(() => {});
       }
     };
-  }, [imagePreview]);
+  }, [selectedPhoto]);
+
+  const imagePreview = selectedPhoto?.previewSrc;
 
   const handlePhotoSelect = (photo: SelectedActivityPhoto) => {
     setSelectedPhoto(photo);
@@ -44,6 +71,11 @@ function RestActivity() {
   };
 
   const handleConfirmReselect = () => navigate('/rest/checklist');
+
+  const createFeedWithNativePhoto = async (
+    photo: PreparedGalleryPhoto,
+    request: FeedCreateRequest
+  ) => appBridge.createFeedWithGalleryPhoto(photo, request);
 
   const handleComplete = async (values: {
     hashtags: string[];
@@ -84,7 +116,7 @@ function RestActivity() {
           throw new Error(response.message ?? '피드 업로드에 실패했어요.');
         }
       } else {
-        await appBridge.createFeedWithGalleryPhoto(selectedPhoto.assetId, request);
+        await createFeedWithNativePhoto(selectedPhoto.photo, request);
       }
 
       navigate('/feed');
@@ -100,6 +132,8 @@ function RestActivity() {
       setIsSubmitting(false);
     }
   };
+
+  if (!hasValidLocationState) return null;
 
   if (!isWritingStarted) {
     return (
@@ -128,6 +162,7 @@ function RestActivity() {
 
   return (
     <RestActivityForm
+      draft={draft}
       desc={locationState?.selectedRelax?.description ?? ''}
       imagePreview={imagePreview}
       isSubmitting={isSubmitting}
@@ -135,6 +170,7 @@ function RestActivity() {
       onCancelReselect={() => setShowReselectModal(false)}
       onComplete={handleComplete}
       onConfirmReselect={handleConfirmReselect}
+      onDraftChange={setDraft}
       onOpenPhotoPicker={() => setShowPhotoPicker(true)}
       onOpenReselectModal={() => setShowReselectModal(true)}
       title={

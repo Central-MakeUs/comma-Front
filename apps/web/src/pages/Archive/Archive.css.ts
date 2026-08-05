@@ -119,3 +119,16 @@ export const navigation = style({
   zIndex: 3,
   transform: 'translateX(-50%)'
 });
+
+export const loadingWrapper = style({
+  width: '100%',
+  height: '100%',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center'
+});
+
+export const alertText = style({
+  ...typography.bodyReadingR,
+  color: colors.textTertiary
+});

@@ -9,11 +9,11 @@ type ArchiveFeedGridProps = {
 
 export function ArchiveFeedGrid({ items }: ArchiveFeedGridProps) {
   if (!items.length) {
-      return (
-        <section className={styles.loadingWrapper} aria-label="내 쉼표 1열 목록">
-          <span className={styles.alertText}>쉼표를 추가해보세요.</span>
-        </section>
-      );
+    return (
+      <section className={styles.loadingWrapper} aria-label="내 쉼표 1열 목록">
+        <span className={styles.alertText}>쉼표를 추가해보세요.</span>
+      </section>
+    );
   }
 
   return (

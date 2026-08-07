@@ -308,27 +308,23 @@ function MyPage() {
               ))}
             </div>
             <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-              {activityCardCount !== 0 && latestFeed?.createdAt
-                ? displayActivityRanking.map((activity, index) => (
-                    <MyPageCard
-                      key={`${activity.rank}-${activity.relaxId}`}
-                      backgroundUrl={backgrounds[index % backgrounds.length]}
-                      num={activity.rank}
-                      count={activity.count}
-                      title={activity.name}
-                      path={paths[index]}
-                      width={sizes[index]?.width ?? SMALL_WIDTH * cardLayoutScale}
-                      height={sizes[index]?.height ?? SMALL_HEIGHT * cardLayoutScale}
-                      x={xs[index] ?? 0}
-                    />
-                  ))
-                : !latestFeed?.createdAt
-                  ? null
-                  : (
-                      <span className={styles.alertText}>
-                        쉼표가 쌓이면 나만의 쉼표 리포트가 생겨요.
-                      </span>
-                    )}
+              {activityCardCount !== 0 && latestFeed?.createdAt ? (
+                displayActivityRanking.map((activity, index) => (
+                  <MyPageCard
+                    key={`${activity.rank}-${activity.relaxId}`}
+                    backgroundUrl={backgrounds[index % backgrounds.length]}
+                    num={activity.rank}
+                    count={activity.count}
+                    title={activity.name}
+                    path={paths[index]}
+                    width={sizes[index]?.width ?? SMALL_WIDTH * cardLayoutScale}
+                    height={sizes[index]?.height ?? SMALL_HEIGHT * cardLayoutScale}
+                    x={xs[index] ?? 0}
+                  />
+                ))
+              ) : !latestFeed?.createdAt ? null : (
+                <span className={styles.alertText}>쉼표가 쌓이면 나만의 쉼표 리포트가 생겨요.</span>
+              )}
             </div>
           </div>
           <div

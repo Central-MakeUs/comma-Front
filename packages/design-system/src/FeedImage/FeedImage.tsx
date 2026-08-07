@@ -22,7 +22,7 @@ export function FeedImage({
 
   return (
     <div className={rootClassName} {...divProps}>
-      <img alt={imageAlt} className={image} src={imageSrc} />
+      <img alt={imageAlt} className={image} draggable={false} src={imageSrc} />
       <span aria-hidden="true" className={heartIcon} onClick={onClick}>
         <Icon height={32} name="heart" variant={heart ? 'on' : 'off'} width={32} />
       </span>

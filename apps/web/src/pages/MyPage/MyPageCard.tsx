@@ -46,6 +46,7 @@ function MyPageCard({
           aria-hidden="true"
           className={styles.cardBackgroundImage}
           decoding="async"
+          draggable={false}
           loading="eager"
           src={resolvedBackgroundUrl}
         />

@@ -201,6 +201,7 @@ function MyPage() {
           aria-hidden="true"
           className={styles.backgroundImage}
           decoding="async"
+          draggable={false}
           fetchPriority="high"
           loading="eager"
           src={bgUrl}

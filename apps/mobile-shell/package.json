@@ -6,9 +6,9 @@
   "scripts": {
     "dev": "expo start",
     "dev:device": "expo start --go --lan",
-    "android": "expo run:android",
+    "android": "expo start --android",
     "android:preview": "eas build --platform android --profile preview",
-    "ios": "expo run:ios",
+    "ios": "expo start --ios",
     "web": "expo start --web",
     "android:build": "eas build --platform android --profile production",
     "android:submit": "eas submit --platform android --profile production",

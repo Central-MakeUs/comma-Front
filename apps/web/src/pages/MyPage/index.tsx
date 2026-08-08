@@ -149,6 +149,7 @@ function MyPage() {
       : latestFeed?.createdAt
         ? `마지막 쉼표 ${transformDate(latestFeed.createdAt)}`
         : null;
+  const hasNoFeed = latestMyFeedQuery.isSuccess && latestFeed === null;
 
   useLayoutEffect(() => {
     if (!containerRef.current) return;
@@ -339,7 +340,7 @@ function MyPage() {
           >
             {showQuestionReportError ? (
               <span className={styles.alertText}>리포트를 불러오지 못했어요.</span>
-            ) : !latestFeed?.createdAt ? null : (
+            ) : hasNoFeed ? null : (
               <>
                 {moodRatio.length > 0 ? (
                   <>
@@ -381,7 +382,7 @@ function MyPage() {
               </>
             )}
           </div>
-          {!latestFeed?.createdAt && !showQuestionReportError ? (
+          {hasNoFeed && !showQuestionReportError ? (
             <span
               className={styles.alertText}
               style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}

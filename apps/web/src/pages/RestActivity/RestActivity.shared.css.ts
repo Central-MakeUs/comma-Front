@@ -3,15 +3,18 @@ import { style } from '@vanilla-extract/css';
 
 export const page = style({
   width: '100%',
-  minHeight: '100dvh',
+  height: '100dvh',
+  overflowY: 'auto',
   overflowX: 'hidden',
+  overscrollBehaviorY: 'contain',
+  WebkitOverflowScrolling: 'touch',
   background: colors.backgroundPrimary
 });
 
 export const screen = style({
   position: 'relative',
   width: '100%',
-  minHeight: '100dvh',
+  minHeight: '100%',
   overflowX: 'hidden',
   color: colors.textPrimary,
   background: colors.backgroundPrimary

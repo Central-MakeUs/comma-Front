@@ -4,8 +4,11 @@ import { style } from '@vanilla-extract/css';
 export const screen = style({
   position: 'relative',
   width: '100%',
-  minHeight: '100dvh',
+  height: '100dvh',
+  overflowY: 'auto',
   overflowX: 'hidden',
+  overscrollBehaviorY: 'contain',
+  WebkitOverflowScrolling: 'touch',
   color: colors.textPrimary,
   background: colors.backgroundPrimary
 });

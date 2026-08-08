@@ -3,9 +3,10 @@ import { style } from '@vanilla-extract/css';
 
 export const container = style({
   width: '100%',
-  minHeight: '100dvh',
+  height: '100dvh',
   position: 'relative',
   isolation: 'isolate',
+  overflow: 'hidden',
   background: colors.backgroundPrimary
 });
 
@@ -31,7 +32,11 @@ export const foreground = style({
   position: 'relative',
   zIndex: 2,
   width: '100%',
-  minHeight: '100dvh'
+  height: '100dvh',
+  overflowY: 'auto',
+  overflowX: 'hidden',
+  overscrollBehaviorY: 'contain',
+  WebkitOverflowScrolling: 'touch'
 });
 
 export const header = style({

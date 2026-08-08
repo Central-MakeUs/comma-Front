@@ -109,6 +109,8 @@ export const scrollContainer = style({
   height: 'calc(100dvh - 60px - var(--safe-area-top))',
   overflowY: 'auto',
   overflowX: 'hidden',
+  overscrollBehaviorY: 'contain',
+  WebkitOverflowScrolling: 'touch',
   paddingBottom: 'calc(140px + var(--safe-area-bottom))'
 });
 

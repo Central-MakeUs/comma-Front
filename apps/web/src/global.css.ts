@@ -5,7 +5,7 @@ globalStyle('*', {
 });
 
 globalStyle('html, body, #root', {
-  minHeight: '100%',
+  height: '100%',
   margin: 0
 });
 
@@ -21,6 +21,8 @@ globalStyle(':root', {
 });
 
 globalStyle('html, body', {
+  overflow: 'hidden',
+  overscrollBehavior: 'none',
   touchAction: 'manipulation'
 });
 
@@ -38,9 +40,10 @@ globalStyle('body', {
 globalStyle('#root', {
   width: '100%',
   maxWidth: 'var(--app-max-width)',
-  minHeight: '100dvh',
+  height: '100dvh',
   margin: '0 auto',
-  overflowX: 'hidden',
+  overflow: 'hidden',
+  overscrollBehavior: 'none',
   position: 'relative',
   background: '#1A1814'
 });

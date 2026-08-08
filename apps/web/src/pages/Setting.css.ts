@@ -26,11 +26,14 @@ export const backButton = style({
 export const container = style({
   background: 'linear-gradient(#11111166 0%, #11111100 100%), #322E29',
   width: '100%',
-  minHeight: '100dvh',
+  height: '100dvh',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  overflowX: 'hidden'
+  overflowY: 'auto',
+  overflowX: 'hidden',
+  overscrollBehaviorY: 'contain',
+  WebkitOverflowScrolling: 'touch'
 });
 
 export const header = style({

@@ -79,7 +79,7 @@ export const Others: Story = {
 export const My: Story = {
   args: {
     variant: 'my',
-    imageHeart: true
+    imageHeart: false
   },
   render: ({ imageHeart, liked, likeCount }) => (
     <div className={themeClass} style={storySurfaceStyle}>
@@ -98,7 +98,7 @@ export const Variants: Story = {
         </div>
         <div style={{ display: 'grid', gap: 8 }}>
           <h3 style={labelStyle}>my</h3>
-          <FeedCard imageHeart likeCount={12} variant="my" />
+          <FeedCard likeCount={12} variant="my" />
         </div>
       </div>
     </div>

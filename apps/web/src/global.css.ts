@@ -1,7 +1,8 @@
 import { globalFontFace, globalStyle } from '@vanilla-extract/css';
 
 globalStyle('*', {
-  boxSizing: 'border-box'
+  boxSizing: 'border-box',
+  overscrollBehavior: 'none'
 });
 
 globalStyle('html, body, #root', {

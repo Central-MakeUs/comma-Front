@@ -419,6 +419,8 @@ export default function App() {
     <View style={styles.container}>
       <StatusBar style="auto" translucent backgroundColor="transparent" />
       <WebView
+        bounces={false}
+        overScrollMode="never"
         ref={webViewRef}
         style={styles.webView}
         source={{ uri: currentWebUrl ?? webUrl }}

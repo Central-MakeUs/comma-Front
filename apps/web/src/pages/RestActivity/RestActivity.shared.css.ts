@@ -15,6 +15,7 @@ export const screen = style({
   position: 'relative',
   width: '100%',
   minHeight: '100%',
+  overflowX: 'hidden',
   color: colors.textPrimary,
   background: colors.backgroundPrimary
 });

@@ -15,6 +15,7 @@ import Constants from 'expo-constants';
 import * as Crypto from 'expo-crypto';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as ImageManipulator from 'expo-image-manipulator';
+import * as ImagePicker from 'expo-image-picker';
 import * as MediaLibrary from 'expo-media-library';
 import * as SecureStore from 'expo-secure-store';
 import { Linking, Platform } from 'react-native';
@@ -31,6 +32,7 @@ const PREPARED_UPLOAD_WIDTH = 1080;
 const GALLERY_THUMBNAIL_WIDTH = 240;
 const PREPARED_PREVIEW_WIDTH = 690;
 const GALLERY_THUMBNAIL_CONCURRENCY = 3;
+const GALLERY_THUMBNAIL_TIMEOUT_MS = 1_500;
 const PREPARED_PHOTO_TTL_MS = 5 * 60 * 1000;
 const ACCESS_TOKEN_KEY = 'comma.accessToken';
 const REFRESH_TOKEN_KEY = 'comma.refreshToken';
@@ -42,6 +44,13 @@ type NativePreparedPhoto = {
   width: number;
   height: number;
   cleanupTimer?: ReturnType<typeof setTimeout>;
+};
+type UploadableImage = {
+  uri: string;
+  name: string;
+  type: string;
+  width: number;
+  height: number;
 };
 const preparedPhotos = new Map<string, NativePreparedPhoto>();
 const photoPreparationPromises = new Map<string, Promise<PreparedGalleryPhoto>>();
@@ -332,6 +341,35 @@ async function createImageDataUri(uri: string, width: number) {
   }
 }
 
+async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, message: string): Promise<T> {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timeoutId = setTimeout(() => reject(new Error(message)), timeoutMs);
+  });
+
+  try {
+    return await Promise.race([promise, timeout]);
+  } finally {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+  }
+}
+
+function createGalleryThumbnailDataUri(uri: string) {
+  return withTimeout(
+    createImageDataUri(uri, GALLERY_THUMBNAIL_WIDTH),
+    GALLERY_THUMBNAIL_TIMEOUT_MS,
+    '사진 썸네일 생성 시간이 초과되었어요.'
+  );
+}
+
+function getLocalAssetUri(assetInfo: MediaLibrary.AssetInfo) {
+  const localUri = assetInfo.localUri ?? assetInfo.uri;
+
+  return localUri?.startsWith('ph://') ? undefined : localUri;
+}
+
 async function getUploadableAsset(assetId: string) {
   if (Platform.OS === 'android') {
     const asset = androidGalleryAssets.get(assetId);
@@ -370,6 +408,18 @@ async function getUploadableAsset(assetId: string) {
   };
 }
 
+function getUploadableCameraAsset(asset: ImagePicker.ImagePickerAsset): UploadableImage {
+  const name = asset.fileName ?? getFilenameFromUri(asset.uri, `camera-${Date.now()}.jpg`);
+
+  return {
+    uri: asset.uri,
+    name,
+    type: asset.mimeType ?? getMimeType(name),
+    width: asset.width,
+    height: asset.height
+  };
+}
+
 function getCenteredCrop(width: number, height: number) {
   const sourceRatio = width / height;
 
@@ -394,8 +444,7 @@ function getCenteredCrop(width: number, height: number) {
   };
 }
 
-async function createPreparedGalleryPhoto(assetId: string): Promise<PreparedGalleryPhoto> {
-  const image = await getUploadableAsset(assetId);
+async function createPreparedPhotoFromImage(image: UploadableImage): Promise<PreparedGalleryPhoto> {
   const crop = getCenteredCrop(image.width, image.height);
   const actions: ImageManipulator.Action[] = [{ crop }];
 
@@ -435,6 +484,10 @@ async function createPreparedGalleryPhoto(assetId: string): Promise<PreparedGall
     await FileSystem.deleteAsync(result.uri, { idempotent: true }).catch(() => {});
     throw error;
   }
+}
+
+async function createPreparedGalleryPhoto(assetId: string): Promise<PreparedGalleryPhoto> {
+  return createPreparedPhotoFromImage(await getUploadableAsset(assetId));
 }
 
 function prepareGalleryPhoto(assetId: string): Promise<PreparedGalleryPhoto> {
@@ -632,7 +685,7 @@ export const appBridge = bridge<AppBridge>({
 
           return {
             id: asset.id,
-            uri: await createImageDataUri(asset.uri, GALLERY_THUMBNAIL_WIDTH),
+            uri: await createGalleryThumbnailDataUri(asset.uri),
             filename: asset.filename,
             width: asset.width,
             height: asset.height
@@ -650,17 +703,17 @@ export const appBridge = bridge<AppBridge>({
       GALLERY_THUMBNAIL_CONCURRENCY,
       async (asset) => {
         const assetInfo = await MediaLibrary.getAssetInfoAsync(asset, {
-          shouldDownloadFromNetwork: true
+          shouldDownloadFromNetwork: false
         });
-        const localUri = assetInfo.localUri ?? assetInfo.uri;
+        const localUri = getLocalAssetUri(assetInfo);
 
-        if (!localUri || localUri.startsWith('ph://')) {
+        if (!localUri) {
           throw new Error('사진의 로컬 파일을 불러오지 못했어요.');
         }
 
         return {
           id: asset.id,
-          uri: await createImageDataUri(localUri, GALLERY_THUMBNAIL_WIDTH),
+          uri: await createGalleryThumbnailDataUri(localUri),
           filename: asset.filename,
           width: asset.width,
           height: asset.height
@@ -676,6 +729,29 @@ export const appBridge = bridge<AppBridge>({
       console.warn('Failed to load a gallery photo.', result.reason);
       return [];
     });
+  },
+  async takeGalleryPhoto() {
+    const permission = await ImagePicker.requestCameraPermissionsAsync();
+
+    if (!permission.granted) {
+      throw new Error('카메라 권한이 필요해요. 설정에서 카메라 접근을 허용해 주세요.');
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ['images'],
+      quality: 1
+    });
+
+    if (result.canceled) {
+      return null;
+    }
+
+    const asset = result.assets[0];
+    if (!asset?.uri || !asset.width || !asset.height) {
+      throw new Error('촬영한 사진을 불러오지 못했어요. 다시 촬영해 주세요.');
+    }
+
+    return createPreparedPhotoFromImage(getUploadableCameraAsset(asset));
   },
   async prepareGalleryPhoto(assetId) {
     return prepareGalleryPhoto(assetId);

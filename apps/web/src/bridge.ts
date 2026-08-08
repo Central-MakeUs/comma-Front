@@ -42,6 +42,13 @@ export const appBridge = linkBridge<BridgeStore<AppBridge>, AppPostMessageSchema
 
       return [];
     },
+    async takeGalleryPhoto() {
+      if (isReactNativeWebView()) {
+        throw new Error('Native camera bridge is not ready yet.');
+      }
+
+      return null;
+    },
     async prepareGalleryPhoto() {
       throw new Error('Native photo preparation is only available in the mobile app.');
     },

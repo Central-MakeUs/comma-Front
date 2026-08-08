@@ -1,0 +1,38 @@
+import { FeedCard } from '@comma/design-system';
+import { transformDate } from '../../../shared/lib/transformDate';
+import type { FeedInfo } from '../model/feed.types';
+import * as styles from './Archive.css';
+
+type ArchiveFeedListProps = {
+  items: readonly FeedInfo[];
+};
+
+export function ArchiveFeedList({ items }: ArchiveFeedListProps) {
+  if (!items.length) {
+    return (
+      <section className={styles.loadingWrapper} aria-label="내 쉼표 1열 목록">
+        <span className={styles.alertText}>쉼표를 추가해보세요.</span>
+      </section>
+    );
+  }
+
+  return (
+    <section className={styles.list} aria-label="내 쉼표 1열 목록">
+      {items.map((item) => (
+        <FeedCard
+          className={styles.listCard}
+          content={item.review}
+          dateLabel={transformDate(item.createdAt)}
+          imageAlt={`피드 이미지 ${item.feedId}`}
+          imageClassName={styles.listImage}
+          imageSrc={item.imageUrl}
+          key={item.feedId}
+          liked={item.isLiked}
+          likeCount={item.likeCount}
+          tags={[...item.hashtags]}
+          variant="my"
+        />
+      ))}
+    </section>
+  );
+}

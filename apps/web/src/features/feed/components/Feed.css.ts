@@ -1,0 +1,40 @@
+import { colors, typography } from '@comma/design-system';
+import { style } from '@vanilla-extract/css';
+
+export const container = style({
+  display: 'flex',
+  flexDirection: 'column',
+  paddingTop: 'var(--safe-area-top)'
+});
+
+export const title = style({
+  width: '100%',
+  padding: 16,
+  textAlign: 'center',
+  ...typography.headingB,
+  color: colors.textPrimary
+});
+
+export const secondChip = style({
+  width: 'fit-content'
+});
+
+export const scrollContainer = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 'clamp(24px, 4.69dvh, 40px)'
+});
+
+export const alertText = style({
+  ...typography.bodyReadingR,
+  color: colors.textTertiary,
+  margin: 'auto'
+});
+
+export const toast = style({
+  position: 'fixed',
+  bottom: 120,
+  left: '50%',
+  transform: 'translateX(-50%)',
+  zIndex: 3
+});

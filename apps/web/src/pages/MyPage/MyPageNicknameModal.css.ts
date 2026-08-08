@@ -9,7 +9,8 @@ export const overlay = style({
   width: '100%',
   maxWidth: 'var(--app-max-width)',
   transform: 'translateX(-50%)',
-  zIndex: 10
+  zIndex: 10,
+  overscrollBehavior: 'none'
 });
 
 export const backdropButton = style({

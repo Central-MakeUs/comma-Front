@@ -37,6 +37,8 @@ export const scrollContainer = style({
   minHeight: 0,
   overflowY: 'auto',
   overflowX: 'hidden',
+  overscrollBehaviorY: 'contain',
+  WebkitOverflowScrolling: 'touch',
   display: 'flex',
   flexDirection: 'column',
   gap: 'clamp(24px, 4.69dvh, 40px)',

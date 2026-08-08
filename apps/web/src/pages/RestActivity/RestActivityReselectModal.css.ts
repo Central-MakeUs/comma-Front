@@ -15,7 +15,8 @@ export const overlay = style({
   justifyContent: 'center',
   padding: 32,
   background: 'rgba(26, 24, 20, 0.66)',
-  boxShadow: '0 4px 4px rgba(0, 0, 0, 0.25)'
+  boxShadow: '0 4px 4px rgba(0, 0, 0, 0.25)',
+  overscrollBehavior: 'none'
 });
 
 export const modal = style({

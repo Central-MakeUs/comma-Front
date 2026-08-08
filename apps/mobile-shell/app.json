@@ -30,7 +30,7 @@
     "ios": {
       "bundleIdentifier": "com.comma.app",
       "icon": "./assets/icon.png",
-      "buildNumber": "20",
+      "buildNumber": "19",
       "supportsTablet": false,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false

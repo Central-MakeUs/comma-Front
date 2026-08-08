@@ -15,7 +15,7 @@ export const content = style({
   position: 'relative',
   zIndex: 2,
   width: '100%',
-  minHeight: 'calc(100dvh - 112px)',
+  minHeight: 'calc(100svh - 112px)',
   display: 'flex',
   flexDirection: 'column',
   padding: '0 0 188px'

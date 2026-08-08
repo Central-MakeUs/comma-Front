@@ -4,7 +4,7 @@ import { style } from '@vanilla-extract/css';
 export const screen = style({
   position: 'relative',
   width: '100%',
-  height: '100dvh',
+  height: '100svh',
   overflowY: 'auto',
   overflowX: 'hidden',
   overscrollBehaviorY: 'contain',

@@ -3,7 +3,7 @@ import { style } from '@vanilla-extract/css';
 
 export const page = style({
   width: '100%',
-  height: '100dvh',
+  height: '100svh',
   overflowY: 'auto',
   overflowX: 'hidden',
   overscrollBehaviorY: 'contain',
@@ -15,7 +15,6 @@ export const screen = style({
   position: 'relative',
   width: '100%',
   minHeight: '100%',
-  overflowX: 'hidden',
   color: colors.textPrimary,
   background: colors.backgroundPrimary
 });
@@ -94,7 +93,8 @@ export const description = style({
 export const upload = style({
   width: 'min(345px, calc(var(--app-width) - 48px))',
   height: 'min(438px, calc((var(--app-width) - 48px) * 1.27))',
-  borderRadius: 100
+  borderRadius: 100,
+  touchAction: 'pan-y'
 });
 
 export const doneButton = style({

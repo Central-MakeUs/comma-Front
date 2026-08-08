@@ -4,7 +4,6 @@ import { style, styleVariants } from '@vanilla-extract/css';
 export const page = style({
   width: '100%',
   minHeight: '100dvh',
-  overflowX: 'hidden',
   background: colors.backgroundPrimary
 });
 
@@ -12,7 +11,6 @@ export const screen = style({
   position: 'relative',
   width: '100%',
   height: '100dvh',
-  overflowX: 'hidden',
   color: colors.textPrimary,
   background: colors.backgroundPrimary
 });

@@ -4,6 +4,8 @@ export const brand = {
 
 export type { DesignAsset } from './assets';
 export { designAssets } from './assets';
+export type { BottomSheetProps } from './BottomSheet';
+export { BottomSheet } from './BottomSheet';
 export type { ChipProps, ChipState } from './Chip';
 export { Chip } from './Chip';
 export type { CtaButtonProps, CtaButtonState } from './CtaButton';
@@ -16,10 +18,14 @@ export type { FeedCardProps, FeedCardVariant } from './FeedCard';
 export { FeedCard } from './FeedCard';
 export type { FeedImageProps } from './FeedImage';
 export { FeedImage } from './FeedImage';
+export type { UseDismissibleLayerOptions } from './hooks/useDismissibleLayer';
+export { useDismissibleLayer } from './hooks/useDismissibleLayer';
 export type { IconName, IconProps, IconVariant } from './Icon';
 export { Icon } from './Icon';
 export type { ImageUploadProps, ImageUploadState } from './ImageUpload';
 export { ImageUpload } from './ImageUpload';
+export type { ModalBackdropTone, ModalProps } from './Modal';
+export { Modal } from './Modal';
 export type { NavigationBarItem, NavigationBarProps } from './NavigationBar';
 export { NavigationBar } from './NavigationBar';
 export type { ProgressBarProps, ProgressBarStep } from './ProgressBar';

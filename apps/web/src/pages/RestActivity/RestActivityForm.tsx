@@ -133,7 +133,13 @@ export function RestActivityForm({
             className={sharedStyles.iconButton}
             onClick={onOpenReselectModal}
             type="button"
-            style={{ width: 44, height: 44, position: 'absolute', top: 10, right: 22 }}
+            style={{
+              width: 44,
+              height: 44,
+              position: 'absolute',
+              top: 'calc(10px + var(--safe-area-top))',
+              right: 22
+            }}
           >
             <Icon color={colors.iconPrimary} name="x" />
           </button>

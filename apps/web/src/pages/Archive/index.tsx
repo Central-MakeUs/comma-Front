@@ -115,10 +115,14 @@ function Archive() {
             }
           }}
         >
-          {viewMode === 'list' ? (
-            <ArchiveFeedList items={state === 'loading' ? [] : content} />
+          {state === 'loading' ? (
+            <div className={styles.loadingWrapper}>
+              <span className={styles.alertText}>불러오는 중...</span>
+            </div>
+          ) : viewMode === 'list' ? (
+            <ArchiveFeedList items={content} />
           ) : (
-            <ArchiveFeedGrid items={state === 'loading' ? [] : content} />
+            <ArchiveFeedGrid items={content} />
           )}
         </div>
         <NavigationBar

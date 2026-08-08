@@ -43,7 +43,9 @@ export function FeedBadook({
   return (
     <div className={rootClassName} {...divProps}>
       <div className={imageFrame}>
-        {imageSrc ? <img alt={imageAlt} className={image} src={imageSrc} /> : null}
+        {imageSrc ? (
+          <img alt={imageAlt} className={image} draggable={false} src={imageSrc} />
+        ) : null}
       </div>
       <div className={body}>
         <div className={metaRow}>

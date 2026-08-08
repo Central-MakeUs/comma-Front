@@ -27,7 +27,7 @@ export type SelectedActivityPhoto =
       previewSrc: string;
     };
 
-const GALLERY_PHOTO_LIMIT = 30;
+const GALLERY_PHOTO_LIMIT = 12;
 const GALLERY_BRIDGE_RETRY_COUNT = 8;
 const GALLERY_BRIDGE_RETRY_DELAY_MS = 150;
 
@@ -62,6 +62,11 @@ async function waitForNativeGalleryBridge() {
 async function getNativeGalleryPhotos() {
   await waitForNativeGalleryBridge();
   return appBridge.getGalleryPhotos(GALLERY_PHOTO_LIMIT);
+}
+
+async function takeNativePhoto() {
+  await waitForNativeGalleryBridge();
+  return appBridge.takeGalleryPhoto();
 }
 
 export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivityPhotoPickerProps) {
@@ -150,6 +155,45 @@ export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivity
     }
   };
 
+  const handleCameraClick = async () => {
+    if (!isNativeGallery) {
+      fileInputRef.current?.click();
+      return;
+    }
+
+    if (preparingAssetId) return;
+
+    setPreparingAssetId('camera');
+
+    try {
+      const preparedPhoto = await takeNativePhoto();
+
+      if (!preparedPhoto) {
+        setPreparingAssetId(undefined);
+        return;
+      }
+
+      await appBridge.retainPreparedGalleryPhoto(preparedPhoto.uri);
+
+      if (!isActiveRef.current) {
+        await appBridge.deletePreparedGalleryPhoto(preparedPhoto.uri).catch(() => {});
+        return;
+      }
+
+      onPhotoSelect({
+        kind: 'native',
+        previewSrc: preparedPhoto.previewUri,
+        photo: preparedPhoto
+      });
+    } catch (error) {
+      if (!isActiveRef.current) return;
+
+      console.error('Failed to take photo.', error);
+      alert(error instanceof Error ? error.message : '사진을 촬영하지 못했어요.');
+      setPreparingAssetId(undefined);
+    }
+  };
+
   return (
     <main className={sharedStyles.page}>
       <div className={styles.screen}>
@@ -179,7 +223,10 @@ export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivity
           <button
             aria-label="카메라로 사진 선택"
             className={styles.cameraTile}
-            onClick={() => fileInputRef.current?.click()}
+            disabled={Boolean(preparingAssetId)}
+            onClick={() => {
+              void handleCameraClick();
+            }}
             type="button"
           >
             <Icon color={colors.iconPrimary} height={40} name="camera" width={40} />

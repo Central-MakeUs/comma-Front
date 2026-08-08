@@ -3,7 +3,7 @@ import { style } from '@vanilla-extract/css';
 
 export const page = style({
   width: '100%',
-  height: '100dvh',
+  height: '100svh',
   overflowY: 'auto',
   overflowX: 'hidden',
   overscrollBehaviorY: 'contain',
@@ -36,7 +36,8 @@ export const dimOverlay = style({
   display: 'none',
   background: 'rgba(26, 24, 20, 0.5)',
   backdropFilter: 'blur(20px)',
-  WebkitBackdropFilter: 'blur(20px)'
+  WebkitBackdropFilter: 'blur(20px)',
+  pointerEvents: 'none'
 });
 
 export const dimOverlayVisible = style({
@@ -93,7 +94,8 @@ export const description = style({
 export const upload = style({
   width: 'min(345px, calc(var(--app-width) - 48px))',
   height: 'min(438px, calc((var(--app-width) - 48px) * 1.27))',
-  borderRadius: 100
+  borderRadius: 100,
+  touchAction: 'pan-y'
 });
 
 export const doneButton = style({

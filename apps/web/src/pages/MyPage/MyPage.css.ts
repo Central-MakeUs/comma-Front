@@ -52,7 +52,7 @@ export const header = style({
 
 export const headerIconContainer = style({
   position: 'absolute',
-  top: '50%',
+  top: 'calc(50% + (var(--safe-area-top) / 2))',
   transform: 'translateY(-50%)',
   right: 22,
   display: 'flex',

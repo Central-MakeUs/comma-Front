@@ -4,7 +4,6 @@ import { style, styleVariants } from '@vanilla-extract/css';
 export const page = style({
   width: '100%',
   minHeight: '100dvh',
-  overflowX: 'hidden',
   background: colors.backgroundPrimary
 });
 
@@ -12,7 +11,6 @@ export const screen = style({
   position: 'relative',
   width: '100%',
   height: '100dvh',
-  overflowX: 'hidden',
   color: colors.textPrimary,
   background: colors.backgroundPrimary
 });
@@ -120,4 +118,17 @@ export const navigation = style({
   bottom: 'max(40px, var(--safe-area-bottom))',
   zIndex: 3,
   transform: 'translateX(-50%)'
+});
+
+export const loadingWrapper = style({
+  width: '100%',
+  height: '100%',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center'
+});
+
+export const alertText = style({
+  ...typography.bodyReadingR,
+  color: colors.textTertiary
 });

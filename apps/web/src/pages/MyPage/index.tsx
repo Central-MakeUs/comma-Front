@@ -148,7 +148,8 @@ function MyPage() {
       ? '마지막 쉼표를 불러오지 못했어요'
       : latestFeed?.createdAt
         ? `마지막 쉼표 ${transformDate(latestFeed.createdAt)}`
-        : '아직 쉼표 기록이 없어요';
+        : null;
+  const hasNoFeed = latestMyFeedQuery.isSuccess && latestFeed === null;
 
   useLayoutEffect(() => {
     if (!containerRef.current) return;
@@ -201,6 +202,7 @@ function MyPage() {
           aria-hidden="true"
           className={styles.backgroundImage}
           decoding="async"
+          draggable={false}
           fetchPriority="high"
           loading="eager"
           src={bgUrl}
@@ -278,106 +280,116 @@ function MyPage() {
             onClick={() => setShowModal(true)}
           />
         </div>
-        <div
-          ref={(node) => {
-            embiaRef(node);
-            containerRef.current = node;
-          }}
-          style={{
-            position: 'relative',
-            overflow: 'hidden',
-            height: BIG_HEIGHT * cardLayoutScale
-          }}
-        >
+        <div style={{ position: 'relative' }}>
           <div
+            ref={(node) => {
+              embiaRef(node);
+              containerRef.current = node;
+            }}
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: GAP * cardLayoutScale
+              position: 'relative',
+              overflow: 'hidden',
+              height: BIG_HEIGHT * cardLayoutScale
             }}
           >
-            {displayActivityRanking.map((activity) => (
-              <div
-                key={`spacer-${activity.rank}-${activity.relaxId}`}
-                style={{
-                  flex: `0 0 ${SMALL_WIDTH * cardLayoutScale}px`,
-                  height: BIG_HEIGHT * cardLayoutScale
-                }}
-              />
-            ))}
-          </div>
-          <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-            {displayActivityRanking.length ? (
-              displayActivityRanking.map((activity, index) => (
-                <MyPageCard
-                  key={`${activity.rank}-${activity.relaxId}`}
-                  backgroundUrl={backgrounds[index % backgrounds.length]}
-                  num={activity.rank}
-                  count={activity.count}
-                  title={activity.name}
-                  path={paths[index]}
-                  width={sizes[index]?.width ?? SMALL_WIDTH * cardLayoutScale}
-                  height={sizes[index]?.height ?? SMALL_HEIGHT * cardLayoutScale}
-                  x={xs[index] ?? 0}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: GAP * cardLayoutScale
+              }}
+            >
+              {displayActivityRanking.map((activity) => (
+                <div
+                  key={`spacer-${activity.rank}-${activity.relaxId}`}
+                  style={{
+                    flex: `0 0 ${SMALL_WIDTH * cardLayoutScale}px`,
+                    height: BIG_HEIGHT * cardLayoutScale
+                  }}
                 />
-              ))
-            ) : (
-              <span className={styles.alertText}>쉼표가 쌓이면 나만의 쉼표 리포트가 생겨요.</span>
+              ))}
+            </div>
+            <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+              {activityCardCount !== 0 && latestFeed?.createdAt ? (
+                displayActivityRanking.map((activity, index) => (
+                  <MyPageCard
+                    key={`${activity.rank}-${activity.relaxId}`}
+                    backgroundUrl={backgrounds[index % backgrounds.length]}
+                    num={activity.rank}
+                    count={activity.count}
+                    title={activity.name}
+                    path={paths[index]}
+                    width={sizes[index]?.width ?? SMALL_WIDTH * cardLayoutScale}
+                    height={sizes[index]?.height ?? SMALL_HEIGHT * cardLayoutScale}
+                    x={xs[index] ?? 0}
+                  />
+                ))
+              ) : !latestFeed?.createdAt ? null : (
+                <span className={styles.alertText}>쉼표가 쌓이면 나만의 쉼표 리포트가 생겨요.</span>
+              )}
+            </div>
+          </div>
+          <div
+            style={{
+              width: '100%',
+              marginTop: hasQuestionReport || showQuestionReportError ? 48 : 0,
+              paddingBottom: 'calc(155px + var(--safe-area-bottom))',
+              paddingLeft: 32,
+              paddingRight: 32
+            }}
+          >
+            {showQuestionReportError ? (
+              <span className={styles.alertText}>리포트를 불러오지 못했어요.</span>
+            ) : hasNoFeed ? null : (
+              <>
+                {moodRatio.length > 0 ? (
+                  <>
+                    <div className={styles.questionContainer}>
+                      <span className={styles.questionNum}>Q1.</span>지금 기분이 어때요?
+                    </div>
+                    <div>
+                      {moodRatio.map((mood, index) => (
+                        <MyPageAnswerContainer
+                          key={mood.mood}
+                          num={index + 1}
+                          text={mood.label}
+                          percent={mood.ratio}
+                        />
+                      ))}
+                    </div>
+                  </>
+                ) : null}
+                {timeBudgetRatio.length > 0 ? (
+                  <>
+                    <div
+                      className={styles.questionContainer}
+                      style={{ marginTop: moodRatio.length > 0 ? 40 : 0 }}
+                    >
+                      <span className={styles.questionNum}>Q2.</span>어느정도 시간이 있어요?
+                    </div>
+                    <div>
+                      {timeBudgetRatio.map((timeBudget, index) => (
+                        <MyPageAnswerContainer
+                          key={timeBudget.timeBudget}
+                          num={index + 1}
+                          text={timeBudget.label}
+                          percent={timeBudget.ratio}
+                        />
+                      ))}
+                    </div>
+                  </>
+                ) : null}
+              </>
             )}
           </div>
-        </div>
-        <div
-          style={{
-            width: '100%',
-            marginTop: hasQuestionReport || showQuestionReportError ? 48 : 0,
-            paddingBottom: 'calc(155px + var(--safe-area-bottom))',
-            paddingLeft: 32,
-            paddingRight: 32
-          }}
-        >
-          {showQuestionReportError ? (
-            <span className={styles.alertText}>리포트를 불러오지 못했어요.</span>
-          ) : (
-            <>
-              {moodRatio.length > 0 ? (
-                <>
-                  <div className={styles.questionContainer}>
-                    <span className={styles.questionNum}>Q1.</span>지금 기분이 어때요?
-                  </div>
-                  <div>
-                    {moodRatio.map((mood, index) => (
-                      <MyPageAnswerContainer
-                        key={mood.mood}
-                        num={index + 1}
-                        text={mood.label}
-                        percent={mood.ratio}
-                      />
-                    ))}
-                  </div>
-                </>
-              ) : null}
-              {timeBudgetRatio.length > 0 ? (
-                <>
-                  <div
-                    className={styles.questionContainer}
-                    style={{ marginTop: moodRatio.length > 0 ? 40 : 0 }}
-                  >
-                    <span className={styles.questionNum}>Q2.</span>어느정도 시간이 있어요?
-                  </div>
-                  <div>
-                    {timeBudgetRatio.map((timeBudget, index) => (
-                      <MyPageAnswerContainer
-                        key={timeBudget.timeBudget}
-                        num={index + 1}
-                        text={timeBudget.label}
-                        percent={timeBudget.ratio}
-                      />
-                    ))}
-                  </div>
-                </>
-              ) : null}
-            </>
-          )}
+          {hasNoFeed && !showQuestionReportError ? (
+            <span
+              className={styles.alertText}
+              style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}
+            >
+              쉼표가 쌓이면 나만의 쉼표 리포트가 생겨요.
+            </span>
+          ) : null}
         </div>
         <NavigationBar
           active="mypage"

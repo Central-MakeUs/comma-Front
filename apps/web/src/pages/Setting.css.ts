@@ -26,11 +26,14 @@ export const backButton = style({
 export const container = style({
   background: 'linear-gradient(#11111166 0%, #11111100 100%), #322E29',
   width: '100%',
-  minHeight: '100dvh',
+  height: '100dvh',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  overflowX: 'hidden'
+  overflowY: 'auto',
+  overflowX: 'hidden',
+  overscrollBehaviorY: 'contain',
+  WebkitOverflowScrolling: 'touch'
 });
 
 export const header = style({
@@ -119,7 +122,8 @@ export const modalOverlay = style({
   width: '100%',
   maxWidth: 'var(--app-max-width)',
   transform: 'translateX(-50%)',
-  zIndex: 10
+  zIndex: 10,
+  overscrollBehavior: 'none'
 });
 
 export const backdropButton = style({
@@ -206,6 +210,8 @@ export const premiumAlertSheet = style({
   flexDirection: 'column',
   alignItems: 'center',
   overflowY: 'auto',
+  overscrollBehaviorY: 'contain',
+  WebkitOverflowScrolling: 'touch',
   borderRadius: '36px 36px 0 0',
   background: 'rgba(194, 191, 188, 0.1)',
   boxShadow: shadows.glassInset,

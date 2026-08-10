@@ -28,7 +28,10 @@ export function RestResultReselectModal({ onClose }: { onClose: () => void }) {
         <CtaButton className={styles.cancleBtn} onClick={onClose}>
           취소
         </CtaButton>
-        <CtaButton className={styles.confirmBtn} onClick={() => navigate('/rest/checklist')}>
+        <CtaButton
+          className={styles.confirmBtn}
+          onClick={() => navigate('/rest/checklist', { replace: true })}
+        >
           확인
         </CtaButton>
       </div>

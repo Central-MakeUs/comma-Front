@@ -1,3 +1,4 @@
+import { NATIVE_BACK_RESPONSE_TYPE } from '@comma/bridge';
 import type { BridgeWebView } from '@webview-bridge/react-native';
 import * as SecureStore from 'expo-secure-store';
 import * as WebBrowser from 'expo-web-browser';
@@ -15,12 +16,14 @@ import {
 import { isExternalBrowserUrl, isTrustedWebViewMessageUrl } from './webViewSecurity';
 
 interface UseWebViewMessageHandlerOptions {
+  onNativeBackResponse?: (requestId: string, handled: boolean) => void;
   webOrigin?: string;
   webViewReadyRef: React.RefObject<boolean>;
   webViewRef: React.RefObject<BridgeWebView | null>;
 }
 
 export function useWebViewMessageHandler({
+  onNativeBackResponse,
   webOrigin,
   webViewReadyRef,
   webViewRef
@@ -102,7 +105,15 @@ export function useWebViewMessageHandler({
         return;
       }
 
-      let message: { type?: string; state?: unknown; url?: string } | undefined;
+      let message:
+        | {
+            type?: string;
+            state?: unknown;
+            url?: string;
+            handled?: unknown;
+            requestId?: unknown;
+          }
+        | undefined;
       try {
         message = JSON.parse(event.nativeEvent.data);
       } catch (error) {
@@ -111,6 +122,12 @@ export function useWebViewMessageHandler({
       }
 
       switch (message?.type) {
+        case NATIVE_BACK_RESPONSE_TYPE: {
+          if (typeof message.requestId === 'string' && typeof message.handled === 'boolean') {
+            onNativeBackResponse?.(message.requestId, message.handled);
+          }
+          break;
+        }
         case 'GOOGLE_LOGIN_RECOVERY_READY': {
           isGoogleRecoveryReadyRef.current = true;
           if (pendingWebMessageRef.current) {
@@ -182,7 +199,7 @@ export function useWebViewMessageHandler({
         }
       }
     },
-    [handleGoogleRedirectUrl, postWebMessage, webOrigin, webViewRef]
+    [handleGoogleRedirectUrl, onNativeBackResponse, postWebMessage, webOrigin, webViewRef]
   );
 
   return { handleGoogleRedirectUrl, handleMessage };

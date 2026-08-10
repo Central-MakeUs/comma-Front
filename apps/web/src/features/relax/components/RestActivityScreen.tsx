@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { expireSession } from '../../../shared/api/client';
 import { appBridge } from '../../../shared/bridge/bridge';
 import { useAppToast } from '../../../shared/components/AppToast';
+import { useNativeBackHandler } from '../../../shared/components/NativeBack';
 import { createFeed } from '../../feed/api/feed.api';
 import type { RestLoadingLocationState } from '../model/relax.types';
 import { ACTIVITY_PROGRESS_COUNT } from '../model/restActivity.constants';
@@ -64,6 +65,28 @@ function RestActivityScreen() {
     }
   });
 
+  useNativeBackHandler(() => {
+    if (uploadMutation.isPending) {
+      showToast('업로드 중이에요.');
+      return true;
+    }
+    if (showPhotoPicker) {
+      setShowPhotoPicker(false);
+      return true;
+    }
+    if (showReselectModal) {
+      setShowReselectModal(false);
+      return true;
+    }
+    if (isWritingStarted) {
+      setIsWritingStarted(false);
+      return true;
+    }
+
+    setShowReselectModal(true);
+    return true;
+  });
+
   useEffect(() => {
     if (hasValidLocationState || invalidStateHandledRef.current) return;
 
@@ -91,7 +114,7 @@ function RestActivityScreen() {
     setShowPhotoPicker(false);
   };
 
-  const handleConfirmReselect = () => navigate('/rest/checklist');
+  const handleConfirmReselect = () => navigate('/rest/checklist', { replace: true });
 
   const handleComplete = async (values: {
     hashtags: string[];
@@ -126,7 +149,7 @@ function RestActivityScreen() {
     try {
       await uploadMutation.mutateAsync({ photo: selectedPhoto, request });
 
-      navigate('/feed');
+      navigate('/feed', { replace: true });
     } catch (error) {
       if (isNativeUploadUnauthorizedError(error)) {
         await expireSession();

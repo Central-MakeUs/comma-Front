@@ -1,6 +1,8 @@
 import { BottomSheet, CtaButton, TextInput } from '@comma/design-system';
 import { useMutation } from '@tanstack/react-query';
 import type { FormEvent } from 'react';
+import { useAppToast } from '../../../../shared/components/AppToast';
+import { useNativeBackHandler } from '../../../../shared/components/NativeBack';
 import { QueryFeedback } from '../../../../shared/components/QueryFeedback';
 import { getStoredNickname } from '../../../../shared/lib/tokenStorage';
 import { updateNickname } from '../../../auth/api/user.api';
@@ -13,11 +15,22 @@ interface MyPageNicknameModalProps {
 }
 
 function MyPageNicknameModal({ onCancelClick, onSave }: MyPageNicknameModalProps) {
+  const { showToast } = useAppToast();
   const updateNicknameMutation = useMutation({
     mutationFn: updateNickname
   });
   const { value, handleChange } = useEditableNickname({
     suggestedValue: getStoredNickname() ?? undefined
+  });
+
+  useNativeBackHandler(() => {
+    if (updateNicknameMutation.isPending) {
+      showToast('닉네임을 저장하고 있어요.');
+      return true;
+    }
+
+    onCancelClick();
+    return true;
   });
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {

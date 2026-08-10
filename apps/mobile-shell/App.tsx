@@ -1,13 +1,14 @@
-import { POST_MESSAGE_EVENT } from '@comma/bridge';
+import { NATIVE_BACK_EVENT, POST_MESSAGE_EVENT } from '@comma/bridge';
 import type { BridgeWebView } from '@webview-bridge/react-native';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import * as WebBrowser from 'expo-web-browser';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { Linking, Platform, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { BackHandler, Linking, PanResponder, Platform, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { WebViewErrorEvent } from 'react-native-webview/lib/WebViewTypes';
 import { postMessage, WebView } from './src/bridge';
+import { shouldCaptureIosBackGesture, shouldCompleteIosBackGesture } from './src/nativeBackGesture';
 import { useWebViewMessageHandler } from './src/useWebViewMessageHandler';
 import { createSafeAreaScript, getWebUrlConfig } from './src/webViewConfig';
 import {
@@ -18,6 +19,8 @@ import {
   isWebOAuthCallbackUrl
 } from './src/webViewSecurity';
 
+const NATIVE_BACK_RESPONSE_TIMEOUT_MS = 700;
+
 SplashScreen.preventAutoHideAsync();
 
 export default function App() {
@@ -25,10 +28,23 @@ export default function App() {
   const insets = useSafeAreaInsets();
   const webViewRef = useRef<BridgeWebView>(null);
   const webViewReadyRef = useRef(false);
+  const pendingBackRequestRef = useRef<string | undefined>(undefined);
+  const pendingBackTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const canWebViewGoBackRef = useRef(false);
+  const currentNavigationUrlRef = useRef(webUrl);
   const safeAreaScript = useMemo(() => createSafeAreaScript(insets), [insets]);
   const webOrigin = useMemo(() => (webUrl ? new URL(webUrl).origin : undefined), [webUrl]);
   const [currentWebUrl, setCurrentWebUrl] = useState(webUrl);
+  const handleNativeBackResponse = useCallback((requestId: string, handled: boolean) => {
+    if (requestId !== pendingBackRequestRef.current) return;
+
+    if (pendingBackTimeoutRef.current) clearTimeout(pendingBackTimeoutRef.current);
+    pendingBackTimeoutRef.current = undefined;
+    pendingBackRequestRef.current = undefined;
+    if (!handled && Platform.OS === 'android') BackHandler.exitApp();
+  }, []);
   const { handleGoogleRedirectUrl, handleMessage } = useWebViewMessageHandler({
+    onNativeBackResponse: handleNativeBackResponse,
     webOrigin,
     webViewReadyRef,
     webViewRef
@@ -66,6 +82,71 @@ export default function App() {
     setCurrentWebUrl(webUrl);
   }, [webUrl]);
 
+  const requestWebBack = useCallback(() => {
+    if (pendingBackRequestRef.current) return;
+    if (!webViewReadyRef.current || error || !webUrl) {
+      if (Platform.OS === 'android') BackHandler.exitApp();
+      return;
+    }
+    if (
+      webOrigin &&
+      currentNavigationUrlRef.current &&
+      !isAllowedWebViewUrl(currentNavigationUrlRef.current, webOrigin) &&
+      canWebViewGoBackRef.current
+    ) {
+      webViewRef.current?.goBack();
+      return;
+    }
+
+    const requestId = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    pendingBackRequestRef.current = requestId;
+    webViewRef.current?.injectJavaScript(`
+      window.dispatchEvent(new CustomEvent(${JSON.stringify(NATIVE_BACK_EVENT)}, {
+        detail: ${JSON.stringify({ requestId })}
+      }));
+      true;
+    `);
+    pendingBackTimeoutRef.current = setTimeout(() => {
+      if (pendingBackRequestRef.current !== requestId) return;
+
+      pendingBackRequestRef.current = undefined;
+      pendingBackTimeoutRef.current = undefined;
+      if (Platform.OS === 'android') BackHandler.exitApp();
+    }, NATIVE_BACK_RESPONSE_TIMEOUT_MS);
+  }, [error, webOrigin, webUrl]);
+
+  const iosBackPanResponder = useMemo(
+    () =>
+      PanResponder.create({
+        onMoveShouldSetPanResponderCapture: (_, gestureState) =>
+          Platform.OS === 'ios' && shouldCaptureIosBackGesture(gestureState),
+        onPanResponderRelease: (_, gestureState) => {
+          if (shouldCompleteIosBackGesture(gestureState)) requestWebBack();
+        },
+        onPanResponderTerminationRequest: () => true
+      }),
+    [requestWebBack]
+  );
+
+  useEffect(() => {
+    if (Platform.OS !== 'android') return;
+
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+      requestWebBack();
+      return true;
+    });
+
+    return () => subscription.remove();
+  }, [requestWebBack]);
+
+  useEffect(() => {
+    return () => {
+      if (pendingBackTimeoutRef.current) clearTimeout(pendingBackTimeoutRef.current);
+      pendingBackTimeoutRef.current = undefined;
+      pendingBackRequestRef.current = undefined;
+    };
+  }, []);
+
   if (error || !webUrl) {
     return (
       <View
@@ -87,7 +168,7 @@ export default function App() {
   const trustedWebOrigin = webOrigin ?? new URL(webUrl).origin;
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} {...iosBackPanResponder.panHandlers}>
       <StatusBar style="auto" translucent backgroundColor="transparent" />
       <WebView
         bounces={false}
@@ -116,6 +197,10 @@ export default function App() {
         }}
         javaScriptEnabled
         domStorageEnabled
+        onNavigationStateChange={(navigationState) => {
+          canWebViewGoBackRef.current = navigationState.canGoBack;
+          currentNavigationUrlRef.current = navigationState.url;
+        }}
         onError={(event: WebViewErrorEvent) => {
           console.warn('Failed to load web app.', {
             webUrl,

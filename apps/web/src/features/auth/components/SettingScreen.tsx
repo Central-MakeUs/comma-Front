@@ -12,6 +12,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppToast } from '../../../shared/components/AppToast';
 import { AppScreen } from '../../../shared/components/layout';
+import { useNativeBackHandler } from '../../../shared/components/NativeBack';
 import { QueryFeedback } from '../../../shared/components/QueryFeedback';
 import { clearTokens } from '../../../shared/lib/tokenStorage';
 import { logout } from '../api/auth.api';
@@ -252,6 +253,28 @@ function SettingScreen() {
     }
   });
 
+  useNativeBackHandler(() => {
+    if (logoutMutation.isPending) {
+      showToast('로그아웃 중이에요.');
+      return true;
+    }
+    if (withdrawMutation.isPending) {
+      showToast('회원 탈퇴 중이에요.');
+      return true;
+    }
+    if (premiumAlertMutation.isPending) {
+      showToast('알림을 신청하고 있어요.');
+      return true;
+    }
+    if (activeModal) {
+      setActiveModal(null);
+      return true;
+    }
+
+    navigate('/mypage', { replace: true });
+    return true;
+  });
+
   const planData = planQuery.data;
   const currentPlan = planData?.currentPlan;
   const freePlan = planData?.plans.find((plan) => plan.plan === 'FREE');
@@ -304,7 +327,7 @@ function SettingScreen() {
         <button
           aria-label="뒤로 가기"
           className={styles.backButton}
-          onClick={() => navigate(-1)}
+          onClick={() => navigate('/mypage', { replace: true })}
           type="button"
         >
           <Icon name="rightArrow" className={styles.leftArrow} />

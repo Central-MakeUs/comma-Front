@@ -3,6 +3,7 @@ import { typography, vars } from '../theme.css';
 
 export const feedCard = style({
   width: '100%',
+  flexShrink: 0,
   display: 'grid',
   gridTemplateColumns: 'minmax(0, 1fr)',
   rowGap: 16,

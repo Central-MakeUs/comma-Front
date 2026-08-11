@@ -9,7 +9,7 @@ import Nickname from '../pages/Nickname';
 import RestActivity from '../pages/RestActivity';
 import RestChecklist from '../pages/RestChecklist';
 import RestLoading from '../pages/RestLoading';
-import RestResult from '../pages/RestResult';
+import RestResult from '../pages/RestResult/index';
 import Setting from '../pages/Setting';
 
 export const router = createBrowserRouter([

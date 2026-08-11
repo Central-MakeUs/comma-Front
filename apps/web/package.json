@@ -20,6 +20,7 @@
     "@vitejs/plugin-react": "^4.6.0",
     "@webview-bridge/web": "^1.7.9",
     "axios": "^1.18.1",
+    "embla-carousel": "^8.6.0",
     "embla-carousel-react": "^8.6.0",
     "react": "19.0.0",
     "react-dom": "19.0.0",

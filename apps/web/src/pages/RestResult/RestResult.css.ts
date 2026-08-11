@@ -1,5 +1,5 @@
 import { colors, radii, shadows, typography } from '@comma/design-system';
-import { globalStyle, style } from '@vanilla-extract/css';
+import { globalStyle, style, styleVariants } from '@vanilla-extract/css';
 
 export const container = style({
   width: '100%',
@@ -44,20 +44,6 @@ export const subTitle = style({
   ...typography.bodyReadingR,
   color: colors.textTertiary,
   marginBottom: 64
-});
-
-export const imageUploadStyle = style({
-  selectors: {
-    '&::after': {
-      content: '',
-      position: 'absolute',
-      inset: 0,
-      borderRadius: 'inherit',
-      zIndex: 1,
-      background: 'linear-gradient(rgba(17, 17, 17, 0) 0%, rgba(17, 17, 17, 0.66) 100%)',
-      boxShadow: 'inset 0 4px 10px 0 rgba(255, 255, 255, 0.2), 0 4px 40px 0 rgba(0, 0, 0, 0.2)'
-    }
-  }
 });
 
 export const dot = style({
@@ -112,49 +98,44 @@ export const imageText = style({
   color: colors.textSecondary
 });
 
-export const modalContainer = style({
-  width: 'calc(100% - 64px)',
-  height: 284,
-  backgroundColor: 'rgba(194, 191, 188, 0.1)',
-  boxShadow: 'inset -2px 0 40px 0 rgba(255, 255, 255, 0.1)',
-  backdropFilter: 'blur(10px)',
-  WebkitBackdropFilter: 'blur(10px)',
-  boxSizing: 'border-box',
-  padding: '24px 20px',
-  display: 'flex',
-  flexDirection: 'column',
-  borderRadius: 36
-});
-
-export const modalTitle = style({
-  ...typography.headlineB,
-  color: colors.textPrimary,
-  marginBottom: 8
-});
-
-export const modalDesc = style({
-  ...typography.bodyNormalR,
-  color: colors.textPrimary
-});
-
-const buttonBase = style({
+export const gradient = style({
+  position: 'absolute',
+  top: 254,
+  bottom: -2,
   width: '100%',
-  height: 60
+  background: 'linear-gradient(0deg, rgba(17, 17, 17, 0.66) 0%, rgba(17, 17, 17, 0) 100%)',
+  zIndex: -1
 });
 
-export const cancleBtn = style([
-  buttonBase,
-  {
-    marginBottom: 8,
-    background: 'transparent',
-    border: '1px solid rgba(194, 191, 188, 0.66)',
-    boxShadow: 'none'
-  }
-]);
+export const header = style({
+  width: '100%',
+  display: 'flex',
+  justifyContent: 'flex-end',
+  boxSizing: 'border-box',
+  padding:
+    'calc(20px + var(--safe-area-top)) calc(32px + var(--safe-area-right)) 20px calc(32px + var(--safe-area-left))'
+});
 
-export const confirmBtn = style([
-  buttonBase,
-  {
-    boxShadow: 'none'
-  }
-]);
+export const titleContainer = style({
+  width: '100%',
+  boxSizing: 'border-box',
+  paddingLeft: 32,
+  paddingRight: 32,
+  display: 'flex',
+  flexDirection: 'column'
+});
+
+const dotContainerBase = {
+  width: 88,
+  height: 8,
+  boxSizing: 'border-box',
+  display: 'flex',
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  margin: '0 auto'
+} as const;
+
+export const dotContainer = styleVariants({
+  compact: { ...dotContainerBase, marginTop: 12, marginBottom: 0 },
+  normal: { ...dotContainerBase, marginTop: 16, marginBottom: 24 }
+});

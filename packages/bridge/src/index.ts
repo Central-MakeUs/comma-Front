@@ -38,6 +38,7 @@ export type FeedCreateRequest = {
   hashtags: string[];
   review: string;
   isPublic: boolean;
+  activityId: number;
 };
 
 export type AuthTokens = {

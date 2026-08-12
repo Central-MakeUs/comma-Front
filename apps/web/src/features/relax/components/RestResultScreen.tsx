@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAppToast } from '../../../shared/components/AppToast';
 import { AppScreen, BackgroundImage } from '../../../shared/components/layout';
+import { useNativeBackHandler } from '../../../shared/components/NativeBack';
 import { QueryFeedback } from '../../../shared/components/QueryFeedback';
 import { BIG_HEIGHT, GAP, SMALL_WIDTH } from '../../../shared/lib/carousel.constants';
 import { useRestResultCarousel } from '../hooks/useRestResultCarousel';
@@ -27,6 +28,20 @@ function RestResultScreen() {
   const carouselSlideWidth = SMALL_WIDTH * layoutScale;
   const carouselGap = GAP * layoutScale;
   const isCompactHeight = layoutScale < 1;
+
+  useNativeBackHandler(() => {
+    if (startMutation.isPending) {
+      showToast('휴식을 시작하고 있어요.');
+      return true;
+    }
+    if (showModal) {
+      setShowModal(false);
+      return true;
+    }
+
+    setShowModal(true);
+    return true;
+  });
 
   useEffect(() => {
     if (validLocationState) return;

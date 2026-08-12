@@ -4,7 +4,9 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { useFunnel } from '@use-funnel/react-router-dom';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAppToast } from '../../../shared/components/AppToast';
 import { TabShell } from '../../../shared/components/layout';
+import { useNativeBackHandler } from '../../../shared/components/NativeBack';
 import { QueryFeedback } from '../../../shared/components/QueryFeedback';
 import { recommend } from '../../relax/api/relax.api';
 import { checklistQueryOptions } from '../api/checklist.queries';
@@ -65,6 +67,7 @@ function RestChecklistSkeleton() {
 
 function RestChecklistScreen() {
   const navigate = useNavigate();
+  const { showToast } = useAppToast();
   const { selectedKey, setSelectedKey, selectThenMove } = useSelectedOption();
   const checklistQuery = useQuery(checklistQueryOptions);
   const recommendMutation = useMutation({ mutationFn: recommend });
@@ -76,6 +79,18 @@ function RestChecklistScreen() {
       step: 'Mood',
       context: {}
     }
+  });
+
+  useNativeBackHandler(() => {
+    if (recommendMutation.isPending) {
+      showToast('휴식을 추천하고 있어요.');
+      return true;
+    }
+    if (funnel.step !== 'Time') return false;
+
+    setSelectedKey(undefined);
+    void funnel.history.replace('Mood', {});
+    return true;
   });
 
   return (

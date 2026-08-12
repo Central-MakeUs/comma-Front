@@ -6,6 +6,7 @@ import { RouterProvider } from 'react-router-dom';
 import AuthBootstrap from '../features/auth/components/AuthBootstrap';
 import { appBridge } from '../shared/bridge/bridge';
 import { AppToastProvider } from '../shared/components/AppToast';
+import { NativeBackProvider } from '../shared/components/NativeBack';
 import { QueryProvider } from './providers/QueryProvider';
 import { router } from './router';
 import './styles/global.css';
@@ -26,9 +27,11 @@ ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
     <QueryProvider>
       <AppToastProvider>
-        <AuthBootstrap>
-          <RouterProvider router={router} />
-        </AuthBootstrap>
+        <NativeBackProvider>
+          <AuthBootstrap>
+            <RouterProvider router={router} />
+          </AuthBootstrap>
+        </NativeBackProvider>
       </AppToastProvider>
     </QueryProvider>
   </React.StrictMode>

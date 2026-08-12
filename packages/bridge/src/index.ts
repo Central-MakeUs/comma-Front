@@ -2,6 +2,9 @@ export const POST_MESSAGE_EVENT = {
   APP_READY: 'appReady'
 } as const;
 
+export const NATIVE_BACK_EVENT = 'comma:native-back';
+export const NATIVE_BACK_RESPONSE_TYPE = 'NATIVE_BACK_RESPONSE';
+
 export type AppInfo = {
   platform: string;
   version: string;

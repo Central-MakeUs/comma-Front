@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAppToast } from '../../../shared/components/AppToast';
 import { AppScreen, BackgroundImage } from '../../../shared/components/layout';
+import { useNativeBackHandler } from '../../../shared/components/NativeBack';
 import { QueryFeedback } from '../../../shared/components/QueryFeedback';
 import { onlineCountQueryOptions } from '../api/relax.queries';
 import type { RestLoadingLocationState } from '../model/relax.types';
@@ -17,6 +18,11 @@ function RestLoadingScreen() {
   const countQuery = useQuery({
     ...onlineCountQueryOptions,
     enabled: recommendations.length > 0
+  });
+
+  useNativeBackHandler(() => {
+    navigate(-1);
+    return true;
   });
 
   useEffect(() => {

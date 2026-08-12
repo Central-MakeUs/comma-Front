@@ -15,5 +15,5 @@ export const navigateToNavigationItem = (
 ) => {
   if (item === active) return;
 
-  void navigate(navigationPaths[item]);
+  void navigate(navigationPaths[item], { replace: true });
 };

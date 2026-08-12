@@ -1,3 +1,4 @@
+import { storeActivityId } from '../lib/activityStorage';
 import type { RelaxActivity } from '../model/relax.types';
 import { getRelaxActiveCount, startRelax } from './relax.api';
 
@@ -9,6 +10,7 @@ export const startRelaxActivity = async (relax: RelaxActivity) => {
     throw new Error(startResponse.message ?? '휴식을 시작하지 못했어요.');
   }
 
+  storeActivityId(activityId);
   const startedRelax = { ...relax, activityId };
 
   try {

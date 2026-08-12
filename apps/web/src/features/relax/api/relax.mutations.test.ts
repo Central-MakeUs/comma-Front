@@ -1,10 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { storeActivityId } from '../lib/activityStorage';
 import { getRelaxActiveCount, startRelax } from './relax.api';
 import { startRelaxActivity } from './relax.mutations';
 
 vi.mock('./relax.api', () => ({
   getRelaxActiveCount: vi.fn(),
   startRelax: vi.fn()
+}));
+
+vi.mock('../lib/activityStorage', () => ({
+  storeActivityId: vi.fn()
 }));
 
 const activity = {
@@ -34,12 +39,14 @@ describe('startRelaxActivity', () => {
       activityId: 42,
       activeUserCount: 9
     });
+    expect(storeActivityId).toHaveBeenCalledWith(42);
   });
 
   it('throws when starting the activity fails', async () => {
     vi.mocked(startRelax).mockResolvedValue({ success: false, message: '시작 실패' });
 
     await expect(startRelaxActivity(activity)).rejects.toThrow('시작 실패');
+    expect(storeActivityId).not.toHaveBeenCalled();
     expect(getRelaxActiveCount).not.toHaveBeenCalled();
   });
 
@@ -47,6 +54,7 @@ describe('startRelaxActivity', () => {
     vi.mocked(startRelax).mockResolvedValue({ success: true });
 
     await expect(startRelaxActivity(activity)).rejects.toThrow('휴식을 시작하지 못했어요.');
+    expect(storeActivityId).not.toHaveBeenCalled();
     expect(getRelaxActiveCount).not.toHaveBeenCalled();
   });
 });

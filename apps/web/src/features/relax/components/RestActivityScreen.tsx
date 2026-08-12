@@ -7,6 +7,7 @@ import { appBridge } from '../../../shared/bridge/bridge';
 import { useAppToast } from '../../../shared/components/AppToast';
 import { useNativeBackHandler } from '../../../shared/components/NativeBack';
 import { createFeed } from '../../feed/api/feed.api';
+import { clearStoredActivityId, getStoredActivityId } from '../lib/activityStorage';
 import type { RestLoadingLocationState } from '../model/relax.types';
 import { ACTIVITY_PROGRESS_COUNT } from '../model/restActivity.constants';
 import { type RestActivityDraft, RestActivityForm } from './RestActivityForm';
@@ -26,7 +27,7 @@ function RestActivityScreen() {
   const { showToast } = useAppToast();
   const location = useLocation();
   const locationState = location.state as RestLoadingLocationState | null;
-  const activityId = locationState?.selectedRelax?.activityId;
+  const activityId = locationState?.selectedRelax?.activityId ?? getStoredActivityId();
   const hasValidLocationState = Boolean(
     locationState?.mood &&
       locationState.timeBudget &&
@@ -149,6 +150,7 @@ function RestActivityScreen() {
     try {
       await uploadMutation.mutateAsync({ photo: selectedPhoto, request });
 
+      clearStoredActivityId();
       navigate('/feed', { replace: true });
     } catch (error) {
       if (isNativeUploadUnauthorizedError(error)) {

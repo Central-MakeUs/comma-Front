@@ -17,14 +17,18 @@ export const getStoredActivityId = () => {
   const storage = getLocalStorage();
   if (!storage) return null;
 
-  const storedValue = storage.getItem(ACTIVE_ACTIVITY_ID_KEY);
-  if (storedValue === null) return null;
+  try {
+    const storedValue = storage.getItem(ACTIVE_ACTIVITY_ID_KEY);
+    if (storedValue === null) return null;
 
-  const activityId = Number(storedValue);
-  if (isValidActivityId(activityId)) return activityId;
+    const activityId = Number(storedValue);
+    if (isValidActivityId(activityId)) return activityId;
 
-  storage.removeItem(ACTIVE_ACTIVITY_ID_KEY);
-  return null;
+    storage.removeItem(ACTIVE_ACTIVITY_ID_KEY);
+    return null;
+  } catch {
+    return null;
+  }
 };
 
 export const storeActivityId = (activityId: number) => {
@@ -33,11 +37,24 @@ export const storeActivityId = (activityId: number) => {
   }
 
   const storage = getLocalStorage();
-  if (!storage) throw new Error('휴식 활동 정보를 저장하지 못했어요.');
+  if (!storage) return false;
 
-  storage.setItem(ACTIVE_ACTIVITY_ID_KEY, String(activityId));
+  try {
+    storage.setItem(ACTIVE_ACTIVITY_ID_KEY, String(activityId));
+    return true;
+  } catch {
+    return false;
+  }
 };
 
 export const clearStoredActivityId = () => {
-  getLocalStorage()?.removeItem(ACTIVE_ACTIVITY_ID_KEY);
+  const storage = getLocalStorage();
+  if (!storage) return false;
+
+  try {
+    storage.removeItem(ACTIVE_ACTIVITY_ID_KEY);
+    return true;
+  } catch {
+    return false;
+  }
 };

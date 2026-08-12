@@ -54,4 +54,34 @@ describe('activityStorage', () => {
     expect(getStoredActivityId()).toBeNull();
     expect(localStorage.removeItem).toHaveBeenCalledWith('comma.activeActivityId');
   });
+
+  it('does not fail the activity start when persistent storage rejects a write', () => {
+    const localStorage = createStorage();
+    localStorage.setItem.mockImplementation(() => {
+      throw new DOMException('Storage is unavailable.');
+    });
+    installWindow(localStorage);
+
+    expect(storeActivityId(123)).toBe(false);
+  });
+
+  it('does not fail a completed feed when persistent storage rejects cleanup', () => {
+    const localStorage = createStorage();
+    localStorage.removeItem.mockImplementation(() => {
+      throw new DOMException('Storage is unavailable.');
+    });
+    installWindow(localStorage);
+
+    expect(clearStoredActivityId()).toBe(false);
+  });
+
+  it('returns no activity when persistent storage rejects a read', () => {
+    const localStorage = createStorage();
+    localStorage.getItem.mockImplementation(() => {
+      throw new DOMException('Storage is unavailable.');
+    });
+    installWindow(localStorage);
+
+    expect(getStoredActivityId()).toBeNull();
+  });
 });

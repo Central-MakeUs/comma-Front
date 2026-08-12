@@ -87,6 +87,10 @@ export const Variants: Story = {
           <h3 style={labelStyle}>heart on</h3>
           <FeedImage heart />
         </div>
+        <div style={{ display: 'grid', gap: 8 }}>
+          <h3 style={labelStyle}>heart hidden</h3>
+          <FeedImage showHeart={false} />
+        </div>
       </div>
     </div>
   )

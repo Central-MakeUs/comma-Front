@@ -30,7 +30,7 @@ export const body = style({
 
 export const metaRow = style({
   display: 'flex',
-  alignItems: 'center',
+  alignItems: 'flex-end',
   justifyContent: 'space-between',
   gap: 8,
   minWidth: 0,
@@ -54,12 +54,12 @@ export const likeRow = style({
   display: 'inline-flex',
   alignItems: 'center',
   gap: 4,
-  color: vars.color.textTertiary,
-  fontFamily: vars.typography.captionB.fontFamily,
-  fontSize: vars.typography.captionB.fontSize,
-  fontWeight: vars.typography.captionB.fontWeight,
-  lineHeight: vars.typography.captionB.lineHeight,
-  letterSpacing: vars.typography.captionB.letterSpacing
+  color: vars.color.textPrimary,
+  fontFamily: vars.typography.captionR.fontFamily,
+  fontSize: vars.typography.captionR.fontSize,
+  fontWeight: vars.typography.captionR.fontWeight,
+  lineHeight: vars.typography.captionR.lineHeight,
+  letterSpacing: vars.typography.captionR.letterSpacing
 });
 
 export const contentText = style({
@@ -68,7 +68,7 @@ export const contentText = style({
   display: '-webkit-box',
   WebkitBoxOrient: 'vertical',
   WebkitLineClamp: 2,
-  color: vars.color.textPrimary,
+  color: vars.color.textSecondary,
   fontFamily: vars.typography.labelReadingR.fontFamily,
   fontSize: vars.typography.labelReadingR.fontSize,
   fontWeight: vars.typography.labelReadingR.fontWeight,
@@ -79,8 +79,7 @@ export const contentText = style({
 export const tagsRow = style({
   display: 'flex',
   flexWrap: 'wrap',
-  columnGap: 4,
-  rowGap: 2,
+  gap: 8,
   color: vars.color.textTertiary,
   fontFamily: vars.typography.labelReadingB.fontFamily,
   fontSize: vars.typography.labelReadingB.fontSize,

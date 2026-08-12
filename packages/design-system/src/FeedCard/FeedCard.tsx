@@ -1,20 +1,27 @@
 import type { ComponentPropsWithoutRef, MouseEventHandler } from 'react';
 import { useState } from 'react';
 import { FeedImage } from '../FeedImage';
+import { useDismissibleLayer } from '../hooks/useDismissibleLayer';
 import { Icon } from '../Icon';
+import { vars } from '../theme.css';
 import {
+  actionMenu,
+  actionMenuContainer,
+  actionMenuItem,
   body,
   contentText,
   feedCard,
+  footerRow,
   likeRow,
   metaRow,
   metaText,
-  modal,
-  modalOverlay,
-  modalText,
   moreButton,
+  myContentText,
+  myMetaText,
   secondaryMetaText,
-  tagsText
+  summary,
+  tag,
+  tagsList
 } from './FeedCard.css';
 
 export type FeedCardVariant = 'others' | 'my';
@@ -37,10 +44,6 @@ export type FeedCardProps = Omit<ComponentPropsWithoutRef<'div'>, 'children' | '
   onBlockClick?: MouseEventHandler<HTMLButtonElement>;
 };
 
-function formatTags(tags: string[]): string {
-  return tags.map((tag) => (tag.startsWith('#') ? tag : `#${tag}`)).join('  ');
-}
-
 export function FeedCard({
   variant = 'others',
   imageSrc,
@@ -61,9 +64,13 @@ export function FeedCard({
   ...divProps
 }: FeedCardProps) {
   const rootClassName = [feedCard, className].filter(Boolean).join(' ');
-  const tagsLabel = formatTags(tags);
   const isOther = variant === 'others' && onReportClick && onBlockClick;
   const [clicked, setClicked] = useState(false);
+  const actionMenuContainerRef = useDismissibleLayer<HTMLDivElement>({
+    dismissOnScroll: true,
+    enabled: clicked,
+    onDismiss: () => setClicked(false)
+  });
 
   return (
     <div className={rootClassName} {...divProps}>
@@ -73,78 +80,83 @@ export function FeedCard({
         imageAlt={imageAlt}
         imageSrc={imageSrc}
         onClick={onHeartClick}
+        showHeart={variant !== 'my'}
       />
       <div className={body}>
-        <div className={metaRow}>
-          {variant === 'my' ? (
-            <>
-              <span className={metaText}>{dateLabel}</span>
-              <span className={likeRow}>
-                <Icon height={18} name="heart" variant={liked ? 'on' : 'off'} width={18} />
-                <span>{likeCount}</span>
-              </span>
-            </>
-          ) : (
-            <>
-              <span className={metaText}>{title}</span>
-              <span className={secondaryMetaText}>{timeLabel}</span>
-            </>
-          )}
+        <div className={summary}>
+          <div className={metaRow}>
+            {variant === 'my' ? (
+              <>
+                <span className={myMetaText}>{dateLabel}</span>
+                <span className={likeRow}>
+                  <Icon
+                    color={vars.color.textTertiary}
+                    height={20}
+                    name="heart"
+                    variant={liked ? 'on' : 'off'}
+                    width={20}
+                  />
+                  <span>{likeCount}</span>
+                </span>
+              </>
+            ) : (
+              <>
+                <span className={metaText}>{title}</span>
+                <span className={secondaryMetaText}>{timeLabel}</span>
+              </>
+            )}
+          </div>
+          <p className={variant === 'my' ? myContentText : contentText}>{content}</p>
         </div>
-        <p className={contentText}>{content}</p>
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            position: 'relative'
-          }}
-        >
-          {tagsLabel.length > 0 ? <p className={tagsText}>{tagsLabel}</p> : null}
-          {isOther ? (
-            <button
-              aria-expanded={clicked}
-              aria-haspopup="menu"
-              aria-label="신고 및 차단 메뉴 열기"
-              className={moreButton}
-              onClick={() => setClicked(true)}
-              type="button"
-            >
-              <Icon name="dots" />
-            </button>
+        <div className={footerRow}>
+          {tags.length > 0 ? (
+            <div className={tagsList}>
+              {tags.map((tagValue) => (
+                <span className={tag} key={tagValue}>
+                  {tagValue.startsWith('#') ? tagValue : `#${tagValue}`}
+                </span>
+              ))}
+            </div>
           ) : null}
-          {clicked ? (
-            <>
+          {isOther ? (
+            <div className={actionMenuContainer} ref={actionMenuContainerRef}>
               <button
-                aria-label="닫기"
-                className={modalOverlay}
-                onClick={() => setClicked(false)}
+                aria-expanded={clicked}
+                aria-haspopup="menu"
+                aria-label="신고 및 차단 메뉴 열기"
+                className={moreButton}
+                onClick={() => setClicked((isOpen) => !isOpen)}
                 type="button"
-              />
-              <div className={modal}>
-                <button
-                  className={modalText}
-                  onClick={(e) => {
-                    setClicked(false);
-                    onReportClick?.(e);
-                  }}
-                  type="button"
-                >
-                  신고
-                </button>
-                <button
-                  className={modalText}
-                  onClick={(e) => {
-                    setClicked(false);
-                    onBlockClick?.(e);
-                  }}
-                  type="button"
-                >
-                  차단
-                </button>
-              </div>
-            </>
+              >
+                <Icon name="dots" />
+              </button>
+              {clicked ? (
+                <div aria-label="피드 작업" className={actionMenu} role="menu">
+                  <button
+                    className={actionMenuItem}
+                    onClick={(e) => {
+                      setClicked(false);
+                      onReportClick?.(e);
+                    }}
+                    role="menuitem"
+                    type="button"
+                  >
+                    신고
+                  </button>
+                  <button
+                    className={actionMenuItem}
+                    onClick={(e) => {
+                      setClicked(false);
+                      onBlockClick?.(e);
+                    }}
+                    role="menuitem"
+                    type="button"
+                  >
+                    차단
+                  </button>
+                </div>
+              ) : null}
+            </div>
           ) : null}
         </div>
       </div>

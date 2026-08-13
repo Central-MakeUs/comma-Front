@@ -36,7 +36,13 @@ export interface PremiumAlertRequest {
   contact: string;
 }
 
+export interface RestStatusData {
+  restedToday: boolean;
+  lastRestedAt?: string | null;
+}
+
 export type PlanResponse = ApiResponse<PlanData>;
+export type RestStatusResponse = ApiResponse<RestStatusData>;
 export type VoidResponse = ApiResponse<void>;
 
 export const getRandomNickname = async () => {
@@ -55,6 +61,12 @@ export const getPlan = async () => {
   const { data } = await apiClient.get<PlanResponse>('/api/users/me/plan');
 
   return unwrapApiResponse(data, '플랜 정보를 불러오지 못했습니다.');
+};
+
+export const getRestStatus = async () => {
+  const { data } = await apiClient.get<RestStatusResponse>('/api/users/me/rest-status');
+
+  return unwrapApiResponse(data, '휴식 상태를 불러오지 못했습니다.');
 };
 
 export const changePlan = async ({ plan }: PlanRequest) => {

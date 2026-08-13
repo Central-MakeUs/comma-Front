@@ -1,11 +1,12 @@
 import { type FeedCreateRequest, NATIVE_FEED_UPLOAD_UNAUTHORIZED_ERROR } from '@comma/bridge';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { expireSession } from '../../../shared/api/client';
 import { appBridge } from '../../../shared/bridge/bridge';
 import { useAppToast } from '../../../shared/components/AppToast';
 import { useNativeBackHandler } from '../../../shared/components/NativeBack';
+import { userQueryKeys } from '../../auth/api/user.queries';
 import { createFeed } from '../../feed/api/feed.api';
 import { clearStoredActivityId, getStoredActivityId } from '../lib/activityStorage';
 import type { RestLoadingLocationState } from '../model/relax.types';
@@ -24,6 +25,7 @@ function isNativeUploadUnauthorizedError(error: unknown) {
 
 function RestActivityScreen() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { showToast } = useAppToast();
   const location = useLocation();
   const locationState = location.state as RestLoadingLocationState | null;
@@ -151,6 +153,7 @@ function RestActivityScreen() {
       await uploadMutation.mutateAsync({ photo: selectedPhoto, request });
 
       clearStoredActivityId();
+      void queryClient.invalidateQueries({ queryKey: userQueryKeys.restStatus() });
       navigate('/feed', { replace: true });
     } catch (error) {
       if (isNativeUploadUnauthorizedError(error)) {

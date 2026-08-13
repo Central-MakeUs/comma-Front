@@ -1,14 +1,16 @@
 import { FeedCard, Toast } from '@comma/design-system';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { SESSION_EXPIRED_ERROR_MESSAGE } from '../../../shared/api/client';
 import { TabScrollArea, TabShell } from '../../../shared/components/layout';
 import { QueryFeedback } from '../../../shared/components/QueryFeedback';
 import { getStoredNickname } from '../../../shared/lib/tokenStorage';
 import { transformDate } from '../../../shared/lib/transformDate';
+import { userRestStatusQueryOptions } from '../../auth/api/user.queries';
 import { feedInfiniteQueryOptions } from '../api/feed.queries';
 import { useFeedActions } from '../hooks/useFeedActions';
 import { useFeedInfiniteScroll } from '../hooks/useFeedInfiniteScroll';
+import { shouldShowFeedRestPrompt } from '../lib/feedRestStatus';
 import { moods, times } from '../model/feed.constants';
 import * as styles from './Feed.css';
 import FeedHeader from './FeedHeader';
@@ -27,6 +29,7 @@ function FeedScreen() {
   const queryOptions = feedInfiniteQueryOptions({ mood, timeBudget, size: FEED_PAGE_SIZE });
   const queryKey = queryOptions.queryKey;
   const feedQuery = useInfiniteQuery(queryOptions);
+  const restStatusQuery = useQuery(userRestStatusQueryOptions);
   const feeds = feedQuery.data?.pages.flatMap((page) => page.items) ?? [];
   const {
     actionError,
@@ -59,7 +62,9 @@ function FeedScreen() {
 
   return (
     <TabShell active="feed" className={styles.container}>
-      <FeedToast isVisible={isHeaderVisible} />
+      <FeedToast
+        isVisible={shouldShowFeedRestPrompt(restStatusQuery.data?.restedToday, isHeaderVisible)}
+      />
       <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
         <FeedHeader
           currentFeel={currentFeel}

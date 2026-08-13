@@ -63,7 +63,12 @@ function FeedScreen() {
   return (
     <TabShell active="feed" className={styles.container}>
       <FeedToast
-        isVisible={shouldShowFeedRestPrompt(restStatusQuery.data?.restedToday, isHeaderVisible)}
+        isVisible={shouldShowFeedRestPrompt({
+          restedToday: restStatusQuery.data?.restedToday,
+          isHeaderVisible,
+          isSuccess: restStatusQuery.isSuccess,
+          isFetching: restStatusQuery.isFetching
+        })}
       />
       <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
         <FeedHeader

@@ -1,19 +1,24 @@
 import type {
   AppBridge,
+  AuthProvider,
   AuthState,
   AuthTokens,
   NativeApiRequest,
-  NativeApiResponse
+  NativeApiResponse,
+  NativeLoginResult
 } from '@comma/bridge';
 import { NATIVE_FEED_UPLOAD_UNAUTHORIZED_ERROR } from '@comma/bridge';
 import Constants from 'expo-constants';
 import * as SecureStore from 'expo-secure-store';
+import { getProviderToken, signOutProvider } from './nativeSocialAuth';
 
 const AUTH_REQUEST_TIMEOUT_MS = 10_000;
 const ACCESS_TOKEN_KEY = 'comma.accessToken';
 const REFRESH_TOKEN_KEY = 'comma.refreshToken';
+const AUTH_PROVIDER_KEY = 'comma.authProvider';
 
 let refreshPromise: Promise<{ accessToken: string; onboardingCompleted?: boolean }> | null = null;
+let loginPromise: Promise<NativeLoginResult> | null = null;
 
 export function getTrustedApiBaseUrl() {
   const environmentUrl = process.env.EXPO_PUBLIC_API_BASE_URL?.trim();
@@ -56,18 +61,47 @@ export async function readAuthTokens(): Promise<AuthTokens | null> {
   return accessToken && refreshToken ? { accessToken, refreshToken } : null;
 }
 
-const writeAuthTokens = async (tokens: AuthTokens) => {
+const writeAuthTokens = async (tokens: AuthTokens, provider?: AuthProvider) => {
   await Promise.all([
     SecureStore.setItemAsync(ACCESS_TOKEN_KEY, tokens.accessToken),
-    SecureStore.setItemAsync(REFRESH_TOKEN_KEY, tokens.refreshToken)
+    SecureStore.setItemAsync(REFRESH_TOKEN_KEY, tokens.refreshToken),
+    ...(provider ? [SecureStore.setItemAsync(AUTH_PROVIDER_KEY, provider)] : [])
+  ]);
+};
+
+const readAuthProvider = async (): Promise<AuthProvider | null> => {
+  const provider = await SecureStore.getItemAsync(AUTH_PROVIDER_KEY);
+  return provider === 'KAKAO' || provider === 'GOOGLE' || provider === 'APPLE' ? provider : null;
+};
+
+const clearStoredAuth = async () => {
+  await Promise.all([
+    SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY),
+    SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY),
+    SecureStore.deleteItemAsync(AUTH_PROVIDER_KEY)
   ]);
 };
 
 export const clearAuthTokens = async () => {
-  await Promise.all([
-    SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY),
-    SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY)
-  ]);
+  let provider: AuthProvider | null = null;
+  try {
+    provider = await readAuthProvider();
+  } catch (error) {
+    console.warn('Failed to read the social login provider.', {
+      message: error instanceof Error ? error.message : 'Unknown secure storage error.'
+    });
+  }
+  if (provider) {
+    try {
+      await signOutProvider(provider);
+    } catch (error) {
+      console.warn('Failed to clear the social login session.', {
+        provider,
+        message: error instanceof Error ? error.message : 'Unknown provider logout error.'
+      });
+    }
+  }
+  await clearStoredAuth();
 };
 
 export async function getAuthState(): Promise<AuthState> {
@@ -209,46 +243,91 @@ export async function migrateAuthTokens(tokens: Parameters<AppBridge['migrateAut
   return getAuthState();
 }
 
-export async function completeLogin(request: Parameters<AppBridge['completeLogin']>[0]) {
-  const response = await fetchAuthApi(
-    `${getTrustedApiBaseUrl()}/api/auth/login/${encodeURIComponent(request.field)}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code: request.code, redirectUri: request.redirectUri })
+async function performProviderLogin(provider: AuthProvider): Promise<NativeLoginResult> {
+  let hasProviderSession = false;
+
+  try {
+    const credential = await getProviderToken(provider);
+    if (credential.type === 'cancelled') return { success: false, cancelled: true };
+    hasProviderSession = true;
+
+    const response = await fetchAuthApi(
+      `${getTrustedApiBaseUrl()}/api/auth/login/sdk/${encodeURIComponent(provider)}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: credential.token })
+      }
+    );
+    const payload = (await parseResponseData(response)) as {
+      success?: boolean;
+      message?: string;
+      data?: {
+        accessToken?: string;
+        refreshToken?: string;
+        onboardingCompleted?: boolean;
+        nickname?: string | null;
+      };
+    } | null;
+
+    if (
+      !response.ok ||
+      !payload?.success ||
+      !payload.data?.accessToken ||
+      !payload.data.refreshToken
+    ) {
+      return { success: false, message: payload?.message ?? '로그인을 완료하지 못했습니다.' };
     }
-  );
-  const payload = (await parseResponseData(response)) as {
-    success?: boolean;
-    message?: string;
-    data?: {
-      accessToken?: string;
-      refreshToken?: string;
-      onboardingCompleted?: boolean;
-      nickname?: string;
+
+    await writeAuthTokens(
+      {
+        accessToken: payload.data.accessToken,
+        refreshToken: payload.data.refreshToken
+      },
+      provider
+    );
+    hasProviderSession = false;
+
+    return {
+      success: true,
+      message: payload.message,
+      data: {
+        onboardingCompleted: payload.data.onboardingCompleted ?? false,
+        nickname: payload.data.nickname ?? null
+      }
     };
-  } | null;
-
-  if (
-    !response.ok ||
-    !payload?.success ||
-    !payload.data?.accessToken ||
-    !payload.data.refreshToken
-  ) {
-    return { success: false, message: payload?.message ?? '로그인을 완료하지 못했습니다.' };
-  }
-
-  await writeAuthTokens({
-    accessToken: payload.data.accessToken,
-    refreshToken: payload.data.refreshToken
-  });
-
-  return {
-    success: true,
-    message: payload.message,
-    data: {
-      onboardingCompleted: payload.data.onboardingCompleted ?? false,
-      nickname: payload.data.nickname ?? ''
+  } catch (error) {
+    console.warn('Native social login failed.', {
+      provider,
+      message: error instanceof Error ? error.message : 'Unknown login error.'
+    });
+    return { success: false, message: '로그인을 완료하지 못했습니다.' };
+  } finally {
+    if (hasProviderSession) {
+      try {
+        await signOutProvider(provider);
+      } catch (error) {
+        console.warn('Failed to roll back the social login session.', {
+          provider,
+          message: error instanceof Error ? error.message : 'Unknown provider logout error.'
+        });
+      }
+      try {
+        await clearStoredAuth();
+      } catch (error) {
+        console.warn('Failed to clear a partial native auth session.', {
+          message: error instanceof Error ? error.message : 'Unknown secure storage error.'
+        });
+      }
     }
-  };
+  }
+}
+
+export function loginWithProvider(provider: AuthProvider) {
+  if (!loginPromise) {
+    loginPromise = performProviderLogin(provider).finally(() => {
+      loginPromise = null;
+    });
+  }
+  return loginPromise;
 }

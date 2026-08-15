@@ -2,8 +2,6 @@ type WebOAuthProvider = 'KAKAO' | 'GOOGLE' | 'APPLE';
 
 const WEB_OAUTH_STATE_PREFIX = 'comma.oauth.state';
 const WEB_OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
-const NATIVE_GOOGLE_STATE_KEY = 'comma.oauth.nativeGoogleState';
-const NATIVE_GOOGLE_STATE_TTL_MS = 10 * 60 * 1000;
 
 interface StoredOAuthState {
   state: string;
@@ -91,68 +89,4 @@ export const consumeWebOAuthState = (provider: WebOAuthProvider, returnedState: 
 
   const expectedState = getFreshState(sessionValue, WEB_OAUTH_STATE_TTL_MS);
   return Boolean(expectedState && returnedState && expectedState === returnedState);
-};
-
-export const createNativeGoogleOAuthState = () => {
-  const pendingState: StoredOAuthState = {
-    state: createRandomState(),
-    createdAt: Date.now()
-  };
-  safeSetItem('localStorage', NATIVE_GOOGLE_STATE_KEY, JSON.stringify(pendingState));
-
-  return pendingState.state;
-};
-
-export const consumeNativeGoogleOAuthState = (returnedState: string | undefined) => {
-  const storedValue = safeGetItem('localStorage', NATIVE_GOOGLE_STATE_KEY);
-  if (!storedValue) return false;
-
-  try {
-    const pendingState = JSON.parse(storedValue) as Partial<StoredOAuthState>;
-    const isFresh =
-      typeof pendingState.createdAt === 'number' &&
-      Date.now() >= pendingState.createdAt &&
-      Date.now() - pendingState.createdAt <= NATIVE_GOOGLE_STATE_TTL_MS;
-    const isMatch =
-      typeof pendingState.state === 'string' &&
-      typeof returnedState === 'string' &&
-      pendingState.state === returnedState;
-
-    if (isFresh && isMatch) {
-      safeRemoveItem('localStorage', NATIVE_GOOGLE_STATE_KEY);
-      return true;
-    }
-
-    if (!isFresh) safeRemoveItem('localStorage', NATIVE_GOOGLE_STATE_KEY);
-    return false;
-  } catch {
-    safeRemoveItem('localStorage', NATIVE_GOOGLE_STATE_KEY);
-    return false;
-  }
-};
-
-export const hasPendingNativeGoogleOAuthState = () => {
-  const storedValue = safeGetItem('localStorage', NATIVE_GOOGLE_STATE_KEY);
-  if (!storedValue) return false;
-
-  try {
-    const pendingState = JSON.parse(storedValue) as Partial<StoredOAuthState>;
-    const age =
-      typeof pendingState.createdAt === 'number' ? Date.now() - pendingState.createdAt : -1;
-    const isFresh =
-      typeof pendingState.state === 'string' &&
-      pendingState.state.length > 0 &&
-      age >= 0 &&
-      age <= NATIVE_GOOGLE_STATE_TTL_MS;
-
-    if (!isFresh) safeRemoveItem('localStorage', NATIVE_GOOGLE_STATE_KEY);
-    return isFresh;
-  } catch {
-    safeRemoveItem('localStorage', NATIVE_GOOGLE_STATE_KEY);
-    return false;
-  }
-};
-
-export const clearNativeGoogleOAuthState = () => {
-  safeRemoveItem('localStorage', NATIVE_GOOGLE_STATE_KEY);
 };

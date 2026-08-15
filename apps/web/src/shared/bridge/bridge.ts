@@ -6,7 +6,7 @@ function isReactNativeWebView() {
 }
 
 export const appBridge = linkBridge<BridgeStore<AppBridge>, AppPostMessageSchema>({
-  timeout: 60000,
+  timeout: 180000,
   throwOnError: true,
   initialBridge: {
     async openExternalBrowser(url) {
@@ -25,7 +25,7 @@ export const appBridge = linkBridge<BridgeStore<AppBridge>, AppPostMessageSchema
     async getAuthState() {
       return { hasTokens: false, accessTokenExpiresAt: null };
     },
-    async completeLogin() {
+    async loginWithProvider() {
       throw new Error('Native login is only available in the mobile app.');
     },
     async refreshAuthSession() {

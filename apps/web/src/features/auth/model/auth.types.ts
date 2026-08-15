@@ -12,12 +12,12 @@ export interface TokenResponse {
   accessToken: string;
   refreshToken: string;
   onboardingCompleted: boolean;
-  nickname: string;
+  nickname: string | null;
 }
 
 export interface LoginData {
   onboardingCompleted: boolean;
-  nickname: string;
+  nickname: string | null;
 }
 
 export type TokenLoginResponse = ApiResponse<TokenResponse>;

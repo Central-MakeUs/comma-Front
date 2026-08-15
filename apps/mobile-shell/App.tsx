@@ -3,21 +3,15 @@ import type { BridgeWebView } from '@webview-bridge/react-native';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import * as WebBrowser from 'expo-web-browser';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { BackHandler, Linking, PanResponder, Platform, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { BackHandler, PanResponder, Platform, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { WebViewErrorEvent } from 'react-native-webview/lib/WebViewTypes';
 import { postMessage, WebView } from './src/bridge';
 import { shouldCaptureIosBackGesture, shouldCompleteIosBackGesture } from './src/nativeBackGesture';
 import { useWebViewMessageHandler } from './src/useWebViewMessageHandler';
 import { createSafeAreaScript, getWebUrlConfig } from './src/webViewConfig';
-import {
-  APPLE_AUTH_ORIGINS,
-  isAllowedWebViewUrl,
-  isAppleAuthUrl,
-  isExternalBrowserUrl,
-  isWebOAuthCallbackUrl
-} from './src/webViewSecurity';
+import { isAllowedWebViewUrl, isExternalBrowserUrl } from './src/webViewSecurity';
 
 const NATIVE_BACK_RESPONSE_TIMEOUT_MS = 700;
 
@@ -34,7 +28,6 @@ export default function App() {
   const currentNavigationUrlRef = useRef(webUrl);
   const safeAreaScript = useMemo(() => createSafeAreaScript(insets), [insets]);
   const webOrigin = useMemo(() => (webUrl ? new URL(webUrl).origin : undefined), [webUrl]);
-  const [currentWebUrl, setCurrentWebUrl] = useState(webUrl);
   const handleNativeBackResponse = useCallback((requestId: string, handled: boolean) => {
     if (requestId !== pendingBackRequestRef.current) return;
 
@@ -43,11 +36,9 @@ export default function App() {
     pendingBackRequestRef.current = undefined;
     if (!handled && Platform.OS === 'android') BackHandler.exitApp();
   }, []);
-  const { handleGoogleRedirectUrl, handleMessage } = useWebViewMessageHandler({
+  const { handleMessage } = useWebViewMessageHandler({
     onNativeBackResponse: handleNativeBackResponse,
-    webOrigin,
-    webViewReadyRef,
-    webViewRef
+    webOrigin
   });
 
   useEffect(() => {
@@ -61,26 +52,6 @@ export default function App() {
 
     webViewRef.current?.injectJavaScript(safeAreaScript);
   }, [error, safeAreaScript, webUrl]);
-
-  useEffect(() => {
-    if (!webOrigin) return;
-
-    const handleUrl = async (url: string) => {
-      if (await handleGoogleRedirectUrl(url)) return;
-      if (isWebOAuthCallbackUrl(url, webOrigin)) setCurrentWebUrl(url);
-    };
-
-    const subscription = Linking.addEventListener('url', ({ url }) => void handleUrl(url));
-    Linking.getInitialURL().then((url) => {
-      if (url) void handleUrl(url);
-    });
-
-    return () => subscription.remove();
-  }, [handleGoogleRedirectUrl, webOrigin]);
-
-  useEffect(() => {
-    setCurrentWebUrl(webUrl);
-  }, [webUrl]);
 
   const requestWebBack = useCallback(() => {
     if (pendingBackRequestRef.current) return;
@@ -177,12 +148,11 @@ export default function App() {
         ref={webViewRef}
         scrollEnabled
         style={styles.webView}
-        source={{ uri: currentWebUrl ?? webUrl }}
+        source={{ uri: webUrl }}
         injectedJavaScriptBeforeContentLoaded={safeAreaScript}
-        originWhitelist={[trustedWebOrigin, ...APPLE_AUTH_ORIGINS]}
+        originWhitelist={[trustedWebOrigin]}
         onShouldStartLoadWithRequest={(request) => {
           if (isAllowedWebViewUrl(request.url, trustedWebOrigin)) return true;
-          if (isAppleAuthUrl(request.url)) return true;
           if (request.isTopFrame === false) {
             console.warn('Blocked an external WebView subframe.', request.url);
             return false;

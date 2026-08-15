@@ -1,12 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import {
-  clearNativeGoogleOAuthState,
-  consumeNativeGoogleOAuthState,
-  consumeWebOAuthState,
-  createNativeGoogleOAuthState,
-  createWebOAuthState,
-  hasPendingNativeGoogleOAuthState
-} from './oauthState';
+import { consumeWebOAuthState, createWebOAuthState } from './oauthState';
 
 const TEN_MINUTES_MS = 10 * 60 * 1000;
 
@@ -37,7 +30,6 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  clearNativeGoogleOAuthState();
   vi.restoreAllMocks();
 });
 
@@ -65,28 +57,5 @@ describe('web OAuth state', () => {
     vi.spyOn(Date, 'now').mockReturnValue(now + TEN_MINUTES_MS + 1);
 
     expect(consumeWebOAuthState('APPLE', state)).toBe(false);
-  });
-});
-
-describe('native Google OAuth state', () => {
-  it('keeps a fresh pending state after a mismatch and consumes a matching state', () => {
-    const state = createNativeGoogleOAuthState();
-
-    expect(hasPendingNativeGoogleOAuthState()).toBe(true);
-    expect(consumeNativeGoogleOAuthState('wrong-state-value')).toBe(false);
-    expect(hasPendingNativeGoogleOAuthState()).toBe(true);
-    expect(consumeNativeGoogleOAuthState(state)).toBe(true);
-    expect(hasPendingNativeGoogleOAuthState()).toBe(false);
-  });
-
-  it('clears an expired pending state', () => {
-    const now = 1_800_000_000_000;
-    vi.spyOn(Date, 'now').mockReturnValue(now);
-    createNativeGoogleOAuthState();
-
-    vi.spyOn(Date, 'now').mockReturnValue(now + TEN_MINUTES_MS + 1);
-
-    expect(hasPendingNativeGoogleOAuthState()).toBe(false);
-    expect(consumeNativeGoogleOAuthState(undefined)).toBe(false);
   });
 });

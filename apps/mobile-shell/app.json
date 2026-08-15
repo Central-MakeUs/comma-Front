@@ -9,6 +9,7 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "plugins": [
+      "expo-apple-authentication",
       [
         "expo-image-picker",
         {
@@ -32,6 +33,14 @@
           "backgroundColor": "#1a1814",
           "enableFullScreenImage_legacy": true
         }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "extraMavenRepos": ["https://devrepo.kakao.com/nexus/content/groups/public/"]
+          }
+        }
       ]
     ],
     "ios": {
@@ -39,13 +48,10 @@
       "icon": "./assets/icon.png",
       "buildNumber": "20",
       "supportsTablet": false,
+      "usesAppleSignIn": true,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
-      },
-      "associatedDomains": [
-        "applinks:comma-front-web.vercel.app",
-        "webcredentials:comma-front-web.vercel.app"
-      ]
+      }
     },
     "android": {
       "edgeToEdgeEnabled": true,
@@ -55,26 +61,7 @@
         "backgroundColor": "#303030"
       },
       "package": "app.comma.mobile",
-      "versionCode": 14,
-      "intentFilters": [
-        {
-          "action": "VIEW",
-          "autoVerify": true,
-          "data": [
-            {
-              "scheme": "https",
-              "host": "comma-front-web.vercel.app",
-              "path": "/oauth/google/callback"
-            },
-            {
-              "scheme": "https",
-              "host": "comma-front-web.vercel.app",
-              "path": "/oauth/kakao/callback"
-            }
-          ],
-          "category": ["BROWSABLE", "DEFAULT"]
-        }
-      ]
+      "versionCode": 14
     },
     "extra": {
       "apiBaseUrl": "https://167-126-10-48.sslip.io",

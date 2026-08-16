@@ -2,7 +2,7 @@ import { Toast } from '@comma/design-system';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AppScreen, BackgroundImage } from '../../../shared/components/layout';
-import { useNativeGoogleLogin } from '../hooks/useNativeGoogleLogin';
+import { useNativeSocialLogin } from '../hooks/useNativeSocialLogin';
 import { createWebOAuthState } from '../lib/oauthState';
 import { PRIVACY_POLICY, TERMS_OF_SERVICE } from '../model/auth.constants';
 import * as styles from './LoginScreen.css';
@@ -52,12 +52,12 @@ function LoginScreen() {
     nextToastIdRef.current += 1;
     setLoginToast({ id: nextToastIdRef.current, message });
   }, []);
-  const handleGoogleLoginError = useCallback(() => {
+  const handleNativeLoginError = useCallback(() => {
     showLoginToast(LOGIN_ERROR_MESSAGE);
   }, [showLoginToast]);
-  const { isPending: isGoogleLoginPending, startGoogleLogin } = useNativeGoogleLogin({
+  const { isPending: isNativeLoginPending, startLogin: startNativeLogin } = useNativeSocialLogin({
     enabled: isMobileWebView,
-    onError: handleGoogleLoginError
+    onError: handleNativeLoginError
   });
 
   useEffect(() => {
@@ -84,8 +84,13 @@ function LoginScreen() {
     navigate('.', { replace: true });
   }, [location.state, navigate, showLoginToast]);
 
-  const onKakaoClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const onKakaoClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
+    if (isMobileWebView) {
+      await startNativeLogin('KAKAO');
+      return;
+    }
+
     const state = createWebOAuthState('KAKAO');
     window.location.href =
       `https://kauth.kakao.com/oauth/authorize` +
@@ -98,7 +103,7 @@ function LoginScreen() {
   const onGoogleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     if (isMobileWebView) {
-      await startGoogleLogin();
+      await startNativeLogin('GOOGLE');
       return;
     }
 
@@ -118,6 +123,11 @@ function LoginScreen() {
 
   const onAppleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
+    if (isMobileWebView) {
+      await startNativeLogin('APPLE');
+      return;
+    }
+
     window.AppleID?.auth.init({
       clientId: APPLE_CLIENT_ID,
       scope: 'email name',
@@ -169,12 +179,22 @@ function LoginScreen() {
         </div>
       </div>
       <div style={{ width: '100%', marginBottom: 80 }}>
-        <button className={styles.kakaoBtn} type="button" onClick={onKakaoClick}>
+        <button
+          className={styles.kakaoBtn}
+          type="button"
+          onClick={onKakaoClick}
+          disabled={isNativeLoginPending}
+        >
           <img src="/images/kakao_logo.svg" alt="카카오 아이콘" width={18} height={18} />
           카카오톡으로 로그인
         </button>
         {!isAndroidApp && (
-          <button className={styles.appleBtn} type="button" onClick={onAppleClick}>
+          <button
+            className={styles.appleBtn}
+            type="button"
+            onClick={onAppleClick}
+            disabled={isNativeLoginPending}
+          >
             <img src="/images/apple_logo.svg" alt="애플 아이콘" width={16} height={19} />
             Apple로 로그인
           </button>
@@ -183,7 +203,7 @@ function LoginScreen() {
           className={styles.googleBtn}
           type="button"
           onClick={onGoogleClick}
-          disabled={isGoogleLoginPending}
+          disabled={isNativeLoginPending}
         >
           <img src="/images/google_logo.svg" alt="구글 아이콘" width={20} height={20} />
           Google로 로그인

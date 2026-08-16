@@ -58,7 +58,13 @@ const buttonBase = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  gap: '5px'
+  gap: '5px',
+  selectors: {
+    '&:disabled': {
+      cursor: 'default',
+      opacity: 0.6
+    }
+  }
 });
 
 export const kakaoBtn = style([

@@ -42,4 +42,9 @@ jobs:
         run: pnpm build:storybook
 
       - name: Check Expo dependencies
+        env:
+          KAKAO_NATIVE_APP_KEY: 3e627c7aa6795025b12f071d8f752fad
+          GOOGLE_IOS_URL_SCHEME: com.googleusercontent.apps.389558827056-fid949ht18fottu1uv2mkl2odfdn4dr1
+          EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID: 389558827056-o797ta3s8i4ikukrlm883gsbolscsuhq.apps.googleusercontent.com
+          EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID: 389558827056-fid949ht18fottu1uv2mkl2odfdn4dr1.apps.googleusercontent.com
         run: pnpm --filter @comma/mobile-shell exec expo install --check

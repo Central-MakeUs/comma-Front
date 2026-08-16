@@ -5,9 +5,9 @@ import { Linking, Platform } from 'react-native';
 import { z } from 'zod';
 import {
   clearAuthTokens,
-  completeLogin,
   fetchAuthenticatedApi,
   getAuthState,
+  loginWithProvider,
   migrateAuthTokens,
   refreshNativeAuthSession
 } from './nativeAuth';
@@ -36,7 +36,7 @@ export const appBridge = bridge<AppBridge>({
   },
   migrateAuthTokens,
   getAuthState,
-  completeLogin,
+  loginWithProvider,
   async refreshAuthSession() {
     const result = await refreshNativeAuthSession();
     return { onboardingCompleted: result.onboardingCompleted };

@@ -98,8 +98,13 @@ export const getStoredNickname = () => {
   return window.localStorage.getItem(NICKNAME_KEY);
 };
 
-export const setStoredNickname = (nickname: string) => {
+export const setStoredNickname = (nickname: string | null) => {
   if (!canUseLocalStorage()) return;
+
+  if (nickname === null) {
+    window.localStorage.removeItem(NICKNAME_KEY);
+    return;
+  }
 
   window.localStorage.setItem(NICKNAME_KEY, nickname);
 };

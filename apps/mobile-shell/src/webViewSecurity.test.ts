@@ -1,10 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   isAllowedWebViewUrl,
-  isAppleAuthUrl,
   isExternalBrowserUrl,
-  isTrustedWebViewMessageUrl,
-  isWebOAuthCallbackUrl
+  isTrustedWebViewMessageUrl
 } from './webViewSecurity';
 
 const webOrigin = 'https://comma.example.com';
@@ -35,21 +33,5 @@ describe('WebView navigation security', () => {
     ['invalid', false]
   ])('classifies external browser URL %s', (url, expected) => {
     expect(isExternalBrowserUrl(url)).toBe(expected);
-  });
-});
-
-describe('OAuth URL security', () => {
-  it('recognizes only the official Apple authorization origin', () => {
-    expect(isAppleAuthUrl('https://appleid.apple.com/auth/authorize')).toBe(true);
-    expect(isAppleAuthUrl('https://appleid.apple.com.attacker.dev/auth/authorize')).toBe(false);
-  });
-
-  it.each([
-    [`${webOrigin}/oauth/google/callback`, true],
-    [`${webOrigin}/oauth/kakao/callback?code=x`, true],
-    [`${webOrigin}/oauth/apple/callback`, false],
-    ['https://attacker.example.com/oauth/google/callback', false]
-  ])('checks whether %s is a supported web OAuth callback', (url, expected) => {
-    expect(isWebOAuthCallbackUrl(url, webOrigin)).toBe(expected);
   });
 });

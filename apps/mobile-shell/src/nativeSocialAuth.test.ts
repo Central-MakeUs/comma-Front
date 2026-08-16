@@ -107,6 +107,10 @@ describe('signOutProvider', () => {
     await signOutProvider('APPLE');
 
     expect(mocks.kakaoLogout).toHaveBeenCalledOnce();
+    expect(mocks.googleConfigure).toHaveBeenCalledWith({
+      webClientId: 'google-web-client-id',
+      iosClientId: 'google-ios-client-id'
+    });
     expect(mocks.googleSignOut).toHaveBeenCalledOnce();
   });
 });

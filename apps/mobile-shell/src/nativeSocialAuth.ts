@@ -93,6 +93,7 @@ export async function signOutProvider(provider: AuthProvider) {
     return;
   }
   if (provider === 'GOOGLE') {
+    configureGoogle();
     await GoogleSignin.signOut();
     return;
   }

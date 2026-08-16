@@ -1,15 +1,17 @@
 import type { ConfigContext, ExpoConfig } from 'expo/config';
 import appJson from './app.json';
 
-const getOptionalEnv = (name: string) => {
+const getRequiredEnv = (name: string) => {
   const value = process.env[name]?.trim();
-  if (!value) console.warn(`Native login config is missing ${name}.`);
+  if (!value) throw new Error(`Native login config is missing ${name}.`);
   return value;
 };
 
 export default ({ config }: ConfigContext): ExpoConfig => {
-  const kakaoAppKey = getOptionalEnv('KAKAO_NATIVE_APP_KEY');
-  const googleIosUrlScheme = getOptionalEnv('GOOGLE_IOS_URL_SCHEME');
+  const kakaoAppKey = getRequiredEnv('KAKAO_NATIVE_APP_KEY');
+  const googleIosUrlScheme = getRequiredEnv('GOOGLE_IOS_URL_SCHEME');
+  getRequiredEnv('EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID');
+  getRequiredEnv('EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID');
   const providerPlugins: NonNullable<ExpoConfig['plugins']> = [];
 
   if (kakaoAppKey) {

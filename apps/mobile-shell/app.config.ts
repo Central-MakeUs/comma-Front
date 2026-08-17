@@ -12,13 +12,15 @@ export default ({ config }: ConfigContext): ExpoConfig => {
   const googleIosUrlScheme = getRequiredEnv('GOOGLE_IOS_URL_SCHEME');
   getRequiredEnv('EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID');
   getRequiredEnv('EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID');
-  const providerPlugins: NonNullable<ExpoConfig['plugins']> = [];
+  const nativePlugins: NonNullable<ExpoConfig['plugins']> = [
+    ['./plugins/with-kakao-sdk-version', { version: '2.22.7' }]
+  ];
 
   if (kakaoAppKey) {
-    providerPlugins.push(['@react-native-seoul/kakao-login', { kakaoAppKey }]);
+    nativePlugins.push(['@react-native-seoul/kakao-login', { kakaoAppKey }]);
   }
   if (googleIosUrlScheme) {
-    providerPlugins.push([
+    nativePlugins.push([
       '@react-native-google-signin/google-signin',
       { iosUrlScheme: googleIosUrlScheme }
     ]);
@@ -27,6 +29,6 @@ export default ({ config }: ConfigContext): ExpoConfig => {
   return {
     ...config,
     ...appJson.expo,
-    plugins: [...(appJson.expo.plugins as NonNullable<ExpoConfig['plugins']>), ...providerPlugins]
+    plugins: [...(appJson.expo.plugins as NonNullable<ExpoConfig['plugins']>), ...nativePlugins]
   };
 };

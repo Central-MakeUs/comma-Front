@@ -26,6 +26,9 @@
     "production": {
       "autoIncrement": true,
       "distribution": "store",
+      "cache": {
+        "key": "production-kakao-ios-sdk-2-22-7"
+      },
       "ios": {
         "simulator": false
       },

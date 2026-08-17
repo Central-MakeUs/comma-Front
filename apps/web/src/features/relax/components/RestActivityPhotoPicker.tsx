@@ -136,6 +136,8 @@ export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivity
   const photoGridRef = useRef<HTMLDivElement>(null);
   const isActiveRef = useRef(true);
   const isGalleryLoadingRef = useRef(false);
+  const galleryScrollFrameRef = useRef<number | null>(null);
+  const galleryScrollMetricsRef = useRef({ scrollTop: 0, viewportHeight: 0 });
   const galleryEndCursorRef = useRef<string | undefined>(undefined);
   const galleryHasNextPageRef = useRef(true);
   const [galleryPhotos, setGalleryPhotos] = useState<GalleryPhotoItem[]>([]);
@@ -289,6 +291,10 @@ export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivity
 
     return () => {
       isActiveRef.current = false;
+      if (galleryScrollFrameRef.current !== null) {
+        window.cancelAnimationFrame(galleryScrollFrameRef.current);
+        galleryScrollFrameRef.current = null;
+      }
     };
   }, []);
 
@@ -448,22 +454,33 @@ export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivity
   };
 
   const handleGalleryScroll = (event: UIEvent<HTMLDivElement>) => {
-    setVirtualMetrics((currentMetrics) => {
-      const nextMetrics = {
-        ...currentMetrics,
-        scrollTop: event.currentTarget.scrollTop,
-        viewportHeight: event.currentTarget.clientHeight
-      };
+    const { clientHeight, scrollHeight, scrollTop } = event.currentTarget;
+    galleryScrollMetricsRef.current = {
+      scrollTop,
+      viewportHeight: clientHeight
+    };
 
-      return currentMetrics.scrollTop === nextMetrics.scrollTop &&
-        currentMetrics.viewportHeight === nextMetrics.viewportHeight
-        ? currentMetrics
-        : nextMetrics;
-    });
+    if (galleryScrollFrameRef.current === null) {
+      galleryScrollFrameRef.current = window.requestAnimationFrame(() => {
+        galleryScrollFrameRef.current = null;
+        const { scrollTop: nextScrollTop, viewportHeight: nextViewportHeight } =
+          galleryScrollMetricsRef.current;
+
+        setVirtualMetrics((currentMetrics) =>
+          currentMetrics.scrollTop === nextScrollTop &&
+          currentMetrics.viewportHeight === nextViewportHeight
+            ? currentMetrics
+            : {
+                ...currentMetrics,
+                scrollTop: nextScrollTop,
+                viewportHeight: nextViewportHeight
+              }
+        );
+      });
+    }
 
     if (!isNativeGallery || !galleryHasNextPage) return;
 
-    const { clientHeight, scrollHeight, scrollTop } = event.currentTarget;
     const distanceToBottom = scrollHeight - scrollTop - clientHeight;
     if (distanceToBottom <= GALLERY_LOAD_MORE_THRESHOLD_PX) {
       void loadNativeGalleryPage();

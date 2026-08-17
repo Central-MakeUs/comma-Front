@@ -7,6 +7,11 @@
     "icon": "./assets/icon.png",
     "scheme": "comma",
     "privacyPolicyUrl": "https://poised-grape-868.notion.site/3a9895115c8780d0b208d31f209870aa",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#1a1814"
+    },
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "plugins": [
@@ -21,9 +26,7 @@
       [
         "expo-media-library",
         {
-          "granularPermissions": [
-            "photo"
-          ],
+          "granularPermissions": ["photo"],
           "photosPermission": "휴식 사진을 선택할 수 있도록 사진 보관함 접근 권한이 필요해요.",
           "savePhotosPermission": "휴식 사진을 저장할 수 있도록 사진 보관함 접근 권한이 필요해요."
         }
@@ -34,16 +37,20 @@
           "image": "./assets/splash.png",
           "resizeMode": "cover",
           "backgroundColor": "#1a1814",
-          "enableFullScreenImage_legacy": true
+          "enableFullScreenImage_legacy": true,
+          "android": {
+            "image": "./assets/android-splash-logo.png",
+            "resizeMode": "contain",
+            "backgroundColor": "#1a1814"
+          }
         }
       ],
       [
         "expo-build-properties",
         {
           "android": {
-            "extraMavenRepos": [
-              "https://devrepo.kakao.com/nexus/content/groups/public/"
-            ]
+            "targetSdkVersion": 35,
+            "extraMavenRepos": ["https://devrepo.kakao.com/nexus/content/groups/public/"]
           }
         }
       ]
@@ -64,9 +71,19 @@
         "NSPrivacyAccessedAPITypes": [
           {
             "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
-            "NSPrivacyAccessedAPITypeReasons": [
-              "CA92.1"
-            ]
+            "NSPrivacyAccessedAPITypeReasons": ["CA92.1"]
+          },
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryFileTimestamp",
+            "NSPrivacyAccessedAPITypeReasons": ["C617.1"]
+          },
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategorySystemBootTime",
+            "NSPrivacyAccessedAPITypeReasons": ["35F9.1"]
+          },
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryDiskSpace",
+            "NSPrivacyAccessedAPITypeReasons": ["E174.1"]
           }
         ],
         "NSPrivacyCollectedDataTypes": [],
@@ -77,12 +94,18 @@
     "android": {
       "edgeToEdgeEnabled": true,
       "icon": "./assets/icon.png",
+      "splash": {
+        "image": "./assets/android-splash-logo.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#1a1814"
+      },
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon-foreground.png",
         "backgroundColor": "#303030"
       },
       "package": "app.comma.mobile",
-      "versionCode": 14
+      "permissions": ["INTERNET"],
+      "versionCode": 15
     },
     "extra": {
       "apiBaseUrl": "https://167-126-10-48.sslip.io",

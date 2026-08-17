@@ -1,5 +1,12 @@
 import { NavigationBar } from '@comma/design-system';
-import type { ComponentProps, ElementType, HTMLAttributes, ReactNode, UIEventHandler } from 'react';
+import type {
+  ComponentProps,
+  ElementType,
+  HTMLAttributes,
+  ReactNode,
+  Ref,
+  UIEventHandler
+} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { navigateToNavigationItem } from '../../lib/navigation';
 import * as styles from './layout.css';
@@ -61,14 +68,16 @@ export function TabShell({
 export function TabScrollArea({
   children,
   className,
-  onScroll
+  onScroll,
+  scrollRef
 }: {
   children: ReactNode;
   className?: string;
   onScroll?: UIEventHandler<HTMLDivElement>;
+  scrollRef?: Ref<HTMLDivElement>;
 }) {
   return (
-    <div className={cx(styles.tabScrollArea, className)} onScroll={onScroll}>
+    <div className={cx(styles.tabScrollArea, className)} onScroll={onScroll} ref={scrollRef}>
       {children}
     </div>
   );

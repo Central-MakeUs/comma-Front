@@ -25,6 +25,22 @@ export const scrollContainer = style({
   gap: 'clamp(24px, 4.69dvh, 40px)'
 });
 
+export const virtualFeedList = style({
+  position: 'relative',
+  width: '100%',
+  flexShrink: 0,
+  margin: 0,
+  padding: 0,
+  listStyle: 'none'
+});
+
+export const virtualFeedCard = style({
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  width: '100%'
+});
+
 export const alertText = style({
   ...typography.bodyReadingR,
   color: colors.textTertiary,

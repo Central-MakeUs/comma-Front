@@ -1,4 +1,10 @@
-import type { FeedCreateRequest, FeedResponse, PreparedGalleryPhoto } from '@comma/bridge';
+import type {
+  FeedCreateRequest,
+  FeedResponse,
+  GalleryPhotoQuery,
+  NativeFilePhoto,
+  PreparedGalleryPhoto
+} from '@comma/bridge';
 import { NATIVE_FEED_UPLOAD_UNAUTHORIZED_ERROR } from '@comma/bridge';
 import * as Crypto from 'expo-crypto';
 import * as FileSystem from 'expo-file-system/legacy';
@@ -20,6 +26,8 @@ const PREPARED_PREVIEW_WIDTH = 690;
 const GALLERY_THUMBNAIL_CONCURRENCY = 3;
 const GALLERY_THUMBNAIL_TIMEOUT_MS = 1_500;
 const PREPARED_PHOTO_TTL_MS = 5 * 60 * 1000;
+const MAX_IMPORTED_FILE_BYTES = 15 * 1024 * 1024;
+const MAX_IMPORTED_BASE64_LENGTH = Math.ceil((MAX_IMPORTED_FILE_BYTES * 4) / 3) + 4;
 
 interface NativePreparedPhoto {
   uri: string;
@@ -266,19 +274,64 @@ export function prepareGalleryPhoto(assetId: string): Promise<PreparedGalleryPho
   return preparation;
 }
 
-export async function getGalleryPhotos(limit = MAX_GALLERY_PHOTOS) {
-  const safeLimit = clampGalleryLimit(limit);
+export async function prepareFilePhoto(file: NativeFilePhoto): Promise<PreparedGalleryPhoto> {
+  if (!FileSystem.cacheDirectory) throw new Error('임시 파일 저장소를 사용할 수 없어요.');
+
+  const base64 = file.base64.replace(/\s/g, '');
+  if (!base64 || base64.length > MAX_IMPORTED_BASE64_LENGTH) {
+    throw new Error('15MB 이하의 사진을 선택해 주세요.');
+  }
+  if (!/^[A-Za-z0-9+/]+={0,2}$/.test(base64)) {
+    throw new Error('선택한 사진 데이터를 읽지 못했어요.');
+  }
+
+  const importUri = `${FileSystem.cacheDirectory}file-photo-${Crypto.randomUUID()}`;
+  let normalizedUri: string | undefined;
+
+  try {
+    await FileSystem.writeAsStringAsync(importUri, base64, {
+      encoding: FileSystem.EncodingType.Base64
+    });
+    const normalized = await ImageManipulator.manipulateAsync(importUri, [], {
+      compress: 1,
+      format: ImageManipulator.SaveFormat.JPEG
+    });
+    normalizedUri = normalized.uri;
+
+    return await createPreparedPhotoFromImage({
+      uri: normalized.uri,
+      name: file.filename ?? `selected-photo-${Date.now()}.jpg`,
+      type: file.mimeType ?? DEFAULT_IMAGE_MIME_TYPE,
+      width: normalized.width,
+      height: normalized.height
+    });
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('15MB')) throw error;
+    throw new Error('선택한 사진을 불러오지 못했어요. 다른 사진을 선택해 주세요.');
+  } finally {
+    await FileSystem.deleteAsync(importUri, { idempotent: true }).catch(() => {});
+    if (normalizedUri) {
+      await FileSystem.deleteAsync(normalizedUri, { idempotent: true }).catch(() => {});
+    }
+  }
+}
+
+export async function getGalleryPhotos(query: GalleryPhotoQuery = {}) {
+  const safeLimit = clampGalleryLimit(query.first ?? MAX_GALLERY_PHOTOS);
   const permission = await MediaLibrary.requestPermissionsAsync(false, ['photo']);
-  if (!permission.granted) return [];
+  if (!permission.granted) {
+    return { photos: [], endCursor: null, hasNextPage: false };
+  }
 
   const assets = await MediaLibrary.getAssetsAsync({
     first: safeLimit,
+    after: query.after,
     mediaType: MediaLibrary.MediaType.photo,
     sortBy: [[MediaLibrary.SortBy.creationTime, false]]
   });
 
   if (Platform.OS === 'android') {
-    androidGalleryAssets.clear();
+    if (!query.after) androidGalleryAssets.clear();
     const results = await mapWithConcurrency(
       assets.assets,
       GALLERY_THUMBNAIL_CONCURRENCY,
@@ -293,7 +346,11 @@ export async function getGalleryPhotos(limit = MAX_GALLERY_PHOTOS) {
         };
       }
     );
-    return results.flatMap((result) => (result.status === 'fulfilled' ? [result.value] : []));
+    return {
+      photos: results.flatMap((result) => (result.status === 'fulfilled' ? [result.value] : [])),
+      endCursor: assets.endCursor || null,
+      hasNextPage: assets.hasNextPage
+    };
   }
 
   const results = await mapWithConcurrency(
@@ -316,11 +373,15 @@ export async function getGalleryPhotos(limit = MAX_GALLERY_PHOTOS) {
     }
   );
 
-  return results.flatMap((result) => {
-    if (result.status === 'fulfilled') return [result.value];
-    console.warn('Failed to load a gallery photo.', result.reason);
-    return [];
-  });
+  return {
+    photos: results.flatMap((result) => {
+      if (result.status === 'fulfilled') return [result.value];
+      console.warn('Failed to load a gallery photo.', result.reason);
+      return [];
+    }),
+    endCursor: assets.endCursor || null,
+    hasNextPage: assets.hasNextPage
+  };
 }
 
 export async function takeGalleryPhoto() {

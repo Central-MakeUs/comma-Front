@@ -2,10 +2,11 @@
   "expo": {
     "name": "Comma",
     "slug": "comma",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "comma",
+    "privacyPolicyUrl": "https://poised-grape-868.notion.site/3a9895115c8780d0b208d31f209870aa",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "plugins": [
@@ -20,7 +21,9 @@
       [
         "expo-media-library",
         {
-          "granularPermissions": ["photo"],
+          "granularPermissions": [
+            "photo"
+          ],
           "photosPermission": "휴식 사진을 선택할 수 있도록 사진 보관함 접근 권한이 필요해요.",
           "savePhotosPermission": "휴식 사진을 저장할 수 있도록 사진 보관함 접근 권한이 필요해요."
         }
@@ -38,7 +41,9 @@
         "expo-build-properties",
         {
           "android": {
-            "extraMavenRepos": ["https://devrepo.kakao.com/nexus/content/groups/public/"]
+            "extraMavenRepos": [
+              "https://devrepo.kakao.com/nexus/content/groups/public/"
+            ]
           }
         }
       ]
@@ -46,11 +51,27 @@
     "ios": {
       "bundleIdentifier": "com.comma.app",
       "icon": "./assets/icon.png",
-      "buildNumber": "20",
+      "buildNumber": "24",
       "supportsTablet": false,
       "usesAppleSignIn": true,
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCameraUsageDescription": "휴식 활동 사진을 촬영할 수 있도록 카메라 접근 권한이 필요해요.",
+        "NSPhotoLibraryUsageDescription": "휴식 사진을 선택할 수 있도록 사진 보관함 접근 권한이 필요해요.",
+        "NSPhotoLibraryAddUsageDescription": "휴식 사진을 저장할 수 있도록 사진 보관함 접근 권한이 필요해요."
+      },
+      "privacyManifests": {
+        "NSPrivacyAccessedAPITypes": [
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
+            "NSPrivacyAccessedAPITypeReasons": [
+              "CA92.1"
+            ]
+          }
+        ],
+        "NSPrivacyCollectedDataTypes": [],
+        "NSPrivacyTracking": false,
+        "NSPrivacyTrackingDomains": []
       }
     },
     "android": {

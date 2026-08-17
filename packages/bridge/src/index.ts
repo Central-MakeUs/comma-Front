@@ -20,12 +20,29 @@ export type GalleryPhoto = {
   height: number;
 };
 
+export type GalleryPhotoQuery = {
+  first?: number;
+  after?: string;
+};
+
+export type GalleryPhotoPage = {
+  photos: GalleryPhoto[];
+  endCursor: string | null;
+  hasNextPage: boolean;
+};
+
 export type PreparedGalleryPhoto = {
   /** Opaque native handle. This is not a file URI. */
   uri: string;
   previewUri: string;
   width: number;
   height: number;
+};
+
+export type NativeFilePhoto = {
+  base64: string;
+  filename?: string;
+  mimeType?: string;
 };
 
 export const FEED_MOODS = ['A', 'B', 'C'] as const;
@@ -106,9 +123,10 @@ export type AppBridge = {
   refreshAuthSession(): Promise<NativeAuthRefreshResult>;
   clearAuthTokens(): Promise<void>;
   authenticatedRequest(request: NativeApiRequest): Promise<NativeApiResponse>;
-  getGalleryPhotos(limit?: number): Promise<GalleryPhoto[]>;
+  getGalleryPhotos(query?: GalleryPhotoQuery): Promise<GalleryPhotoPage>;
   takeGalleryPhoto(): Promise<PreparedGalleryPhoto | null>;
   prepareGalleryPhoto(assetId: string): Promise<PreparedGalleryPhoto>;
+  prepareFilePhoto(file: NativeFilePhoto): Promise<PreparedGalleryPhoto>;
   retainPreparedGalleryPhoto(uri: string): Promise<void>;
   deletePreparedGalleryPhoto(uri: string): Promise<void>;
   createFeedWithGalleryPhoto(

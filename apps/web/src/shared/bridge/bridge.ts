@@ -40,7 +40,7 @@ export const appBridge = linkBridge<BridgeStore<AppBridge>, AppPostMessageSchema
         throw new Error('Native gallery bridge is not ready yet.');
       }
 
-      return [];
+      return { photos: [], endCursor: null, hasNextPage: false };
     },
     async takeGalleryPhoto() {
       if (isReactNativeWebView()) {
@@ -51,6 +51,9 @@ export const appBridge = linkBridge<BridgeStore<AppBridge>, AppPostMessageSchema
     },
     async prepareGalleryPhoto() {
       throw new Error('Native photo preparation is only available in the mobile app.');
+    },
+    async prepareFilePhoto() {
+      throw new Error('Native file photo preparation is only available in the mobile app.');
     },
     async retainPreparedGalleryPhoto() {},
     async deletePreparedGalleryPhoto() {},

@@ -15,6 +15,7 @@ import {
   createFeedWithMultipart,
   deletePreparedPhoto,
   getGalleryPhotos,
+  prepareFilePhoto,
   prepareGalleryPhoto,
   retainPreparedPhoto,
   takeGalleryPhoto
@@ -46,6 +47,7 @@ export const appBridge = bridge<AppBridge>({
   getGalleryPhotos,
   takeGalleryPhoto,
   prepareGalleryPhoto,
+  prepareFilePhoto,
   async retainPreparedGalleryPhoto(handle) {
     retainPreparedPhoto(handle);
   },

@@ -1,5 +1,5 @@
 import { colors } from '@comma/design-system';
-import { style } from '@vanilla-extract/css';
+import { keyframes, style } from '@vanilla-extract/css';
 import * as layoutStyles from '../../../shared/components/layout/layout.css';
 
 export const screen = style([
@@ -77,6 +77,31 @@ export const emptyPhotoTile = style({
   width: '100%',
   height: '100%',
   background: colors.backgroundPrimary
+});
+
+const skeletonPulse = keyframes({
+  '0%': {
+    opacity: 0.36
+  },
+  '50%': {
+    opacity: 0.72
+  },
+  '100%': {
+    opacity: 0.36
+  }
+});
+
+export const photoSkeletonTile = style({
+  width: '100%',
+  height: '100%',
+  background: 'rgba(252, 252, 252, 0.14)',
+  boxShadow: 'inset -2px 0 18px rgba(255, 255, 255, 0.08)',
+  animation: `${skeletonPulse} 1200ms ease-in-out infinite`,
+  '@media': {
+    '(prefers-reduced-motion: reduce)': {
+      animation: 'none'
+    }
+  }
 });
 
 export const hiddenInput = style({

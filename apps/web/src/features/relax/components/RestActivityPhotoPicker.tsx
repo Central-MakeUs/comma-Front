@@ -6,6 +6,7 @@ import {
   type UIEvent,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState
@@ -131,6 +132,7 @@ export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivity
   const { showToast } = useAppToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const screenRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLElement>(null);
   const photoGridRef = useRef<HTMLDivElement>(null);
   const isActiveRef = useRef(true);
   const isGalleryLoadingRef = useRef(false);
@@ -203,12 +205,17 @@ export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivity
     Math.ceil(visiblePhotoBottom / photoRowStride) + PHOTO_GRID_ROW_OVERSCAN,
     Math.max(photoRowCount - 1, 0)
   );
+  const firstVisiblePhotoIndex = firstVisiblePhotoRow * PHOTO_GRID_COLUMN_COUNT;
+  const lastVisiblePhotoIndex = Math.min(
+    (lastVisiblePhotoRow + 1) * PHOTO_GRID_COLUMN_COUNT,
+    virtualPhotoTiles.length
+  );
   const visiblePhotoTiles = virtualPhotoTiles
-    .map((tile, index) => ({ tile, index }))
-    .filter(({ index }) => {
-      const row = Math.floor(index / PHOTO_GRID_COLUMN_COUNT);
-      return row >= firstVisiblePhotoRow && row <= lastVisiblePhotoRow;
-    });
+    .slice(firstVisiblePhotoIndex, lastVisiblePhotoIndex)
+    .map((tile, visibleIndex) => ({
+      tile,
+      index: firstVisiblePhotoIndex + visibleIndex
+    }));
 
   const loadNativeGalleryPage = useCallback(
     async (options?: { reset?: boolean }) => {
@@ -285,18 +292,27 @@ export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivity
     };
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const updateVirtualMetrics = () => {
       const screen = screenRef.current;
       const photoGrid = photoGridRef.current;
       if (!screen || !photoGrid) return;
 
-      setVirtualMetrics({
+      const nextMetrics = {
         gridOffsetTop: photoGrid.offsetTop,
         gridWidth: photoGrid.clientWidth,
         scrollTop: screen.scrollTop,
         viewportHeight: screen.clientHeight
-      });
+      };
+
+      setVirtualMetrics((currentMetrics) =>
+        currentMetrics.gridOffsetTop === nextMetrics.gridOffsetTop &&
+        currentMetrics.gridWidth === nextMetrics.gridWidth &&
+        currentMetrics.scrollTop === nextMetrics.scrollTop &&
+        currentMetrics.viewportHeight === nextMetrics.viewportHeight
+          ? currentMetrics
+          : nextMetrics
+      );
     };
 
     updateVirtualMetrics();
@@ -304,6 +320,7 @@ export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivity
     const resizeObserver =
       typeof ResizeObserver !== 'undefined' ? new ResizeObserver(updateVirtualMetrics) : undefined;
     if (screenRef.current) resizeObserver?.observe(screenRef.current);
+    if (contentRef.current) resizeObserver?.observe(contentRef.current);
     if (photoGridRef.current) resizeObserver?.observe(photoGridRef.current);
 
     return () => {
@@ -431,11 +448,18 @@ export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivity
   };
 
   const handleGalleryScroll = (event: UIEvent<HTMLDivElement>) => {
-    setVirtualMetrics((currentMetrics) => ({
-      ...currentMetrics,
-      scrollTop: event.currentTarget.scrollTop,
-      viewportHeight: event.currentTarget.clientHeight
-    }));
+    setVirtualMetrics((currentMetrics) => {
+      const nextMetrics = {
+        ...currentMetrics,
+        scrollTop: event.currentTarget.scrollTop,
+        viewportHeight: event.currentTarget.clientHeight
+      };
+
+      return currentMetrics.scrollTop === nextMetrics.scrollTop &&
+        currentMetrics.viewportHeight === nextMetrics.viewportHeight
+        ? currentMetrics
+        : nextMetrics;
+    });
 
     if (!isNativeGallery || !galleryHasNextPage) return;
 
@@ -463,7 +487,7 @@ export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivity
           </button>
         </header>
 
-        <section className={styles.content} aria-label="사진 선택">
+        <section className={styles.content} aria-label="사진 선택" ref={contentRef}>
           <ImageUpload
             className={sharedStyles.upload}
             onClick={() => fileInputRef.current?.click()}
@@ -524,7 +548,12 @@ export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivity
                   style={tileStyle}
                   type="button"
                 >
-                  <img alt="" className={styles.photoTileImage} src={tile.photo.src} />
+                  <img
+                    alt=""
+                    className={styles.photoTileImage}
+                    decoding="async"
+                    src={tile.photo.src}
+                  />
                 </button>
               );
             }

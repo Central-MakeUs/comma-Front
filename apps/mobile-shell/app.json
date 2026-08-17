@@ -44,6 +44,7 @@
         "expo-build-properties",
         {
           "android": {
+            "targetSdkVersion": 35,
             "extraMavenRepos": ["https://devrepo.kakao.com/nexus/content/groups/public/"]
           }
         }
@@ -99,7 +100,6 @@
       },
       "package": "app.comma.mobile",
       "permissions": ["INTERNET"],
-      "targetSdkVersion": 35,
       "versionCode": 15
     },
     "extra": {

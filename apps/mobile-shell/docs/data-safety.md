@@ -29,6 +29,12 @@ Use these answers for Google Play Console > Policy and programs > App content > 
 - Required: Optional; only when the user requests premium launch notifications by phone/contact number
 - Purpose: Developer communications/marketing
 
+- User IDs
+- Collected: Yes
+- Shared: No
+- Required: Required for account/session functionality
+- Purpose: App functionality
+
 ### Photos and videos
 
 - Photos
@@ -51,14 +57,6 @@ Use these answers for Google Play Console > Policy and programs > App content > 
 - Required: Required for core rest recommendation/feed functionality
 - Purpose: App functionality, personalization
 
-### Device or other IDs
-
-- User IDs
-- Collected: Yes
-- Shared: No
-- Required: Required for account/session functionality
-- Purpose: App functionality
-
 ## Not declared
 
 Do not declare these unless the app changes:
@@ -70,6 +68,7 @@ Do not declare these unless the app changes:
 - Health and fitness
 - Financial info
 - Advertising ID
+- Device or other IDs
 - Crash logs or diagnostics SDK data
 
 ## Permission notes

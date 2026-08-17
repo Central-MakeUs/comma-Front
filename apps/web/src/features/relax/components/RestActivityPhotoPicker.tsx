@@ -1,6 +1,15 @@
 import type { PreparedGalleryPhoto } from '@comma/bridge';
 import { colors, Icon, ImageUpload } from '@comma/design-system';
-import { type ChangeEvent, type UIEvent, useCallback, useEffect, useRef, useState } from 'react';
+import {
+  type CSSProperties,
+  type ChangeEvent,
+  type UIEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react';
 import { appBridge } from '../../../shared/bridge/bridge';
 import { useAppToast } from '../../../shared/components/AppToast';
 import { EMPTY_PHOTO_TILES, PHOTO_PICKER_IMAGES } from '../model/restActivity.constants';
@@ -34,12 +43,34 @@ const GALLERY_BRIDGE_RETRY_DELAY_MS = 150;
 const GALLERY_LOAD_MORE_THRESHOLD_PX = 320;
 const INITIAL_GALLERY_SKELETON_COUNT = 11;
 const LOAD_MORE_GALLERY_SKELETON_COUNT = 6;
+const PHOTO_GRID_COLUMN_COUNT = 3;
+const PHOTO_GRID_GAP = 3;
+const PHOTO_GRID_ROW_OVERSCAN = 4;
 const MAX_NATIVE_FILE_SIZE = 15 * 1024 * 1024;
 
 type RestActivityPhotoPickerProps = {
   onClose: () => void;
   onPhotoSelect: (photo: SelectedActivityPhoto) => void;
 };
+
+type VirtualPhotoTile =
+  | {
+      kind: 'camera';
+      key: string;
+    }
+  | {
+      kind: 'photo';
+      key: string;
+      photo: GalleryPhotoItem;
+    }
+  | {
+      kind: 'empty';
+      key: string;
+    }
+  | {
+      kind: 'skeleton';
+      key: string;
+    };
 
 function isReactNativeWebView() {
   return typeof window !== 'undefined' && Boolean(window.ReactNativeWebView);
@@ -99,6 +130,8 @@ function readFileAsBase64(file: File) {
 export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivityPhotoPickerProps) {
   const { showToast } = useAppToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const screenRef = useRef<HTMLDivElement>(null);
+  const photoGridRef = useRef<HTMLDivElement>(null);
   const isActiveRef = useRef(true);
   const isGalleryLoadingRef = useRef(false);
   const galleryEndCursorRef = useRef<string | undefined>(undefined);
@@ -108,6 +141,12 @@ export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivity
   const [isGalleryLoadingMore, setIsGalleryLoadingMore] = useState(false);
   const [galleryHasNextPage, setGalleryHasNextPage] = useState(true);
   const [preparingAssetId, setPreparingAssetId] = useState<string>();
+  const [virtualMetrics, setVirtualMetrics] = useState({
+    gridOffsetTop: 0,
+    gridWidth: 0,
+    scrollTop: 0,
+    viewportHeight: 0
+  });
   const isNativeGallery = isReactNativeWebView();
   const isGalleryLoading = isGalleryLoadingInitial || isGalleryLoadingMore;
   const photos =
@@ -118,6 +157,54 @@ export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivity
     : isNativeGallery && photos.length === 0
       ? 5
       : (3 - (tileCount % 3)) % 3;
+  const virtualPhotoTiles = useMemo<VirtualPhotoTile[]>(
+    () => [
+      { kind: 'camera', key: 'camera' },
+      ...photos.map((photo) => ({ kind: 'photo' as const, key: photo.id, photo })),
+      ...EMPTY_PHOTO_TILES.slice(0, emptyTileCount).map((tile) => ({
+        kind: 'empty' as const,
+        key: `empty-${tile}`
+      })),
+      ...Array.from({ length: isGalleryLoadingInitial ? INITIAL_GALLERY_SKELETON_COUNT : 0 }, (_, index) => ({
+        kind: 'skeleton' as const,
+        key: `initial-gallery-skeleton-${index}`
+      })),
+      ...Array.from({ length: isGalleryLoadingMore ? LOAD_MORE_GALLERY_SKELETON_COUNT : 0 }, (_, index) => ({
+        kind: 'skeleton' as const,
+        key: `more-gallery-skeleton-${index}`
+      }))
+    ],
+    [emptyTileCount, isGalleryLoadingInitial, isGalleryLoadingMore, photos]
+  );
+  const photoTileWidth = Math.max(
+    (virtualMetrics.gridWidth - PHOTO_GRID_GAP * (PHOTO_GRID_COLUMN_COUNT - 1)) /
+      PHOTO_GRID_COLUMN_COUNT,
+    1
+  );
+  const photoTileHeight = Math.max((virtualMetrics.gridWidth - 54) / PHOTO_GRID_COLUMN_COUNT, 1);
+  const photoColumnStride = photoTileWidth + PHOTO_GRID_GAP;
+  const photoRowStride = photoTileHeight + PHOTO_GRID_GAP;
+  const photoRowCount = Math.ceil(virtualPhotoTiles.length / PHOTO_GRID_COLUMN_COUNT);
+  const photoGridHeight =
+    photoRowCount > 0
+      ? photoRowCount * photoTileHeight + (photoRowCount - 1) * PHOTO_GRID_GAP
+      : 0;
+  const visiblePhotoTop = Math.max(virtualMetrics.scrollTop - virtualMetrics.gridOffsetTop, 0);
+  const visiblePhotoBottom = Math.max(visiblePhotoTop + virtualMetrics.viewportHeight, 0);
+  const firstVisiblePhotoRow = Math.max(
+    Math.floor(visiblePhotoTop / photoRowStride) - PHOTO_GRID_ROW_OVERSCAN,
+    0
+  );
+  const lastVisiblePhotoRow = Math.min(
+    Math.ceil(visiblePhotoBottom / photoRowStride) + PHOTO_GRID_ROW_OVERSCAN,
+    Math.max(photoRowCount - 1, 0)
+  );
+  const visiblePhotoTiles = virtualPhotoTiles
+    .map((tile, index) => ({ tile, index }))
+    .filter(({ index }) => {
+      const row = Math.floor(index / PHOTO_GRID_COLUMN_COUNT);
+      return row >= firstVisiblePhotoRow && row <= lastVisiblePhotoRow;
+    });
 
   const loadNativeGalleryPage = useCallback(
     async (options?: { reset?: boolean }) => {
@@ -193,6 +280,33 @@ export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivity
       isActiveRef.current = false;
     };
   }, []);
+
+  useEffect(() => {
+    const updateVirtualMetrics = () => {
+      const screen = screenRef.current;
+      const photoGrid = photoGridRef.current;
+      if (!screen || !photoGrid) return;
+
+      setVirtualMetrics({
+        gridOffsetTop: photoGrid.offsetTop,
+        gridWidth: photoGrid.clientWidth,
+        scrollTop: screen.scrollTop,
+        viewportHeight: screen.clientHeight
+      });
+    };
+
+    updateVirtualMetrics();
+    window.addEventListener('resize', updateVirtualMetrics);
+    const resizeObserver =
+      typeof ResizeObserver !== 'undefined' ? new ResizeObserver(updateVirtualMetrics) : undefined;
+    if (screenRef.current) resizeObserver?.observe(screenRef.current);
+    if (photoGridRef.current) resizeObserver?.observe(photoGridRef.current);
+
+    return () => {
+      window.removeEventListener('resize', updateVirtualMetrics);
+      resizeObserver?.disconnect();
+    };
+  }, [virtualPhotoTiles.length]);
 
   const handleImageChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.currentTarget.files?.[0];
@@ -313,6 +427,12 @@ export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivity
   };
 
   const handleGalleryScroll = (event: UIEvent<HTMLDivElement>) => {
+    setVirtualMetrics((currentMetrics) => ({
+      ...currentMetrics,
+      scrollTop: event.currentTarget.scrollTop,
+      viewportHeight: event.currentTarget.clientHeight
+    }));
+
     if (!isNativeGallery || !galleryHasNextPage) return;
 
     const { clientHeight, scrollHeight, scrollTop } = event.currentTarget;
@@ -322,15 +442,9 @@ export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivity
     }
   };
 
-  const skeletonCount = isGalleryLoadingInitial
-    ? INITIAL_GALLERY_SKELETON_COUNT
-    : isGalleryLoadingMore
-      ? LOAD_MORE_GALLERY_SKELETON_COUNT
-      : 0;
-
   return (
     <main className={sharedStyles.page}>
-      <div className={styles.screen} onScroll={handleGalleryScroll}>
+      <div className={styles.screen} onScroll={handleGalleryScroll} ref={screenRef}>
         <div aria-hidden="true" className={sharedStyles.topGradient} />
         <div aria-hidden="true" className={sharedStyles.bottomGradient} />
 
@@ -353,50 +467,83 @@ export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivity
           />
         </section>
 
-        <div className={styles.photoGrid}>
-          <button
-            aria-label="카메라로 사진 선택"
-            className={styles.cameraTile}
-            disabled={Boolean(preparingAssetId)}
-            onClick={() => {
-              void handleCameraClick();
-            }}
-            type="button"
-          >
-            <Icon color={colors.iconPrimary} height={40} name="camera" width={40} />
-          </button>
-          {photos.map((photo) => (
-            <button
-              aria-label="사진 선택"
-              className={styles.photoTile}
-              disabled={Boolean(preparingAssetId)}
-              key={photo.id}
-              onClick={() => {
-                if (galleryPhotos.length > 0) {
-                  void handleNativePhotoSelect(photo);
-                  return;
-                }
+        <div
+          className={styles.photoGrid}
+          ref={photoGridRef}
+          style={{ height: photoGridHeight } as CSSProperties}
+        >
+          {visiblePhotoTiles.map(({ tile, index }) => {
+            const row = Math.floor(index / PHOTO_GRID_COLUMN_COUNT);
+            const column = index % PHOTO_GRID_COLUMN_COUNT;
+            const tileStyle = {
+              width: photoTileWidth,
+              height: photoTileHeight,
+              transform: `translate3d(${column * photoColumnStride}px, ${row * photoRowStride}px, 0)`
+            } as CSSProperties;
 
-                onPhotoSelect({
-                  kind: 'preview',
-                  previewSrc: photo.src
-                });
-              }}
-              type="button"
-            >
-              <img alt="" className={styles.photoTileImage} src={photo.src} />
-            </button>
-          ))}
-          {EMPTY_PHOTO_TILES.slice(0, emptyTileCount).map((tile) => (
-            <div className={styles.emptyPhotoTile} key={tile} />
-          ))}
-          {Array.from({ length: skeletonCount }, (_, index) => (
-            <div
-              aria-hidden="true"
-              className={styles.photoSkeletonTile}
-              key={`gallery-skeleton-${index}`}
-            />
-          ))}
+            if (tile.kind === 'camera') {
+              return (
+                <button
+                  aria-label="카메라로 사진 선택"
+                  className={`${styles.cameraTile} ${styles.virtualPhotoTile}`}
+                  disabled={Boolean(preparingAssetId)}
+                  key={tile.key}
+                  onClick={() => {
+                    void handleCameraClick();
+                  }}
+                  style={tileStyle}
+                  type="button"
+                >
+                  <Icon color={colors.iconPrimary} height={40} name="camera" width={40} />
+                </button>
+              );
+            }
+
+            if (tile.kind === 'photo') {
+              return (
+                <button
+                  aria-label="사진 선택"
+                  className={`${styles.photoTile} ${styles.virtualPhotoTile}`}
+                  disabled={Boolean(preparingAssetId)}
+                  key={tile.key}
+                  onClick={() => {
+                    if (galleryPhotos.length > 0) {
+                      void handleNativePhotoSelect(tile.photo);
+                      return;
+                    }
+
+                    onPhotoSelect({
+                      kind: 'preview',
+                      previewSrc: tile.photo.src
+                    });
+                  }}
+                  style={tileStyle}
+                  type="button"
+                >
+                  <img alt="" className={styles.photoTileImage} src={tile.photo.src} />
+                </button>
+              );
+            }
+
+            if (tile.kind === 'empty') {
+              return (
+                <div
+                  className={`${styles.emptyPhotoTile} ${styles.virtualPhotoTile}`}
+                  key={tile.key}
+                  style={tileStyle}
+                />
+              );
+            }
+
+            return (
+              <div
+                aria-hidden="true"
+                className={`${styles.photoSkeletonTile} ${styles.virtualPhotoTile}`}
+                key={tile.key}
+                style={tileStyle}
+              />
+            );
+          })}
         </div>
 
         <input

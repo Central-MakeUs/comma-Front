@@ -34,12 +34,14 @@ export const photoGrid = style({
   position: 'relative',
   zIndex: 2,
   width: '100%',
-  display: 'grid',
-  gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-  gridAutoRows: 'calc((var(--app-width) - 54px) / 3)',
-  gap: 3,
   marginTop: 28,
   paddingBottom: 'max(40px, var(--safe-area-bottom))'
+});
+
+export const virtualPhotoTile = style({
+  position: 'absolute',
+  top: 0,
+  left: 0
 });
 
 export const cameraTile = style({

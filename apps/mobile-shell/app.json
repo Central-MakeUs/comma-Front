@@ -88,6 +88,11 @@
     "android": {
       "edgeToEdgeEnabled": true,
       "icon": "./assets/icon.png",
+      "splash": {
+        "image": "./assets/android-splash-logo.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#1a1814"
+      },
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon-foreground.png",
         "backgroundColor": "#303030"

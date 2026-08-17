@@ -28,7 +28,10 @@ export const scrollContainer = style({
 export const virtualFeedList = style({
   position: 'relative',
   width: '100%',
-  flexShrink: 0
+  flexShrink: 0,
+  margin: 0,
+  padding: 0,
+  listStyle: 'none'
 });
 
 export const virtualFeedCard = style({

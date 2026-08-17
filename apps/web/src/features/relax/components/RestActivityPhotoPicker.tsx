@@ -1,8 +1,8 @@
 import type { PreparedGalleryPhoto } from '@comma/bridge';
 import { colors, Icon, ImageUpload } from '@comma/design-system';
 import {
-  type CSSProperties,
   type ChangeEvent,
+  type CSSProperties,
   type UIEvent,
   useCallback,
   useEffect,
@@ -165,14 +165,20 @@ export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivity
         kind: 'empty' as const,
         key: `empty-${tile}`
       })),
-      ...Array.from({ length: isGalleryLoadingInitial ? INITIAL_GALLERY_SKELETON_COUNT : 0 }, (_, index) => ({
-        kind: 'skeleton' as const,
-        key: `initial-gallery-skeleton-${index}`
-      })),
-      ...Array.from({ length: isGalleryLoadingMore ? LOAD_MORE_GALLERY_SKELETON_COUNT : 0 }, (_, index) => ({
-        kind: 'skeleton' as const,
-        key: `more-gallery-skeleton-${index}`
-      }))
+      ...Array.from(
+        { length: isGalleryLoadingInitial ? INITIAL_GALLERY_SKELETON_COUNT : 0 },
+        (_, index) => ({
+          kind: 'skeleton' as const,
+          key: `initial-gallery-skeleton-${index}`
+        })
+      ),
+      ...Array.from(
+        { length: isGalleryLoadingMore ? LOAD_MORE_GALLERY_SKELETON_COUNT : 0 },
+        (_, index) => ({
+          kind: 'skeleton' as const,
+          key: `more-gallery-skeleton-${index}`
+        })
+      )
     ],
     [emptyTileCount, isGalleryLoadingInitial, isGalleryLoadingMore, photos]
   );
@@ -186,9 +192,7 @@ export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivity
   const photoRowStride = photoTileHeight + PHOTO_GRID_GAP;
   const photoRowCount = Math.ceil(virtualPhotoTiles.length / PHOTO_GRID_COLUMN_COUNT);
   const photoGridHeight =
-    photoRowCount > 0
-      ? photoRowCount * photoTileHeight + (photoRowCount - 1) * PHOTO_GRID_GAP
-      : 0;
+    photoRowCount > 0 ? photoRowCount * photoTileHeight + (photoRowCount - 1) * PHOTO_GRID_GAP : 0;
   const visiblePhotoTop = Math.max(virtualMetrics.scrollTop - virtualMetrics.gridOffsetTop, 0);
   const visiblePhotoBottom = Math.max(visiblePhotoTop + virtualMetrics.viewportHeight, 0);
   const firstVisiblePhotoRow = Math.max(
@@ -306,7 +310,7 @@ export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivity
       window.removeEventListener('resize', updateVirtualMetrics);
       resizeObserver?.disconnect();
     };
-  }, [virtualPhotoTiles.length]);
+  }, []);
 
   const handleImageChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.currentTarget.files?.[0];

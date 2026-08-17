@@ -71,13 +71,19 @@ function FeedScreen() {
       0
     );
     const end = Math.min(
-      Math.ceil((virtualMetrics.scrollTop + virtualMetrics.viewportHeight) / feedVirtualItemHeight) +
-        FEED_VIRTUAL_OVERSCAN,
+      Math.ceil(
+        (virtualMetrics.scrollTop + virtualMetrics.viewportHeight) / feedVirtualItemHeight
+      ) + FEED_VIRTUAL_OVERSCAN,
       feeds.length - 1
     );
 
     return { start, end };
-  }, [feeds.length, feedVirtualItemHeight, virtualMetrics.scrollTop, virtualMetrics.viewportHeight]);
+  }, [
+    feeds.length,
+    feedVirtualItemHeight,
+    virtualMetrics.scrollTop,
+    virtualMetrics.viewportHeight
+  ]);
   const visibleFeeds = feeds
     .map((feed, index) => ({ feed, index }))
     .slice(visibleFeedRange.start, visibleFeedRange.end + 1);
@@ -154,41 +160,46 @@ function FeedScreen() {
           ) : feeds.length === 0 ? (
             <span className={styles.alertText}>쉼표를 추가해보세요.</span>
           ) : (
-            <div
+            <ul
               aria-label="피드 목록"
               className={styles.virtualFeedList}
               style={{ height: virtualFeedListHeight } as CSSProperties}
             >
               {visibleFeeds.map(({ feed: f, index }) => (
-                <FeedCard
+                <li
                   className={styles.virtualFeedCard}
                   key={f.feedId}
-                  id={String(f.feedId)}
-                  imageSrc={f.imageUrl}
-                  imageAlt={`피드 이미지 ${f.feedId}`}
-                  timeLabel={transformDate(f.createdAt)}
-                  tags={[...f.hashtags]}
-                  content={f.review}
-                  variant="others"
-                  liked={f.isLiked}
-                  likeCount={f.likeCount}
-                  onHeartClick={() => onHeartClick(f.feedId, f.nickname ?? '')}
-                  title={f.nickname}
-                  imageHeart={f.isLiked}
-                  onReportClick={
-                    f.nickname === nickname
-                      ? undefined
-                      : () => onReportClick(f.feedId, f.nickname ?? '')
-                  }
-                  onBlockClick={
-                    f.nickname === nickname ? undefined : () => onBlockClick(f.feedId, f.nickname ?? '')
-                  }
                   style={{
                     transform: `translate3d(0, ${index * feedVirtualItemHeight}px, 0)`
                   }}
-                />
+                >
+                  <FeedCard
+                    id={String(f.feedId)}
+                    imageSrc={f.imageUrl}
+                    imageAlt={`피드 이미지 ${f.feedId}`}
+                    timeLabel={transformDate(f.createdAt)}
+                    tags={[...f.hashtags]}
+                    content={f.review}
+                    variant="others"
+                    liked={f.isLiked}
+                    likeCount={f.likeCount}
+                    onHeartClick={() => onHeartClick(f.feedId, f.nickname ?? '')}
+                    title={f.nickname}
+                    imageHeart={f.isLiked}
+                    onReportClick={
+                      f.nickname === nickname
+                        ? undefined
+                        : () => onReportClick(f.feedId, f.nickname ?? '')
+                    }
+                    onBlockClick={
+                      f.nickname === nickname
+                        ? undefined
+                        : () => onBlockClick(f.feedId, f.nickname ?? '')
+                    }
+                  />
+                </li>
               ))}
-            </div>
+            </ul>
           )}
           {feedQuery.isFetchNextPageError && feeds.length > 0 ? (
             <QueryFeedback

@@ -37,7 +37,12 @@
           "image": "./assets/splash.png",
           "resizeMode": "cover",
           "backgroundColor": "#1a1814",
-          "enableFullScreenImage_legacy": true
+          "enableFullScreenImage_legacy": true,
+          "android": {
+            "image": "./assets/android-splash-logo.png",
+            "resizeMode": "contain",
+            "backgroundColor": "#1a1814"
+          }
         }
       ],
       [

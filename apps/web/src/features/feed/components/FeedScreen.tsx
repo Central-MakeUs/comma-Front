@@ -27,6 +27,7 @@ import FeedToast from './FeedToast';
 const FEED_PAGE_SIZE = 5;
 const FEED_VIRTUAL_BODY_HEIGHT = 104;
 const FEED_VIRTUAL_OVERSCAN = 4;
+const FEED_VIEWPORT_HEIGHT_CACHE_RESET_THRESHOLD = 8;
 
 function getFeedVirtualImageHeight(viewportHeight: number) {
   return Math.min(Math.max(viewportHeight * 0.58, 360), 499);
@@ -38,11 +39,12 @@ function getFeedVirtualGap(viewportHeight: number) {
 
 type VirtualFeedItemProps = {
   children: React.ReactNode;
+  feedId: number;
   itemTop: number;
-  onHeightChange: (height: number) => void;
+  onHeightChange: (feedId: number, height: number) => void;
 };
 
-function VirtualFeedItem({ children, itemTop, onHeightChange }: VirtualFeedItemProps) {
+function VirtualFeedItem({ children, feedId, itemTop, onHeightChange }: VirtualFeedItemProps) {
   const itemRef = useRef<HTMLLIElement>(null);
 
   useLayoutEffect(() => {
@@ -50,7 +52,7 @@ function VirtualFeedItem({ children, itemTop, onHeightChange }: VirtualFeedItemP
     if (!item) return undefined;
 
     const measure = () => {
-      onHeightChange(Math.ceil(item.getBoundingClientRect().height));
+      onHeightChange(feedId, Math.ceil(item.getBoundingClientRect().height));
     };
 
     measure();
@@ -61,7 +63,7 @@ function VirtualFeedItem({ children, itemTop, onHeightChange }: VirtualFeedItemP
     return () => {
       resizeObserver?.disconnect();
     };
-  }, [onHeightChange]);
+  }, [feedId, onHeightChange]);
 
   return (
     <li
@@ -85,7 +87,8 @@ function FeedScreen() {
     scrollTop: 0,
     viewportHeight: 0
   });
-  const [feedHeights, setFeedHeights] = useState<Record<number, number>>({});
+  const viewportHeightRef = useRef(0);
+  const [feedCardHeights, setFeedCardHeights] = useState<Record<number, number>>({});
 
   const nickname = getStoredNickname();
   const mood = moods[currentFeel];
@@ -117,15 +120,13 @@ function FeedScreen() {
     onHeaderVisibilityChange: setIsHeaderVisible
   });
   const feedVirtualGap = getFeedVirtualGap(virtualMetrics.viewportHeight);
-  const estimatedFeedItemHeight =
-    getFeedVirtualImageHeight(virtualMetrics.viewportHeight) +
-    FEED_VIRTUAL_BODY_HEIGHT +
-    feedVirtualGap;
+  const estimatedFeedCardHeight =
+    getFeedVirtualImageHeight(virtualMetrics.viewportHeight) + FEED_VIRTUAL_BODY_HEIGHT;
   const virtualFeedItems = useMemo(() => {
     let itemTop = 0;
 
     const items = feeds.map((feed) => {
-      const itemHeight = feedHeights[feed.feedId] ?? estimatedFeedItemHeight;
+      const itemHeight = (feedCardHeights[feed.feedId] ?? estimatedFeedCardHeight) + feedVirtualGap;
       const item = {
         feed,
         height: itemHeight,
@@ -140,7 +141,7 @@ function FeedScreen() {
       items,
       totalHeight: itemTop
     };
-  }, [estimatedFeedItemHeight, feedHeights, feeds]);
+  }, [estimatedFeedCardHeight, feedCardHeights, feedVirtualGap, feeds]);
   const visibleFeedRange = useMemo(() => {
     if (!feeds.length) return { start: 0, end: -1 };
 
@@ -176,6 +177,16 @@ function FeedScreen() {
       scrollTop: scrollElement.scrollTop,
       viewportHeight: scrollElement.clientHeight
     };
+    const previousViewportHeight = viewportHeightRef.current;
+
+    if (
+      previousViewportHeight > 0 &&
+      Math.abs(previousViewportHeight - nextMetrics.viewportHeight) >=
+        FEED_VIEWPORT_HEIGHT_CACHE_RESET_THRESHOLD
+    ) {
+      setFeedCardHeights({});
+    }
+    viewportHeightRef.current = nextMetrics.viewportHeight;
 
     setVirtualMetrics((currentMetrics) =>
       currentMetrics.scrollTop === nextMetrics.scrollTop &&
@@ -184,17 +195,13 @@ function FeedScreen() {
         : nextMetrics
     );
   }, []);
-  const handleFeedHeightChange = useCallback(
-    (feedId: number, measuredHeight: number) => {
-      const nextHeight = measuredHeight + feedVirtualGap;
-      setFeedHeights((currentHeights) =>
-        Math.abs((currentHeights[feedId] ?? 0) - nextHeight) <= 1
-          ? currentHeights
-          : { ...currentHeights, [feedId]: nextHeight }
-      );
-    },
-    [feedVirtualGap]
-  );
+  const handleFeedHeightChange = useCallback((feedId: number, measuredHeight: number) => {
+    setFeedCardHeights((currentHeights) =>
+      Math.abs((currentHeights[feedId] ?? 0) - measuredHeight) <= 1
+        ? currentHeights
+        : { ...currentHeights, [feedId]: measuredHeight }
+    );
+  }, []);
   const resetFeedScrollMetrics = useCallback(() => {
     const scrollElement = feedScrollRef.current;
     if (!scrollElement) return;
@@ -289,11 +296,10 @@ function FeedScreen() {
             >
               {visibleFeeds.map(({ feed: f, top }) => (
                 <VirtualFeedItem
+                  feedId={f.feedId}
                   itemTop={top}
                   key={f.feedId}
-                  onHeightChange={(measuredHeight) =>
-                    handleFeedHeightChange(f.feedId, measuredHeight)
-                  }
+                  onHeightChange={handleFeedHeightChange}
                 >
                   <FeedCard
                     id={String(f.feedId)}

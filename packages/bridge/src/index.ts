@@ -83,6 +83,12 @@ export type NativeLoginResult = {
   };
 };
 
+export type NativeLoginRequest = {
+  field: AuthProvider;
+  code: string;
+  redirectUri: string;
+};
+
 export type NativeAuthRefreshResult = {
   onboardingCompleted?: boolean;
 };
@@ -119,6 +125,7 @@ export type AppBridge = {
   setStatusBar(style: StatusBarStyle): Promise<void>;
   migrateAuthTokens(tokens: AuthTokens | null): Promise<AuthState>;
   getAuthState(): Promise<AuthState>;
+  completeLogin?(request: NativeLoginRequest): Promise<NativeLoginResult>;
   loginWithProvider(provider: AuthProvider): Promise<NativeLoginResult>;
   refreshAuthSession(): Promise<NativeAuthRefreshResult>;
   clearAuthTokens(): Promise<void>;

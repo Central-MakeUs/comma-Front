@@ -2,6 +2,8 @@ type WebOAuthProvider = 'KAKAO' | 'GOOGLE' | 'APPLE';
 
 const WEB_OAUTH_STATE_PREFIX = 'comma.oauth.state';
 const WEB_OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
+const NATIVE_GOOGLE_STATE_KEY = 'comma.oauth.nativeGoogleState';
+const NATIVE_GOOGLE_STATE_TTL_MS = 10 * 60 * 1000;
 
 interface StoredOAuthState {
   state: string;
@@ -89,4 +91,37 @@ export const consumeWebOAuthState = (provider: WebOAuthProvider, returnedState: 
 
   const expectedState = getFreshState(sessionValue, WEB_OAUTH_STATE_TTL_MS);
   return Boolean(expectedState && returnedState && expectedState === returnedState);
+};
+
+export const createNativeGoogleOAuthState = () => {
+  const pendingState: StoredOAuthState = {
+    state: createRandomState(),
+    createdAt: Date.now()
+  };
+  safeSetItem('localStorage', NATIVE_GOOGLE_STATE_KEY, JSON.stringify(pendingState));
+
+  return pendingState.state;
+};
+
+export const consumeNativeGoogleOAuthState = (returnedState: string | undefined) => {
+  const storedValue = safeGetItem('localStorage', NATIVE_GOOGLE_STATE_KEY);
+  if (!storedValue) return false;
+
+  const expectedState = getFreshState(storedValue, NATIVE_GOOGLE_STATE_TTL_MS);
+  if (expectedState && returnedState && expectedState === returnedState) {
+    safeRemoveItem('localStorage', NATIVE_GOOGLE_STATE_KEY);
+    return true;
+  }
+
+  if (!expectedState) safeRemoveItem('localStorage', NATIVE_GOOGLE_STATE_KEY);
+  return false;
+};
+
+export const hasPendingNativeGoogleOAuthState = () =>
+  Boolean(
+    getFreshState(safeGetItem('localStorage', NATIVE_GOOGLE_STATE_KEY), NATIVE_GOOGLE_STATE_TTL_MS)
+  );
+
+export const clearNativeGoogleOAuthState = () => {
+  safeRemoveItem('localStorage', NATIVE_GOOGLE_STATE_KEY);
 };

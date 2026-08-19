@@ -17,10 +17,11 @@ const getFieldByPathname = (pathname: string): AuthProvider | null => {
 };
 
 const getRedirectUri = (field: AuthProvider) => {
-  if (field === 'KAKAO') return import.meta.env.VITE_KAKAO_REDIRECT_URI;
-  if (field === 'GOOGLE') return import.meta.env.VITE_GOOGLE_REDIRECT_URI;
+  const fallback = `${typeof window !== 'undefined' ? window.location.origin : ''}/oauth/${field.toLowerCase()}/callback`;
+  if (field === 'KAKAO') return import.meta.env.VITE_KAKAO_REDIRECT_URI || fallback;
+  if (field === 'GOOGLE') return import.meta.env.VITE_GOOGLE_REDIRECT_URI || fallback;
 
-  return import.meta.env.VITE_APPLE_REDIRECT_URI;
+  return import.meta.env.VITE_APPLE_REDIRECT_URI || fallback;
 };
 
 function OAuthCallbackScreen() {

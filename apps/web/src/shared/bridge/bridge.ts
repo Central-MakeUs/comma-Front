@@ -25,6 +25,9 @@ export const appBridge = linkBridge<BridgeStore<AppBridge>, AppPostMessageSchema
     async getAuthState() {
       return { hasTokens: false, accessTokenExpiresAt: null };
     },
+    async completeLogin() {
+      throw new Error('Native login is only available in the mobile app.');
+    },
     async loginWithProvider() {
       throw new Error('Native login is only available in the mobile app.');
     },

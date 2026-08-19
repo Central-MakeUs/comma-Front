@@ -21,9 +21,9 @@ export const backgroundOverlay = style([
   layoutStyles.absoluteFill,
   {
     zIndex: 1,
-    background: 'rgba(26, 24, 20, 0.5)',
-    backdropFilter: 'blur(5px)',
-    WebkitBackdropFilter: 'blur(5px)'
+    background: 'rgba(26, 24, 20, 0.6)',
+    backdropFilter: 'blur(80px)',
+    WebkitBackdropFilter: 'blur(80px)'
   }
 ]);
 

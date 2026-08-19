@@ -24,6 +24,7 @@ export type { IconName, IconProps, IconVariant } from './Icon';
 export { Icon } from './Icon';
 export type { ImageUploadProps, ImageUploadState } from './ImageUpload';
 export { ImageUpload } from './ImageUpload';
+export { VIDEO_SRC_PATTERN } from './lib/media';
 export type { ModalBackdropTone, ModalProps } from './Modal';
 export { Modal } from './Modal';
 export type { NavigationBarItem, NavigationBarProps } from './NavigationBar';

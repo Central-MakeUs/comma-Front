@@ -1,11 +1,13 @@
-import { NavigationBar } from '@comma/design-system';
-import type {
-  ComponentProps,
-  ElementType,
-  HTMLAttributes,
-  ReactNode,
-  Ref,
-  UIEventHandler
+import { NavigationBar, VIDEO_SRC_PATTERN } from '@comma/design-system';
+import {
+  type ComponentProps,
+  type ElementType,
+  type HTMLAttributes,
+  type ReactNode,
+  type Ref,
+  type UIEventHandler,
+  useEffect,
+  useState
 } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { navigateToNavigationItem } from '../../lib/navigation';
@@ -83,7 +85,35 @@ export function TabScrollArea({
   );
 }
 
+const FALLBACK_BACKGROUND_SRC = '/images/feed-image.svg';
+
 export function BackgroundImage({ className, src }: { className?: string; src: string }) {
+  const [hasError, setHasError] = useState(false);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reset error state when src changes so a previously broken image can retry
+  useEffect(() => {
+    setHasError(false);
+  }, [src]);
+
+  const resolvedSrc = hasError ? FALLBACK_BACKGROUND_SRC : src;
+  const isVideo = !hasError && VIDEO_SRC_PATTERN.test(src);
+
+  if (isVideo) {
+    return (
+      <video
+        aria-hidden="true"
+        autoPlay
+        className={cx(styles.absoluteFillImage, className)}
+        loop
+        muted
+        onError={() => setHasError(true)}
+        playsInline
+        src={resolvedSrc}
+        tabIndex={-1}
+      />
+    );
+  }
+
   return (
     <img
       alt=""
@@ -93,7 +123,8 @@ export function BackgroundImage({ className, src }: { className?: string; src: s
       draggable={false}
       fetchPriority="high"
       loading="eager"
-      src={src}
+      onError={() => setHasError(true)}
+      src={resolvedSrc}
     />
   );
 }

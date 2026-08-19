@@ -1,4 +1,6 @@
 import type { ComponentPropsWithoutRef } from 'react';
+import { useEffect, useState } from 'react';
+import { VIDEO_SRC_PATTERN } from '../lib/media';
 import { image, imageUpload, imageUploadState, plusIcon, selectText } from './ImageUpload.css';
 
 export type ImageUploadState = 'none' | 'select' | 'exist';
@@ -26,7 +28,15 @@ export function ImageUpload({
   'aria-labelledby': ariaLabelledBy,
   ...buttonProps
 }: ImageUploadProps) {
-  const hasImage = state === 'exist' && Boolean(imageSrc);
+  const [hasError, setHasError] = useState(false);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reset error state when imageSrc or state changes so a previously broken image can retry
+  useEffect(() => {
+    setHasError(false);
+  }, [imageSrc, state]);
+
+  const hasImage = state === 'exist' && Boolean(imageSrc) && !hasError;
+  const isVideo = hasImage && VIDEO_SRC_PATTERN.test(imageSrc ?? '');
   const visualState = hasImage ? 'exist' : state === 'exist' ? 'existEmpty' : state;
   const buttonClassName = [imageUpload, imageUploadState[visualState], className]
     .filter(Boolean)
@@ -42,7 +52,21 @@ export function ImageUpload({
     >
       {state === 'none' ? <span aria-hidden="true" className={plusIcon} /> : null}
       {state === 'select' ? <span className={selectText}>사진을 선택하세요</span> : null}
-      {hasImage ? <img alt={imageAlt} className={image} src={imageSrc} /> : null}
+      {hasImage ? (
+        isVideo ? (
+          <video
+            autoPlay
+            className={image}
+            loop
+            muted
+            onError={() => setHasError(true)}
+            playsInline
+            src={imageSrc}
+          />
+        ) : (
+          <img alt={imageAlt} className={image} onError={() => setHasError(true)} src={imageSrc} />
+        )
+      ) : null}
     </button>
   );
 }

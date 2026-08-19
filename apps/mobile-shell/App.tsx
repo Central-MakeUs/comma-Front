@@ -142,7 +142,9 @@ export default function App() {
     <View style={styles.container} {...iosBackPanResponder.panHandlers}>
       <StatusBar style="auto" translucent backgroundColor="transparent" />
       <WebView
+        allowsInlineMediaPlayback
         bounces={false}
+        mediaPlaybackRequiresUserAction={false}
         nestedScrollEnabled
         overScrollMode="never"
         ref={webViewRef}

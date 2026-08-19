@@ -23,6 +23,7 @@ interface IAppleRes {
 
 const LOGIN_TOAST_DURATION_MS = 4000;
 const LOGIN_ERROR_MESSAGE = '로그인 에러입니다. 다시 시도해주세요.';
+const USE_NATIVE_WEBVIEW_LOGIN = false; // true: 모바일 웹뷰 네이티브 SDK 로그인 사용, false: 웹 OAuth 로그인만 사용
 
 interface LoginToastState {
   id: number;
@@ -47,13 +48,14 @@ function LoginScreen() {
   const [loginToast, setLoginToast] = useState<LoginToastState | null>(null);
   const isMobileWebView = typeof window !== 'undefined' && window.ReactNativeWebView !== undefined;
   const isAndroidApp = isMobileWebView && /Android/i.test(window.navigator.userAgent);
+  const shouldUseNativeLogin = isMobileWebView && USE_NATIVE_WEBVIEW_LOGIN;
 
   const showLoginToast = useCallback((message: string) => {
     nextToastIdRef.current += 1;
     setLoginToast({ id: nextToastIdRef.current, message });
   }, []);
   const { isPending: isNativeLoginPending, startLogin: startNativeLogin } = useNativeSocialLogin({
-    enabled: isMobileWebView
+    enabled: shouldUseNativeLogin
   });
 
   useEffect(() => {
@@ -123,21 +125,21 @@ function LoginScreen() {
 
   const onKakaoClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    if (isMobileWebView && (await startNativeLogin('KAKAO'))) return;
+    if (shouldUseNativeLogin && (await startNativeLogin('KAKAO'))) return;
 
     startKakaoWebLogin();
   };
 
   const onGoogleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    if (isMobileWebView && (await startNativeLogin('GOOGLE'))) return;
+    if (shouldUseNativeLogin && (await startNativeLogin('GOOGLE'))) return;
 
     startGoogleWebLogin();
   };
 
   const onAppleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    if (isMobileWebView && (await startNativeLogin('APPLE'))) return;
+    if (shouldUseNativeLogin && (await startNativeLogin('APPLE'))) return;
 
     await startAppleWebLogin();
   };

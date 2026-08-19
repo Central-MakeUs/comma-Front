@@ -7,6 +7,7 @@ import type {
   Ref,
   UIEventHandler
 } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { navigateToNavigationItem } from '../../lib/navigation';
 import * as styles from './layout.css';
@@ -83,7 +84,36 @@ export function TabScrollArea({
   );
 }
 
+const VIDEO_SRC_PATTERN = /\.(mp4|webm|mov)(?:[?#]|$)/i;
+const FALLBACK_BACKGROUND_SRC = '/images/feed-image.svg';
+
 export function BackgroundImage({ className, src }: { className?: string; src: string }) {
+  const [hasError, setHasError] = useState(false);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reset error state when src changes so a previously broken image can retry
+  useEffect(() => {
+    setHasError(false);
+  }, [src]);
+
+  const resolvedSrc = hasError ? FALLBACK_BACKGROUND_SRC : src;
+  const isVideo = !hasError && VIDEO_SRC_PATTERN.test(src);
+
+  if (isVideo) {
+    return (
+      <video
+        aria-hidden="true"
+        autoPlay
+        className={cx(styles.absoluteFillImage, className)}
+        loop
+        muted
+        onError={() => setHasError(true)}
+        playsInline
+        src={resolvedSrc}
+        tabIndex={-1}
+      />
+    );
+  }
+
   return (
     <img
       alt=""
@@ -93,7 +123,8 @@ export function BackgroundImage({ className, src }: { className?: string; src: s
       draggable={false}
       fetchPriority="high"
       loading="eager"
-      src={src}
+      onError={() => setHasError(true)}
+      src={resolvedSrc}
     />
   );
 }

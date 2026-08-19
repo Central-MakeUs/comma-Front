@@ -30,10 +30,10 @@ export function ImageUpload({
 }: ImageUploadProps) {
   const [hasError, setHasError] = useState(false);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: reset error state when imageSrc changes so a previously broken image can retry
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reset error state when imageSrc or state changes so a previously broken image can retry
   useEffect(() => {
     setHasError(false);
-  }, [imageSrc]);
+  }, [imageSrc, state]);
 
   const hasImage = state === 'exist' && Boolean(imageSrc) && !hasError;
   const isVideo = hasImage && VIDEO_SRC_PATTERN.test(imageSrc ?? '');

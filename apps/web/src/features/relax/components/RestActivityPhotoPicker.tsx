@@ -13,6 +13,7 @@ import {
 } from 'react';
 import { appBridge } from '../../../shared/bridge/bridge';
 import { useAppToast } from '../../../shared/components/AppToast';
+import { MAX_UPLOAD_FILE_SIZE, readFileAsBase64 } from '../lib/photoFile';
 import { EMPTY_PHOTO_TILES, PHOTO_PICKER_IMAGES } from '../model/restActivity.constants';
 import * as sharedStyles from './RestActivity.shared.css';
 import * as styles from './RestActivityPhotoPicker.css';
@@ -47,7 +48,6 @@ const LOAD_MORE_GALLERY_SKELETON_COUNT = 6;
 const PHOTO_GRID_COLUMN_COUNT = 3;
 const PHOTO_GRID_GAP = 3;
 const PHOTO_GRID_ROW_OVERSCAN = 4;
-const MAX_NATIVE_FILE_SIZE = 15 * 1024 * 1024;
 
 type RestActivityPhotoPickerProps = {
   onClose: () => void;
@@ -106,28 +106,6 @@ async function takeNativePhoto() {
   return appBridge.takeGalleryPhoto();
 }
 
-function readFileAsBase64(file: File) {
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-
-    reader.onerror = () => reject(new Error('선택한 사진 데이터를 읽지 못했어요.'));
-    reader.onload = () => {
-      if (typeof reader.result !== 'string') {
-        reject(new Error('선택한 사진 데이터를 읽지 못했어요.'));
-        return;
-      }
-
-      const separatorIndex = reader.result.indexOf(',');
-      if (separatorIndex < 0) {
-        reject(new Error('선택한 사진 데이터를 읽지 못했어요.'));
-        return;
-      }
-      resolve(reader.result.slice(separatorIndex + 1));
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
 export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivityPhotoPickerProps) {
   const { showToast } = useAppToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -141,6 +119,7 @@ export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivity
   const galleryEndCursorRef = useRef<string | undefined>(undefined);
   const galleryHasNextPageRef = useRef(true);
   const [galleryPhotos, setGalleryPhotos] = useState<GalleryPhotoItem[]>([]);
+  const [useNativeGallery, setUseNativeGallery] = useState(isReactNativeWebView());
   const [isGalleryLoadingInitial, setIsGalleryLoadingInitial] = useState(isReactNativeWebView());
   const [isGalleryLoadingMore, setIsGalleryLoadingMore] = useState(false);
   const [galleryHasNextPage, setGalleryHasNextPage] = useState(true);
@@ -151,7 +130,7 @@ export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivity
     scrollTop: 0,
     viewportHeight: 0
   });
-  const isNativeGallery = isReactNativeWebView();
+  const isNativeGallery = useNativeGallery;
   const isGalleryLoading = isGalleryLoadingInitial || isGalleryLoadingMore;
   const photos =
     galleryPhotos.length > 0 ? galleryPhotos : isNativeGallery ? [] : PHOTO_PICKER_IMAGES;
@@ -263,6 +242,7 @@ export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivity
           setGalleryPhotos([]);
           setGalleryHasNextPage(false);
           galleryHasNextPageRef.current = false;
+          setUseNativeGallery(false);
         }
       } finally {
         if (isActiveRef.current) {
@@ -351,7 +331,7 @@ export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivity
     }
 
     if (preparingAssetId) return;
-    if (file.size > MAX_NATIVE_FILE_SIZE) {
+    if (file.size > MAX_UPLOAD_FILE_SIZE) {
       showToast('15MB 이하의 사진을 선택해 주세요.');
       return;
     }
@@ -381,7 +361,12 @@ export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivity
       if (!isActiveRef.current) return;
 
       console.error('Failed to prepare a file photo.', error);
-      showToast(error instanceof Error ? error.message : '사진을 불러오지 못했어요.');
+      setUseNativeGallery(false);
+      onPhotoSelect({
+        kind: 'file',
+        previewSrc: URL.createObjectURL(file),
+        file
+      });
       setPreparingAssetId(undefined);
     }
   };

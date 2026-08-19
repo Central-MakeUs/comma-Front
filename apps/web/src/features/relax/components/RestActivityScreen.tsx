@@ -6,9 +6,11 @@ import { expireSession } from '../../../shared/api/client';
 import { appBridge } from '../../../shared/bridge/bridge';
 import { useAppToast } from '../../../shared/components/AppToast';
 import { useNativeBackHandler } from '../../../shared/components/NativeBack';
+import { isNativeApp } from '../../../shared/lib/tokenStorage';
 import { userQueryKeys } from '../../auth/api/user.queries';
 import { createFeed } from '../../feed/api/feed.api';
 import { clearStoredActivityId, getStoredActivityId } from '../lib/activityStorage';
+import { MAX_UPLOAD_FILE_SIZE, readFileAsBase64 } from '../lib/photoFile';
 import type { RestLoadingLocationState } from '../model/relax.types';
 import { ACTIVITY_PROGRESS_COUNT } from '../model/restActivity.constants';
 import { type RestActivityDraft, RestActivityForm } from './RestActivityForm';
@@ -21,6 +23,32 @@ function isObjectUrl(value?: string) {
 
 function isNativeUploadUnauthorizedError(error: unknown) {
   return error instanceof Error && error.message.includes(NATIVE_FEED_UPLOAD_UNAUTHORIZED_ERROR);
+}
+
+async function createFeedWithFilePhoto(file: File, request: FeedCreateRequest) {
+  if (!isNativeApp()) {
+    const response = await createFeed(file, request);
+    if (!response.success) {
+      throw new Error(response.message ?? '피드 업로드에 실패했어요.');
+    }
+    return;
+  }
+
+  if (file.size > MAX_UPLOAD_FILE_SIZE) {
+    throw new Error('15MB 이하의 사진을 선택해 주세요.');
+  }
+
+  const preparedPhoto = await appBridge.prepareFilePhoto({
+    base64: await readFileAsBase64(file),
+    filename: file.name,
+    mimeType: file.type || undefined
+  });
+
+  try {
+    await appBridge.createFeedWithGalleryPhoto(preparedPhoto, request);
+  } finally {
+    await appBridge.deletePreparedGalleryPhoto(preparedPhoto.uri).catch(() => {});
+  }
 }
 
 function RestActivityScreen() {
@@ -57,10 +85,7 @@ function RestActivityScreen() {
       request: FeedCreateRequest;
     }) => {
       if (photo.kind === 'file') {
-        const response = await createFeed(photo.file, request);
-        if (!response.success) {
-          throw new Error(response.message ?? '피드 업로드에 실패했어요.');
-        }
+        await createFeedWithFilePhoto(photo.file, request);
         return;
       }
 

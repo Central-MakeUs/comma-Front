@@ -6,6 +6,7 @@ import {
 } from '../../../shared/api/client';
 import { appBridge } from '../../../shared/bridge/bridge';
 import {
+  isNativeApp,
   setOnboardingCompleted,
   setStoredNickname,
   setTokens
@@ -26,6 +27,19 @@ const persistLoginData = (data: LoginData) => {
 };
 
 export const login = async ({ field, code, redirectUri }: LoginRequest) => {
+  if (isNativeApp()) {
+    if (!appBridge.completeLogin) {
+      return { success: false, message: 'Native login bridge is unavailable.' };
+    }
+
+    const result = await appBridge.completeLogin({ field, code, redirectUri });
+    if (result.success) {
+      if (result.data) persistLoginData(result.data);
+      resetSessionExpiredState();
+    }
+    return result;
+  }
+
   const { data } = await publicApiClient.post<TokenLoginResponse>(`/api/auth/login/${field}`, {
     code,
     redirectUri

@@ -1,9 +1,17 @@
 import { Toast } from '@comma/design-system';
+import { useMutation } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AppScreen, BackgroundImage } from '../../../shared/components/layout';
+import { type LoginData, login } from '../api/auth.api';
 import { useNativeSocialLogin } from '../hooks/useNativeSocialLogin';
-import { createWebOAuthState } from '../lib/oauthState';
+import {
+  clearNativeGoogleOAuthState,
+  consumeNativeGoogleOAuthState,
+  createNativeGoogleOAuthState,
+  createWebOAuthState,
+  hasPendingNativeGoogleOAuthState
+} from '../lib/oauthState';
 import { PRIVACY_POLICY, TERMS_OF_SERVICE } from '../model/auth.constants';
 import * as styles from './LoginScreen.css';
 
@@ -23,11 +31,34 @@ interface IAppleRes {
 
 const LOGIN_TOAST_DURATION_MS = 4000;
 const LOGIN_ERROR_MESSAGE = '로그인 에러입니다. 다시 시도해주세요.';
-const USE_NATIVE_WEBVIEW_LOGIN = false; // true: 모바일 웹뷰 네이티브 SDK 로그인 사용, false: 웹 OAuth 로그인만 사용
+const GOOGLE_LOGIN_TIMEOUT_MS = 60000;
+const GOOGLE_LOGIN_RECOVERY_TIMEOUT_MS = 10000;
+const USE_NATIVE_SDK_WEBVIEW_LOGIN = import.meta.env.VITE_USE_NATIVE_SDK_WEBVIEW_LOGIN === 'true';
+
+type WebProvider = 'KAKAO' | 'GOOGLE' | 'APPLE';
+
+const getWebRedirectUri = (provider: WebProvider) => {
+  const configuredRedirectUri =
+    provider === 'KAKAO'
+      ? KAKAO_REDIRECT_URI
+      : provider === 'GOOGLE'
+        ? GOOGLE_REDIRECT_URI
+        : APPLE_REDIRECT_URI;
+
+  if (configuredRedirectUri) return configuredRedirectUri;
+  if (typeof window === 'undefined') return '';
+
+  return `${window.location.origin}/oauth/${provider.toLowerCase()}/callback`;
+};
 
 interface LoginToastState {
   id: number;
   message: string;
+}
+
+interface GoogleLoginResult {
+  code: string;
+  redirectUri: string;
 }
 
 const getLoginState = (state: unknown) =>
@@ -41,23 +72,98 @@ const getLoginState = (state: unknown) =>
       }
     : undefined;
 
+const getPostLoginPath = (data: LoginData) => (data.onboardingCompleted ? '/loading' : '/nickname');
+
+const waitForGoogleLogin = ({
+  signal,
+  timeoutMs = GOOGLE_LOGIN_TIMEOUT_MS
+}: {
+  signal?: AbortSignal;
+  timeoutMs?: number;
+} = {}): Promise<GoogleLoginResult> =>
+  new Promise((resolve, reject) => {
+    let isSettled = false;
+
+    const removeMessageListeners = () => {
+      window.removeEventListener('message', handler);
+      document.removeEventListener('message', handler as EventListener);
+      signal?.removeEventListener('abort', onAbort);
+    };
+
+    const finish = (callback: () => void) => {
+      if (isSettled) return;
+      isSettled = true;
+      window.clearTimeout(timeoutId);
+      removeMessageListeners();
+      callback();
+    };
+
+    const timeoutId = window.setTimeout(() => {
+      finish(() => {
+        clearNativeGoogleOAuthState();
+        reject(new Error('구글 로그인 응답 시간이 초과되었습니다.'));
+      });
+    }, timeoutMs);
+
+    const onAbort = () => {
+      finish(() => reject(new DOMException('Google login was cancelled.', 'AbortError')));
+    };
+
+    function handler(event: MessageEvent) {
+      let message:
+        | {
+            type?: string;
+            code?: string;
+            redirectUri?: string;
+            state?: string;
+            error?: string;
+          }
+        | undefined;
+      try {
+        message = typeof event.data === 'string' ? JSON.parse(event.data) : undefined;
+      } catch {
+        return;
+      }
+
+      if (message?.type === 'GOOGLE_LOGIN_SUCCESS') {
+        if (!consumeNativeGoogleOAuthState(message.state)) return;
+        finish(() => resolve({ code: message.code ?? '', redirectUri: message.redirectUri ?? '' }));
+      } else if (message?.type === 'GOOGLE_LOGIN_FAILED') {
+        if (!consumeNativeGoogleOAuthState(message.state)) return;
+        finish(() => reject(new Error(message.error ?? '구글 로그인 중 에러가 발생했습니다.')));
+      }
+    }
+
+    window.addEventListener('message', handler);
+    document.addEventListener('message', handler as EventListener);
+    if (signal?.aborted) onAbort();
+    else signal?.addEventListener('abort', onAbort, { once: true });
+  });
+
 function LoginScreen() {
   const navigate = useNavigate();
   const location = useLocation();
+  const hasStartedNativeGoogleRecovery = useRef(false);
+  const googleLoginAbortControllerRef = useRef<AbortController | null>(null);
+  const isGoogleOAuthPendingRef = useRef(false);
   const nextToastIdRef = useRef(0);
+  const [isGoogleOAuthPending, setIsGoogleOAuthPending] = useState(false);
   const [loginToast, setLoginToast] = useState<LoginToastState | null>(null);
   const isMobileWebView = typeof window !== 'undefined' && window.ReactNativeWebView !== undefined;
   const isAndroidApp = isMobileWebView && /Android/i.test(window.navigator.userAgent);
-  const shouldUseNativeLogin = isMobileWebView && USE_NATIVE_WEBVIEW_LOGIN;
+  const shouldUseNativeSdkLogin = isMobileWebView && USE_NATIVE_SDK_WEBVIEW_LOGIN;
+  const { isPending: isGoogleLoginPending, mutateAsync: googleLoginMutateAsync } = useMutation({
+    mutationFn: login
+  });
+  const { isPending: isNativeSdkLoginPending, startLogin: startNativeSdkLogin } =
+    useNativeSocialLogin({
+      enabled: shouldUseNativeSdkLogin
+    });
 
   const showLoginToast = useCallback((message: string) => {
     nextToastIdRef.current += 1;
     setLoginToast({ id: nextToastIdRef.current, message });
   }, []);
-  const { isPending: isNativeLoginPending, startLogin: startNativeLogin } = useNativeSocialLogin({
-    enabled: shouldUseNativeLogin
-  });
-
   useEffect(() => {
     if (!loginToast) return;
 
@@ -82,21 +188,81 @@ function LoginScreen() {
     navigate('.', { replace: true });
   }, [location.state, navigate, showLoginToast]);
 
+  useEffect(
+    () => () => {
+      googleLoginAbortControllerRef.current?.abort();
+      googleLoginAbortControllerRef.current = null;
+    },
+    []
+  );
+
+  useEffect(() => {
+    if (
+      !isMobileWebView ||
+      hasStartedNativeGoogleRecovery.current ||
+      !hasPendingNativeGoogleOAuthState()
+    ) {
+      return;
+    }
+
+    hasStartedNativeGoogleRecovery.current = true;
+    isGoogleOAuthPendingRef.current = true;
+    setIsGoogleOAuthPending(true);
+    const controller = new AbortController();
+    googleLoginAbortControllerRef.current = controller;
+    void waitForGoogleLogin({
+      signal: controller.signal,
+      timeoutMs: GOOGLE_LOGIN_RECOVERY_TIMEOUT_MS
+    })
+      .then(async ({ code, redirectUri }) => {
+        if (controller.signal.aborted) return;
+
+        const res = await googleLoginMutateAsync({
+          field: 'GOOGLE',
+          code,
+          redirectUri
+        });
+        if (controller.signal.aborted) return;
+
+        if (res.success && res.data) {
+          navigate(getPostLoginPath(res.data), { replace: true });
+        } else {
+          showLoginToast(LOGIN_ERROR_MESSAGE);
+        }
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) clearNativeGoogleOAuthState();
+      })
+      .finally(() => {
+        if (googleLoginAbortControllerRef.current === controller) {
+          googleLoginAbortControllerRef.current = null;
+        }
+        if (!controller.signal.aborted) {
+          isGoogleOAuthPendingRef.current = false;
+          setIsGoogleOAuthPending(false);
+        }
+      });
+
+    window.ReactNativeWebView?.postMessage(JSON.stringify({ type: 'GOOGLE_LOGIN_RECOVERY_READY' }));
+  }, [googleLoginMutateAsync, isMobileWebView, navigate, showLoginToast]);
+
   const startKakaoWebLogin = useCallback(() => {
     const state = createWebOAuthState('KAKAO');
+    const redirectUri = getWebRedirectUri('KAKAO');
     window.location.href =
       `https://kauth.kakao.com/oauth/authorize` +
       `?response_type=code` +
       `&client_id=${REST_API_KEY}` +
-      `&redirect_uri=${encodeURIComponent(KAKAO_REDIRECT_URI)}` +
+      `&redirect_uri=${encodeURIComponent(redirectUri)}` +
       `&state=${encodeURIComponent(state)}`;
   }, []);
 
   const startGoogleWebLogin = useCallback(() => {
     const state = createWebOAuthState('GOOGLE');
+    const redirectUri = getWebRedirectUri('GOOGLE');
     const params = new URLSearchParams({
       client_id: GOOGLE_CLIENT_ID,
-      redirect_uri: GOOGLE_REDIRECT_URI,
+      redirect_uri: redirectUri,
       response_type: 'code',
       scope: [
         'https://www.googleapis.com/auth/userinfo.email',
@@ -108,10 +274,11 @@ function LoginScreen() {
   }, []);
 
   const startAppleWebLogin = useCallback(async () => {
+    const redirectUri = getWebRedirectUri('APPLE');
     window.AppleID?.auth.init({
       clientId: APPLE_CLIENT_ID,
       scope: 'email name',
-      redirectURI: `${APPLE_REDIRECT_URI}`,
+      redirectURI: `${redirectUri}`,
       usePopup: true
     });
 
@@ -123,23 +290,83 @@ function LoginScreen() {
     }
   }, [navigate, showLoginToast]);
 
-  const onKakaoClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
+  const onKakaoClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    if (shouldUseNativeLogin && (await startNativeLogin('KAKAO'))) return;
+    if (shouldUseNativeSdkLogin) {
+      void startNativeSdkLogin('KAKAO').then((handled) => {
+        if (!handled) showLoginToast(LOGIN_ERROR_MESSAGE);
+      });
+      return;
+    }
 
     startKakaoWebLogin();
   };
 
   const onGoogleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    if (shouldUseNativeLogin && (await startNativeLogin('GOOGLE'))) return;
+    if (shouldUseNativeSdkLogin) {
+      if (await startNativeSdkLogin('GOOGLE')) return;
+      showLoginToast(LOGIN_ERROR_MESSAGE);
+      return;
+    }
+
+    if (isMobileWebView) {
+      if (isGoogleOAuthPendingRef.current || isGoogleLoginPending) return;
+
+      isGoogleOAuthPendingRef.current = true;
+      setIsGoogleOAuthPending(true);
+
+      const state = createNativeGoogleOAuthState();
+      const controller = new AbortController();
+      googleLoginAbortControllerRef.current = controller;
+      const googleLoginResponse = waitForGoogleLogin({ signal: controller.signal });
+      window.ReactNativeWebView?.postMessage(
+        JSON.stringify({
+          type: 'GOOGLE_LOGIN',
+          state
+        })
+      );
+
+      try {
+        const { code, redirectUri } = await googleLoginResponse;
+        const res = await googleLoginMutateAsync({
+          field: 'GOOGLE',
+          code,
+          redirectUri
+        });
+        if (controller.signal.aborted) return;
+
+        if (res.success && res.data) {
+          navigate(getPostLoginPath(res.data), { replace: true });
+        } else {
+          showLoginToast(LOGIN_ERROR_MESSAGE);
+        }
+      } catch {
+        if (controller.signal.aborted) return;
+        clearNativeGoogleOAuthState();
+        showLoginToast(LOGIN_ERROR_MESSAGE);
+      } finally {
+        if (googleLoginAbortControllerRef.current === controller) {
+          googleLoginAbortControllerRef.current = null;
+        }
+        if (!controller.signal.aborted) {
+          isGoogleOAuthPendingRef.current = false;
+          setIsGoogleOAuthPending(false);
+        }
+      }
+      return;
+    }
 
     startGoogleWebLogin();
   };
 
   const onAppleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    if (shouldUseNativeLogin && (await startNativeLogin('APPLE'))) return;
+    if (shouldUseNativeSdkLogin) {
+      if (await startNativeSdkLogin('APPLE')) return;
+      showLoginToast(LOGIN_ERROR_MESSAGE);
+      return;
+    }
 
     await startAppleWebLogin();
   };
@@ -184,7 +411,7 @@ function LoginScreen() {
           className={styles.kakaoBtn}
           type="button"
           onClick={onKakaoClick}
-          disabled={isNativeLoginPending}
+          disabled={isNativeSdkLoginPending}
         >
           <img src="/images/kakao_logo.svg" alt="카카오 아이콘" width={18} height={18} />
           카카오톡으로 로그인
@@ -194,7 +421,7 @@ function LoginScreen() {
             className={styles.appleBtn}
             type="button"
             onClick={onAppleClick}
-            disabled={isNativeLoginPending}
+            disabled={isNativeSdkLoginPending}
           >
             <img src="/images/apple_logo.svg" alt="애플 아이콘" width={16} height={19} />
             Apple로 로그인
@@ -204,7 +431,7 @@ function LoginScreen() {
           className={styles.googleBtn}
           type="button"
           onClick={onGoogleClick}
-          disabled={isNativeLoginPending}
+          disabled={isNativeSdkLoginPending || isGoogleOAuthPending || isGoogleLoginPending}
         >
           <img src="/images/google_logo.svg" alt="구글 아이콘" width={20} height={20} />
           Google로 로그인

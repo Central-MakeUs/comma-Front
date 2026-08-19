@@ -6,10 +6,9 @@ import { getPostLoginPath } from '../lib/authNavigation';
 
 interface UseNativeSocialLoginOptions {
   enabled: boolean;
-  onError: () => void;
 }
 
-export function useNativeSocialLogin({ enabled, onError }: UseNativeSocialLoginOptions) {
+export function useNativeSocialLogin({ enabled }: UseNativeSocialLoginOptions) {
   const navigate = useNavigate();
   const isLoginInProgressRef = useRef(false);
   const [pendingProvider, setPendingProvider] = useState<AuthProvider | null>(null);
@@ -17,27 +16,27 @@ export function useNativeSocialLogin({ enabled, onError }: UseNativeSocialLoginO
 
   const startLogin = useCallback(
     async (provider: AuthProvider) => {
-      if (!enabled || isLoginInProgressRef.current || isPending) return;
+      if (!enabled || isLoginInProgressRef.current || isPending) return false;
 
       isLoginInProgressRef.current = true;
       setPendingProvider(provider);
       try {
         const response = await mutateAsync(provider);
-        if (response.cancelled) return;
+        if (response.cancelled) return true;
         if (!response.success || !response.data) {
-          onError();
-          return;
+          return false;
         }
 
         navigate(getPostLoginPath(response.data), { replace: true });
+        return true;
       } catch {
-        onError();
+        return false;
       } finally {
         isLoginInProgressRef.current = false;
         setPendingProvider(null);
       }
     },
-    [enabled, isPending, mutateAsync, navigate, onError]
+    [enabled, isPending, mutateAsync, navigate]
   );
 
   return {

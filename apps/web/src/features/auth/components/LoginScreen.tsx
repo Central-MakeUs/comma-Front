@@ -52,12 +52,8 @@ function LoginScreen() {
     nextToastIdRef.current += 1;
     setLoginToast({ id: nextToastIdRef.current, message });
   }, []);
-  const handleNativeLoginError = useCallback(() => {
-    showLoginToast(LOGIN_ERROR_MESSAGE);
-  }, [showLoginToast]);
   const { isPending: isNativeLoginPending, startLogin: startNativeLogin } = useNativeSocialLogin({
-    enabled: isMobileWebView,
-    onError: handleNativeLoginError
+    enabled: isMobileWebView
   });
 
   useEffect(() => {
@@ -84,13 +80,7 @@ function LoginScreen() {
     navigate('.', { replace: true });
   }, [location.state, navigate, showLoginToast]);
 
-  const onKakaoClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    if (isMobileWebView) {
-      await startNativeLogin('KAKAO');
-      return;
-    }
-
+  const startKakaoWebLogin = useCallback(() => {
     const state = createWebOAuthState('KAKAO');
     window.location.href =
       `https://kauth.kakao.com/oauth/authorize` +
@@ -98,15 +88,9 @@ function LoginScreen() {
       `&client_id=${REST_API_KEY}` +
       `&redirect_uri=${encodeURIComponent(KAKAO_REDIRECT_URI)}` +
       `&state=${encodeURIComponent(state)}`;
-  };
+  }, []);
 
-  const onGoogleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    if (isMobileWebView) {
-      await startNativeLogin('GOOGLE');
-      return;
-    }
-
+  const startGoogleWebLogin = useCallback(() => {
     const state = createWebOAuthState('GOOGLE');
     const params = new URLSearchParams({
       client_id: GOOGLE_CLIENT_ID,
@@ -119,15 +103,9 @@ function LoginScreen() {
       state
     });
     window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
-  };
+  }, []);
 
-  const onAppleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    if (isMobileWebView) {
-      await startNativeLogin('APPLE');
-      return;
-    }
-
+  const startAppleWebLogin = useCallback(async () => {
     window.AppleID?.auth.init({
       clientId: APPLE_CLIENT_ID,
       scope: 'email name',
@@ -141,6 +119,27 @@ function LoginScreen() {
     } catch {
       showLoginToast(LOGIN_ERROR_MESSAGE);
     }
+  }, [navigate, showLoginToast]);
+
+  const onKakaoClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    if (isMobileWebView && (await startNativeLogin('KAKAO'))) return;
+
+    startKakaoWebLogin();
+  };
+
+  const onGoogleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    if (isMobileWebView && (await startNativeLogin('GOOGLE'))) return;
+
+    startGoogleWebLogin();
+  };
+
+  const onAppleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    if (isMobileWebView && (await startNativeLogin('APPLE'))) return;
+
+    await startAppleWebLogin();
   };
 
   const onUrlClick = (url: string) => {

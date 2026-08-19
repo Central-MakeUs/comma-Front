@@ -1,13 +1,14 @@
-import { NavigationBar } from '@comma/design-system';
-import type {
-  ComponentProps,
-  ElementType,
-  HTMLAttributes,
-  ReactNode,
-  Ref,
-  UIEventHandler
+import { NavigationBar, VIDEO_SRC_PATTERN } from '@comma/design-system';
+import {
+  type ComponentProps,
+  type ElementType,
+  type HTMLAttributes,
+  type ReactNode,
+  type Ref,
+  type UIEventHandler,
+  useEffect,
+  useState
 } from 'react';
-import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { navigateToNavigationItem } from '../../lib/navigation';
 import * as styles from './layout.css';
@@ -84,7 +85,6 @@ export function TabScrollArea({
   );
 }
 
-const VIDEO_SRC_PATTERN = /\.(mp4|webm|mov)(?:[?#]|$)/i;
 const FALLBACK_BACKGROUND_SRC = '/images/feed-image.svg';
 
 export function BackgroundImage({ className, src }: { className?: string; src: string }) {

@@ -161,7 +161,7 @@
         "android.permission.RECORD_AUDIO",
         "android.permission.SYSTEM_ALERT_WINDOW"
       ],
-      "versionCode": 17
+      "versionCode": 18
     },
     "extra": {
       "apiBaseUrl": "https://167-126-10-48.sslip.io",

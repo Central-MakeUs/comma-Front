@@ -1,5 +1,6 @@
 import type { ComponentPropsWithoutRef } from 'react';
 import { useEffect, useState } from 'react';
+import { VIDEO_SRC_PATTERN } from '../lib/media';
 import { image, imageUpload, imageUploadState, plusIcon, selectText } from './ImageUpload.css';
 
 export type ImageUploadState = 'none' | 'select' | 'exist';
@@ -16,8 +17,6 @@ const defaultAriaLabels: Record<ImageUploadState, string> = {
   select: '사진 선택',
   exist: '사진 변경'
 };
-
-const VIDEO_SRC_PATTERN = /\.(mp4|webm|mov)(?:[?#]|$)/i;
 
 export function ImageUpload({
   state = 'none',

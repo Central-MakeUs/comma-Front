@@ -43,10 +43,6 @@ export function ImageUpload({
     .filter(Boolean)
     .join(' ');
 
-  // iOS WebKit renders <video> in its own hardware compositing layer, which can ignore
-  // an ancestor's clip-path/overflow:hidden. Keep clip-path on the button too (it still
-  // shapes the ::after overlay and the button's own box), and also apply it directly to
-  // the media element so the video itself is clipped if WebKit honors it there.
   const { clipPath, WebkitClipPath } = style ?? {};
   const mediaStyle = clipPath || WebkitClipPath ? { clipPath, WebkitClipPath } : undefined;
 

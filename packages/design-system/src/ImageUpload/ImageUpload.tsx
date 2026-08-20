@@ -43,8 +43,28 @@ export function ImageUpload({
     .filter(Boolean)
     .join(' ');
 
-  const { clipPath, WebkitClipPath } = style ?? {};
-  const mediaStyle = clipPath || WebkitClipPath ? { clipPath, WebkitClipPath } : undefined;
+  const { clipPath, WebkitClipPath, width, height } = style ?? {};
+  const pathData =
+    typeof clipPath === 'string' ? clipPath.match(/^path\(\s*["'](.+)["']\s*\)$/)?.[1] : undefined;
+  const maskImage =
+    pathData && typeof width === 'number' && typeof height === 'number'
+      ? `url("data:image/svg+xml,${encodeURIComponent(
+          `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}"><path d="${pathData}" fill="#fff"/></svg>`
+        )}")`
+      : undefined;
+  const videoStyle = maskImage
+    ? {
+        WebkitMaskImage: maskImage,
+        maskImage,
+        WebkitMaskSize: '100% 100%',
+        maskSize: '100% 100%',
+        WebkitMaskRepeat: 'no-repeat' as const,
+        maskRepeat: 'no-repeat' as const
+      }
+    : clipPath || WebkitClipPath
+      ? { clipPath, WebkitClipPath }
+      : undefined;
+  const imageStyle = clipPath || WebkitClipPath ? { clipPath, WebkitClipPath } : undefined;
 
   return (
     <button
@@ -67,7 +87,7 @@ export function ImageUpload({
             onError={() => setHasError(true)}
             playsInline
             src={imageSrc}
-            style={mediaStyle}
+            style={videoStyle}
           />
         ) : (
           <img
@@ -75,7 +95,7 @@ export function ImageUpload({
             className={image}
             onError={() => setHasError(true)}
             src={imageSrc}
-            style={mediaStyle}
+            style={imageStyle}
           />
         )
       ) : null}

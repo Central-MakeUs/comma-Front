@@ -58,7 +58,7 @@
     "ios": {
       "bundleIdentifier": "com.comma.app",
       "icon": "./assets/icon.png",
-      "buildNumber": "29",
+      "buildNumber": "30",
       "supportsTablet": false,
       "usesAppleSignIn": true,
       "infoPlist": {

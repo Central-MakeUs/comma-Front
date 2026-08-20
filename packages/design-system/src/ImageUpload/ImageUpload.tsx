@@ -31,7 +31,6 @@ export function ImageUpload({
 }: ImageUploadProps) {
   const [hasError, setHasError] = useState(false);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: reset error state when imageSrc or state changes so a previously broken image can retry
   useEffect(() => {
     setHasError(false);
   }, [imageSrc, state]);
@@ -42,29 +41,6 @@ export function ImageUpload({
   const buttonClassName = [imageUpload, imageUploadState[visualState], className]
     .filter(Boolean)
     .join(' ');
-
-  const { clipPath, WebkitClipPath, width, height } = style ?? {};
-  const pathData =
-    typeof clipPath === 'string' ? clipPath.match(/^path\(\s*["'](.+)["']\s*\)$/)?.[1] : undefined;
-  const maskImage =
-    pathData && typeof width === 'number' && typeof height === 'number'
-      ? `url("data:image/svg+xml,${encodeURIComponent(
-          `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}"><path d="${pathData}" fill="#fff"/></svg>`
-        )}")`
-      : undefined;
-  const videoStyle = maskImage
-    ? {
-        WebkitMaskImage: maskImage,
-        maskImage,
-        WebkitMaskSize: '100% 100%',
-        maskSize: '100% 100%',
-        WebkitMaskRepeat: 'no-repeat' as const,
-        maskRepeat: 'no-repeat' as const
-      }
-    : clipPath || WebkitClipPath
-      ? { clipPath, WebkitClipPath }
-      : undefined;
-  const imageStyle = clipPath || WebkitClipPath ? { clipPath, WebkitClipPath } : undefined;
 
   return (
     <button
@@ -87,16 +63,9 @@ export function ImageUpload({
             onError={() => setHasError(true)}
             playsInline
             src={imageSrc}
-            style={videoStyle}
           />
         ) : (
-          <img
-            alt={imageAlt}
-            className={image}
-            onError={() => setHasError(true)}
-            src={imageSrc}
-            style={imageStyle}
-          />
+          <img alt={imageAlt} className={image} onError={() => setHasError(true)} src={imageSrc} />
         )
       ) : null}
     </button>

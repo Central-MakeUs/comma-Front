@@ -8,7 +8,11 @@ export const container = style({
 });
 
 export const header = style({
-  width: '100%'
+  position: 'relative',
+  zIndex: 2,
+  width: '100%',
+  flexShrink: 0,
+  background: colors.backgroundPrimary
 });
 
 export const title = style({
@@ -42,9 +46,14 @@ export const secondChip = style({
 });
 
 export const scrollContainer = style({
+  position: 'relative',
+  zIndex: 1,
   display: 'flex',
   flexDirection: 'column',
-  gap: 'clamp(24px, 4.69dvh, 40px)'
+  gap: 'clamp(24px, 4.69dvh, 40px)',
+  isolation: 'isolate',
+  contain: 'paint',
+  background: colors.backgroundPrimary
 });
 
 export const virtualFeedList = style({

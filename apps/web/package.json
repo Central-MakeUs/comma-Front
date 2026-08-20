@@ -13,6 +13,7 @@
     "@comma/bridge": "workspace:*",
     "@comma/design-system": "workspace:*",
     "@tanstack/react-query": "^5.101.2",
+    "@tanstack/react-virtual": "^3.14.10",
     "@use-funnel/react-router-dom": "0.0.16",
     "@vanilla-extract/css": "^1.21.0",
     "@vanilla-extract/dynamic": "^2.1.5",

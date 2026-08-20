@@ -7,6 +7,14 @@ export const container = style({
   paddingTop: 'var(--safe-area-top)'
 });
 
+export const header = style({
+  position: 'relative',
+  zIndex: 2,
+  width: '100%',
+  flexShrink: 0,
+  background: colors.backgroundPrimary
+});
+
 export const title = style({
   width: '100%',
   padding: 16,
@@ -15,17 +23,37 @@ export const title = style({
   color: colors.textPrimary
 });
 
+export const filterRow = style({
+  display: 'flex',
+  flexDirection: 'row',
+  width: '100%',
+  paddingTop: 8,
+  paddingBottom: 16,
+  paddingLeft: 24,
+  paddingRight: 24,
+  gap: 8,
+  overflowX: 'auto',
+  overflowY: 'hidden'
+});
+
+export const filterItem = style({
+  position: 'relative',
+  flexShrink: 0
+});
+
 export const secondChip = style({
   width: 'fit-content'
 });
 
 export const scrollContainer = style({
+  position: 'relative',
+  zIndex: 1,
   display: 'flex',
   flexDirection: 'column',
-  gap: 'clamp(24px, 4.69dvh, 40px)'
+  background: colors.backgroundPrimary
 });
 
-export const virtualFeedList = style({
+export const feedList = style({
   position: 'relative',
   width: '100%',
   flexShrink: 0,
@@ -34,9 +62,8 @@ export const virtualFeedList = style({
   listStyle: 'none'
 });
 
-export const virtualFeedCard = style({
+export const feedListItem = style({
   position: 'absolute',
-  top: 0,
   left: 0,
   width: '100%'
 });
@@ -45,6 +72,19 @@ export const alertText = style({
   ...typography.bodyReadingR,
   color: colors.textTertiary,
   margin: 'auto'
+});
+
+export const bottomScrim = style({
+  position: 'fixed',
+  left: '50%',
+  bottom: 0,
+  zIndex: 2,
+  width: '100%',
+  maxWidth: 'var(--app-max-width)',
+  height: 'calc(144px + var(--safe-area-bottom))',
+  transform: 'translateX(-50%)',
+  pointerEvents: 'none',
+  background: `linear-gradient(to bottom, rgba(50, 46, 41, 0) 0%, ${colors.backgroundPrimary} 48%, ${colors.backgroundPrimary} 100%)`
 });
 
 export const toast = style({

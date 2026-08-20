@@ -11,7 +11,7 @@ import { postMessage, WebView } from './src/bridge';
 import { shouldCaptureIosBackGesture, shouldCompleteIosBackGesture } from './src/nativeBackGesture';
 import { useWebViewMessageHandler } from './src/useWebViewMessageHandler';
 import { createSafeAreaScript, getWebUrlConfig } from './src/webViewConfig';
-import { isAllowedWebViewUrl, isExternalBrowserUrl } from './src/webViewSecurity';
+import { isAllowedWebViewUrl, isAppWebViewUrl, isExternalBrowserUrl } from './src/webViewSecurity';
 
 const NATIVE_BACK_RESPONSE_TIMEOUT_MS = 700;
 
@@ -62,7 +62,7 @@ export default function App() {
     if (
       webOrigin &&
       currentNavigationUrlRef.current &&
-      !isAllowedWebViewUrl(currentNavigationUrlRef.current, webOrigin) &&
+      !isAppWebViewUrl(currentNavigationUrlRef.current, webOrigin) &&
       canWebViewGoBackRef.current
     ) {
       webViewRef.current?.goBack();

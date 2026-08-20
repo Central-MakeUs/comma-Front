@@ -17,6 +17,8 @@ export const isAllowedWebViewUrl = (url: string, webOrigin: string) =>
   hasOrigin(url, webOrigin) ||
   OAUTH_ORIGINS.some((origin) => hasOrigin(url, origin));
 
+export const isAppWebViewUrl = hasOrigin;
+
 export const isTrustedWebViewMessageUrl = hasOrigin;
 
 export const isExternalBrowserUrl = (url: string) => {

@@ -54,19 +54,17 @@ export const scrollContainer = style({
   background: colors.backgroundPrimary
 });
 
-export const virtualFeedList = style({
-  position: 'relative',
+export const feedList = style({
   width: '100%',
   flexShrink: 0,
   margin: 0,
   padding: 0,
+  display: 'grid',
+  gap: 'clamp(24px, 4.69dvh, 40px)',
   listStyle: 'none'
 });
 
-export const virtualFeedCard = style({
-  position: 'absolute',
-  top: 0,
-  left: 0,
+export const feedListItem = style({
   width: '100%'
 });
 
@@ -74,6 +72,19 @@ export const alertText = style({
   ...typography.bodyReadingR,
   color: colors.textTertiary,
   margin: 'auto'
+});
+
+export const bottomScrim = style({
+  position: 'fixed',
+  left: '50%',
+  bottom: 0,
+  zIndex: 2,
+  width: '100%',
+  maxWidth: 'var(--app-max-width)',
+  height: 'calc(144px + var(--safe-area-bottom))',
+  transform: 'translateX(-50%)',
+  pointerEvents: 'none',
+  background: `linear-gradient(to bottom, rgba(50, 46, 41, 0) 0%, ${colors.backgroundPrimary} 48%, ${colors.backgroundPrimary} 100%)`
 });
 
 export const toast = style({

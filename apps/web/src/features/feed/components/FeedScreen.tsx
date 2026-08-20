@@ -1,14 +1,6 @@
 import { FeedCard, Toast } from '@comma/design-system';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
-import {
-  type CSSProperties,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState
-} from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { SESSION_EXPIRED_ERROR_MESSAGE } from '../../../shared/api/client';
 import { TabScrollArea, TabShell } from '../../../shared/components/layout';
 import { QueryFeedback } from '../../../shared/components/QueryFeedback';
@@ -25,70 +17,12 @@ import FeedHeader from './FeedHeader';
 import FeedToast from './FeedToast';
 
 const FEED_PAGE_SIZE = 5;
-const FEED_VIRTUAL_BODY_HEIGHT = 104;
-const FEED_VIRTUAL_OVERSCAN = 4;
-const FEED_VIEWPORT_HEIGHT_CACHE_RESET_THRESHOLD = 8;
-
-function getFeedVirtualImageHeight(viewportHeight: number) {
-  return Math.min(Math.max(viewportHeight * 0.58, 360), 499);
-}
-
-function getFeedVirtualGap(viewportHeight: number) {
-  return Math.min(Math.max(viewportHeight * 0.0469, 24), 40);
-}
-
-type VirtualFeedItemProps = {
-  children: React.ReactNode;
-  feedId: number;
-  itemTop: number;
-  onHeightChange: (feedId: number, height: number) => void;
-};
-
-function VirtualFeedItem({ children, feedId, itemTop, onHeightChange }: VirtualFeedItemProps) {
-  const itemRef = useRef<HTMLLIElement>(null);
-
-  useLayoutEffect(() => {
-    const item = itemRef.current;
-    if (!item) return undefined;
-
-    const measure = () => {
-      onHeightChange(feedId, Math.ceil(item.getBoundingClientRect().height));
-    };
-
-    measure();
-    const resizeObserver =
-      typeof ResizeObserver !== 'undefined' ? new ResizeObserver(measure) : undefined;
-    resizeObserver?.observe(item);
-
-    return () => {
-      resizeObserver?.disconnect();
-    };
-  }, [feedId, onHeightChange]);
-
-  return (
-    <li
-      className={styles.virtualFeedCard}
-      ref={itemRef}
-      style={{
-        transform: `translate3d(0, ${itemTop}px, 0)`
-      }}
-    >
-      {children}
-    </li>
-  );
-}
 
 function FeedScreen() {
   const [currentFeel, setCurrentFeel] = useState('상태');
   const [currentBody, setCurrentBody] = useState('시간');
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const feedScrollRef = useRef<HTMLDivElement>(null);
-  const [virtualMetrics, setVirtualMetrics] = useState({
-    scrollTop: 0,
-    viewportHeight: 0
-  });
-  const viewportHeightRef = useRef(0);
-  const [feedCardHeights, setFeedCardHeights] = useState<Record<number, number>>({});
 
   const nickname = getStoredNickname();
   const mood = moods[currentFeel];
@@ -119,96 +53,13 @@ function FeedScreen() {
     isFetchingNextPage: feedQuery.isFetchingNextPage,
     onHeaderVisibilityChange: setIsHeaderVisible
   });
-  const feedVirtualGap = getFeedVirtualGap(virtualMetrics.viewportHeight);
-  const estimatedFeedCardHeight =
-    getFeedVirtualImageHeight(virtualMetrics.viewportHeight) + FEED_VIRTUAL_BODY_HEIGHT;
-  const virtualFeedItems = useMemo(() => {
-    let itemTop = 0;
-
-    const items = feeds.map((feed) => {
-      const itemHeight = (feedCardHeights[feed.feedId] ?? estimatedFeedCardHeight) + feedVirtualGap;
-      const item = {
-        feed,
-        height: itemHeight,
-        top: itemTop
-      };
-
-      itemTop += itemHeight;
-      return item;
-    });
-
-    return {
-      items,
-      totalHeight: itemTop
-    };
-  }, [estimatedFeedCardHeight, feedCardHeights, feedVirtualGap, feeds]);
-  const visibleFeedRange = useMemo(() => {
-    if (!feeds.length) return { start: 0, end: -1 };
-
-    const visibleTop = virtualMetrics.scrollTop;
-    const visibleBottom = virtualMetrics.scrollTop + virtualMetrics.viewportHeight;
-    const firstVisibleIndex = virtualFeedItems.items.findIndex(
-      (item) => item.top + item.height >= visibleTop
-    );
-    const lastVisibleIndex = virtualFeedItems.items.findIndex((item) => item.top > visibleBottom);
-    const start = Math.max(
-      (firstVisibleIndex < 0 ? 0 : firstVisibleIndex) - FEED_VIRTUAL_OVERSCAN,
-      0
-    );
-    const end = Math.min(
-      (lastVisibleIndex < 0 ? feeds.length - 1 : lastVisibleIndex) + FEED_VIRTUAL_OVERSCAN,
-      feeds.length - 1
-    );
-
-    return { start, end };
-  }, [
-    feeds.length,
-    virtualFeedItems.items,
-    virtualMetrics.scrollTop,
-    virtualMetrics.viewportHeight
-  ]);
-  const visibleFeeds = virtualFeedItems.items.slice(
-    visibleFeedRange.start,
-    visibleFeedRange.end + 1
-  );
-  const virtualFeedListHeight = virtualFeedItems.totalHeight;
-  const updateFeedVirtualMetrics = useCallback((scrollElement: HTMLDivElement) => {
-    const nextMetrics = {
-      scrollTop: scrollElement.scrollTop,
-      viewportHeight: scrollElement.clientHeight
-    };
-    const previousViewportHeight = viewportHeightRef.current;
-
-    if (
-      previousViewportHeight > 0 &&
-      Math.abs(previousViewportHeight - nextMetrics.viewportHeight) >=
-        FEED_VIEWPORT_HEIGHT_CACHE_RESET_THRESHOLD
-    ) {
-      setFeedCardHeights({});
-    }
-    viewportHeightRef.current = nextMetrics.viewportHeight;
-
-    setVirtualMetrics((currentMetrics) =>
-      currentMetrics.scrollTop === nextMetrics.scrollTop &&
-      currentMetrics.viewportHeight === nextMetrics.viewportHeight
-        ? currentMetrics
-        : nextMetrics
-    );
-  }, []);
-  const handleFeedHeightChange = useCallback((feedId: number, measuredHeight: number) => {
-    setFeedCardHeights((currentHeights) =>
-      Math.abs((currentHeights[feedId] ?? 0) - measuredHeight) <= 1
-        ? currentHeights
-        : { ...currentHeights, [feedId]: measuredHeight }
-    );
-  }, []);
   const resetFeedScrollMetrics = useCallback(() => {
     const scrollElement = feedScrollRef.current;
     if (!scrollElement) return;
 
     scrollElement.scrollTop = 0;
-    updateFeedVirtualMetrics(scrollElement);
-  }, [updateFeedVirtualMetrics]);
+    setIsHeaderVisible(true);
+  }, []);
   const handleFeelChange = useCallback(
     (nextFeel: string) => {
       resetFeedScrollMetrics();
@@ -231,26 +82,6 @@ function FeedScreen() {
     console.error(feedQuery.error);
   }, [feedQuery.error]);
 
-  useEffect(() => {
-    const updateVirtualMetrics = () => {
-      const scrollElement = feedScrollRef.current;
-      if (!scrollElement) return;
-
-      updateFeedVirtualMetrics(scrollElement);
-    };
-
-    updateVirtualMetrics();
-    window.addEventListener('resize', updateVirtualMetrics);
-    const resizeObserver =
-      typeof ResizeObserver !== 'undefined' ? new ResizeObserver(updateVirtualMetrics) : undefined;
-    if (feedScrollRef.current) resizeObserver?.observe(feedScrollRef.current);
-
-    return () => {
-      window.removeEventListener('resize', updateVirtualMetrics);
-      resizeObserver?.disconnect();
-    };
-  }, [updateFeedVirtualMetrics]);
-
   return (
     <TabShell active="feed" className={styles.container}>
       <FeedToast
@@ -270,10 +101,7 @@ function FeedScreen() {
         />
         <TabScrollArea
           className={styles.scrollContainer}
-          onScroll={(event) => {
-            updateFeedVirtualMetrics(event.currentTarget);
-            onScroll(event);
-          }}
+          onScroll={onScroll}
           scrollRef={feedScrollRef}
         >
           {feedQuery.isPending ? (
@@ -289,18 +117,9 @@ function FeedScreen() {
           ) : feeds.length === 0 ? (
             <span className={styles.alertText}>쉼표를 추가해보세요.</span>
           ) : (
-            <ul
-              aria-label="피드 목록"
-              className={styles.virtualFeedList}
-              style={{ height: virtualFeedListHeight } as CSSProperties}
-            >
-              {visibleFeeds.map(({ feed: f, top }) => (
-                <VirtualFeedItem
-                  feedId={f.feedId}
-                  itemTop={top}
-                  key={f.feedId}
-                  onHeightChange={handleFeedHeightChange}
-                >
+            <ul aria-label="피드 목록" className={styles.feedList}>
+              {feeds.map((f) => (
+                <li className={styles.feedListItem} key={f.feedId}>
                   <FeedCard
                     id={String(f.feedId)}
                     imageSrc={f.imageUrl}
@@ -325,7 +144,7 @@ function FeedScreen() {
                         : () => onBlockClick(f.feedId, f.nickname ?? '')
                     }
                   />
-                </VirtualFeedItem>
+                </li>
               ))}
             </ul>
           )}
@@ -347,6 +166,7 @@ function FeedScreen() {
           ) : null}
         </TabScrollArea>
       </div>
+      <div aria-hidden="true" className={styles.bottomScrim} />
       {toastVariant ? (
         <Toast variant={toastVariant} className={styles.toast} onClose={dismissToast} />
       ) : null}

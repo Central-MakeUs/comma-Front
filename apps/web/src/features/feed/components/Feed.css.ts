@@ -50,21 +50,21 @@ export const scrollContainer = style({
   zIndex: 1,
   display: 'flex',
   flexDirection: 'column',
-  gap: 'clamp(24px, 4.69dvh, 40px)',
   background: colors.backgroundPrimary
 });
 
 export const feedList = style({
+  position: 'relative',
   width: '100%',
   flexShrink: 0,
   margin: 0,
   padding: 0,
-  display: 'grid',
-  gap: 'clamp(24px, 4.69dvh, 40px)',
   listStyle: 'none'
 });
 
 export const feedListItem = style({
+  position: 'absolute',
+  left: 0,
   width: '100%'
 });
 

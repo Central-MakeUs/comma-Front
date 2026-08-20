@@ -6,6 +6,7 @@ import { AppScreen, BackgroundImage } from '../../../shared/components/layout';
 import { useNativeBackHandler } from '../../../shared/components/NativeBack';
 import { QueryFeedback } from '../../../shared/components/QueryFeedback';
 import { BIG_HEIGHT, GAP, SMALL_WIDTH } from '../../../shared/lib/carousel.constants';
+import { isNativeApp } from '../../../shared/lib/tokenStorage';
 import { useRestResultCarousel } from '../hooks/useRestResultCarousel';
 import { useStartRelax } from '../hooks/useStartRelax';
 import { isValidRestResultLocationState } from '../lib/restResultState';
@@ -13,7 +14,6 @@ import type { RestResultLocationState } from '../model/relax.types';
 import { RestResultCard } from './RestResultCard';
 import { RestResultReselectModal } from './RestResultReselectModal';
 import * as styles from './RestResultScreen.css';
-import { isNativeApp } from '../../../shared/lib/tokenStorage';
 
 function RestResultScreen() {
   const navigate = useNavigate();
@@ -81,7 +81,11 @@ function RestResultScreen() {
 
   return (
     <AppScreen className={styles.container}>
-      <BackgroundImage className={styles.backgroundImage} src={backgroundSrc} isNative={isNativeApp()}/>
+      <BackgroundImage
+        className={styles.backgroundImage}
+        src={backgroundSrc}
+        isNative={isNativeApp()}
+      />
       <div aria-hidden="true" className={styles.backgroundOverlay} />
       {showModal ? <RestResultReselectModal onClose={() => setShowModal(false)} /> : null}
       <div

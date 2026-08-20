@@ -10,7 +10,14 @@ interface RestResultCardProps {
   isNative: boolean;
 }
 
-export function RestResultCard({ height, imageSrc, path, width, x, isNative }: RestResultCardProps) {
+export function RestResultCard({
+  height,
+  imageSrc,
+  path,
+  width,
+  x,
+  isNative
+}: RestResultCardProps) {
   return (
     <div
       style={{

@@ -33,6 +33,7 @@ export function ImageUpload({
 }: ImageUploadProps) {
   const [hasError, setHasError] = useState(false);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reset error state when imageSrc or state changes so a previously broken image can retry
   useEffect(() => {
     setHasError(false);
   }, [imageSrc, state]);

@@ -51,8 +51,6 @@ export const scrollContainer = style({
   display: 'flex',
   flexDirection: 'column',
   gap: 'clamp(24px, 4.69dvh, 40px)',
-  isolation: 'isolate',
-  contain: 'paint',
   background: colors.backgroundPrimary
 });
 

@@ -35,23 +35,10 @@ function FeedHeader({ currentFeel, currentBody, onFeelChange, onBodyChange }: IF
   };
 
   return (
-    <div style={{ width: '100%' }}>
+    <div className={styles.header}>
       <div className={styles.title}>피드</div>
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'row',
-          width: '100%',
-          paddingTop: 8,
-          paddingBottom: 16,
-          paddingLeft: 24,
-          paddingRight: 24,
-          gap: 8,
-          overflowX: 'auto',
-          overflowY: 'hidden'
-        }}
-      >
-        <div ref={feelRef} style={{ position: 'relative', flexShrink: 0 }}>
+      <div className={styles.filterRow}>
+        <div className={styles.filterItem} ref={feelRef}>
           <Chip
             aria-controls="feed-feel-filter-menu"
             aria-expanded={feelOpen}
@@ -76,7 +63,7 @@ function FeedHeader({ currentFeel, currentBody, onFeelChange, onBodyChange }: IF
             />
           ) : null}
         </div>
-        <div ref={bodyRef} style={{ position: 'relative', flexShrink: 0 }}>
+        <div className={styles.filterItem} ref={bodyRef}>
           <Chip
             aria-controls="feed-time-filter-menu"
             aria-expanded={bodyOpen}

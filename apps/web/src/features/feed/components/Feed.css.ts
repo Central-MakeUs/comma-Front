@@ -7,12 +7,34 @@ export const container = style({
   paddingTop: 'var(--safe-area-top)'
 });
 
+export const header = style({
+  width: '100%'
+});
+
 export const title = style({
   width: '100%',
   padding: 16,
   textAlign: 'center',
   ...typography.headingB,
   color: colors.textPrimary
+});
+
+export const filterRow = style({
+  display: 'flex',
+  flexDirection: 'row',
+  width: '100%',
+  paddingTop: 8,
+  paddingBottom: 16,
+  paddingLeft: 24,
+  paddingRight: 24,
+  gap: 8,
+  overflowX: 'auto',
+  overflowY: 'hidden'
+});
+
+export const filterItem = style({
+  position: 'relative',
+  flexShrink: 0
 });
 
 export const secondChip = style({

@@ -41,6 +41,14 @@ function normalizeTag(value: string) {
   return value.replace(/^#+\s*/, '').trim();
 }
 
+function appendTag(tags: string[], tagInput: string) {
+  const nextTag = normalizeTag(tagInput);
+
+  if (!nextTag || tags.includes(nextTag) || tags.length >= 2) return tags;
+
+  return [...tags, nextTag];
+}
+
 export function RestActivityForm({
   draft,
   imagePreview,
@@ -66,28 +74,30 @@ export function RestActivityForm({
   const { tagInput, tags, comment, isSecret } = draft;
 
   const handleAddTag = () => {
-    const nextTag = normalizeTag(tagInput);
-
-    if (!nextTag) return;
-
     onDraftChange((currentDraft) => {
-      if (currentDraft.tags.includes(nextTag) || currentDraft.tags.length >= 2) {
+      const nextTags = appendTag(currentDraft.tags, currentDraft.tagInput);
+
+      if (nextTags === currentDraft.tags) {
         return currentDraft;
       }
 
       return {
         ...currentDraft,
         tagInput: '',
-        tags: [...currentDraft.tags, nextTag]
+        tags: nextTags
       };
     });
   };
 
   const handleTagKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key !== 'Enter') return;
-    if (event.nativeEvent.isComposing) return;
 
-    event.preventDefault();
+    if (!event.nativeEvent.isComposing) event.preventDefault();
+    window.setTimeout(handleAddTag, 0);
+  };
+
+  const handleTagBlur = () => {
+    setFocusedInput(undefined);
     handleAddTag();
   };
 
@@ -100,6 +110,7 @@ export function RestActivityForm({
         ? 'filledPlus'
         : 'default';
   const isCommentOverLimit = comment.length > COMMENT_MAX_LENGTH;
+  const completedTags = appendTag(tags, tagInput);
   const commentState = isCommentOverLimit
     ? 'filled'
     : focusedInput === 'comment'
@@ -108,7 +119,10 @@ export function RestActivityForm({
         ? 'filled'
         : 'default';
   const isComplete =
-    Boolean(imagePreview) && tags.length > 0 && comment.trim().length > 0 && !isCommentOverLimit;
+    Boolean(imagePreview) &&
+    completedTags.length > 0 &&
+    comment.trim().length > 0 &&
+    !isCommentOverLimit;
   const isDoneDisabled = !isComplete || isSubmitting;
   const handleOpenPhotoPicker = () => {
     if (touchScrollRef.current.isDragging) {
@@ -205,7 +219,7 @@ export function RestActivityForm({
               <TextInput
                 className={styles.input}
                 maxLength={TAG_MAX_LENGTH}
-                onBlur={() => setFocusedInput(undefined)}
+                onBlur={handleTagBlur}
                 onChange={(tagInput) =>
                   onDraftChange((currentDraft) => ({ ...currentDraft, tagInput }))
                 }
@@ -268,7 +282,7 @@ export function RestActivityForm({
             disabled={isDoneDisabled}
             onClick={() =>
               onComplete({
-                hashtags: tags,
+                hashtags: completedTags,
                 review: comment.trim(),
                 isPublic: !isSecret
               })

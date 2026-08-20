@@ -151,7 +151,7 @@ function LoginScreen() {
   const [loginToast, setLoginToast] = useState<LoginToastState | null>(null);
   const isMobileWebView = typeof window !== 'undefined' && window.ReactNativeWebView !== undefined;
   const isAndroidApp = isMobileWebView && /Android/i.test(window.navigator.userAgent);
-  const shouldUseNativeSdkLogin = isMobileWebView && USE_NATIVE_SDK_WEBVIEW_LOGIN;
+  const shouldUseNativeSdkLogin = isAndroidApp && USE_NATIVE_SDK_WEBVIEW_LOGIN;
   const { isPending: isGoogleLoginPending, mutateAsync: googleLoginMutateAsync } = useMutation({
     mutationFn: login
   });

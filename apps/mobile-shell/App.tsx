@@ -152,7 +152,7 @@ export default function App() {
         style={styles.webView}
         source={{ uri: webUrl }}
         injectedJavaScriptBeforeContentLoaded={safeAreaScript}
-        originWhitelist={[trustedWebOrigin]}
+        originWhitelist={[trustedWebOrigin, 'https://kauth.kakao.com', 'https://accounts.google.com', 'https://appleid.apple.com']}
         onShouldStartLoadWithRequest={(request) => {
           if (isAllowedWebViewUrl(request.url, trustedWebOrigin)) return true;
           if (request.isTopFrame === false) {

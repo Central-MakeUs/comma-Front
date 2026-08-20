@@ -24,6 +24,7 @@ export function ImageUpload({
   imageAlt = '',
   type = 'button',
   className,
+  style,
   'aria-label': ariaLabel,
   'aria-labelledby': ariaLabelledBy,
   ...buttonProps
@@ -42,11 +43,15 @@ export function ImageUpload({
     .filter(Boolean)
     .join(' ');
 
+  const { clipPath, WebkitClipPath } = style ?? {};
+  const mediaStyle = clipPath || WebkitClipPath ? { clipPath, WebkitClipPath } : undefined;
+
   return (
     <button
       aria-label={ariaLabelledBy ? ariaLabel : (ariaLabel ?? defaultAriaLabels[state])}
       aria-labelledby={ariaLabelledBy}
       className={buttonClassName}
+      style={style}
       type={type}
       {...buttonProps}
     >
@@ -62,9 +67,16 @@ export function ImageUpload({
             onError={() => setHasError(true)}
             playsInline
             src={imageSrc}
+            style={mediaStyle}
           />
         ) : (
-          <img alt={imageAlt} className={image} onError={() => setHasError(true)} src={imageSrc} />
+          <img
+            alt={imageAlt}
+            className={image}
+            onError={() => setHasError(true)}
+            src={imageSrc}
+            style={mediaStyle}
+          />
         )
       ) : null}
     </button>

@@ -13,6 +13,7 @@ import type { RestResultLocationState } from '../model/relax.types';
 import { RestResultCard } from './RestResultCard';
 import { RestResultReselectModal } from './RestResultReselectModal';
 import * as styles from './RestResultScreen.css';
+import { isNativeApp } from '../../../shared/lib/tokenStorage';
 
 function RestResultScreen() {
   const navigate = useNavigate();
@@ -80,7 +81,7 @@ function RestResultScreen() {
 
   return (
     <AppScreen className={styles.container}>
-      <BackgroundImage className={styles.backgroundImage} src={backgroundSrc} />
+      <BackgroundImage className={styles.backgroundImage} src={backgroundSrc} isNative={isNativeApp()}/>
       <div aria-hidden="true" className={styles.backgroundOverlay} />
       {showModal ? <RestResultReselectModal onClose={() => setShowModal(false)} /> : null}
       <div
@@ -143,6 +144,7 @@ function RestResultScreen() {
                     path={layout.paths[index]}
                     width={layout.sizes[index].width}
                     x={layout.xs[index]}
+                    isNative={isNativeApp()}
                   />
                 ))
               : null}

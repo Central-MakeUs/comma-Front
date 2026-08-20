@@ -10,6 +10,7 @@ export type ImageUploadProps = Omit<ComponentPropsWithoutRef<'button'>, 'type'> 
   imageSrc?: string;
   imageAlt?: string;
   type?: 'button' | 'submit' | 'reset';
+  isNative?: boolean;
 };
 
 const defaultAriaLabels: Record<ImageUploadState, string> = {
@@ -27,6 +28,7 @@ export function ImageUpload({
   style,
   'aria-label': ariaLabel,
   'aria-labelledby': ariaLabelledBy,
+  isNative,
   ...buttonProps
 }: ImageUploadProps) {
   const [hasError, setHasError] = useState(false);
@@ -54,7 +56,7 @@ export function ImageUpload({
       {state === 'none' ? <span aria-hidden="true" className={plusIcon} /> : null}
       {state === 'select' ? <span className={selectText}>사진을 선택하세요</span> : null}
       {hasImage ? (
-        isVideo ? (
+        isVideo && isNative === false ? (
           <video
             autoPlay
             className={image}

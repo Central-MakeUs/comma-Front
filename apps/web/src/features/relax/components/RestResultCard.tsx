@@ -7,9 +7,10 @@ interface RestResultCardProps {
   path: string;
   width: number;
   x: number;
+  isNative: boolean;
 }
 
-export function RestResultCard({ height, imageSrc, path, width, x }: RestResultCardProps) {
+export function RestResultCard({ height, imageSrc, path, width, x, isNative }: RestResultCardProps) {
   return (
     <div
       style={{
@@ -26,6 +27,7 @@ export function RestResultCard({ height, imageSrc, path, width, x }: RestResultC
         imageSrc={imageSrc}
         state="exist"
         style={{ width, height, borderRadius: 0, clipPath: `path("${path}")` }}
+        isNative={isNative}
       />
     </div>
   );

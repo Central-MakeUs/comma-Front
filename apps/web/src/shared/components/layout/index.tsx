@@ -87,7 +87,7 @@ export function TabScrollArea({
 
 const FALLBACK_BACKGROUND_SRC = '/images/feed-image.svg';
 
-export function BackgroundImage({ className, src }: { className?: string; src: string }) {
+export function BackgroundImage({ className, src, isNative }: { className?: string; src: string, isNative?: boolean }) {
   const [hasError, setHasError] = useState(false);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: reset error state when src changes so a previously broken image can retry
@@ -98,7 +98,7 @@ export function BackgroundImage({ className, src }: { className?: string; src: s
   const resolvedSrc = hasError ? FALLBACK_BACKGROUND_SRC : src;
   const isVideo = !hasError && VIDEO_SRC_PATTERN.test(src);
 
-  if (isVideo) {
+  if (isVideo && isNative === false) {
     return (
       <video
         aria-hidden="true"

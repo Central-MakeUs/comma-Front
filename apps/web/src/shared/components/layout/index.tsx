@@ -89,8 +89,7 @@ const FALLBACK_BACKGROUND_SRC = '/images/feed-image.svg';
 
 export function BackgroundImage({
   className,
-  src,
-  isNative
+  src
 }: {
   className?: string;
   src: string;
@@ -106,7 +105,7 @@ export function BackgroundImage({
   const resolvedSrc = hasError ? FALLBACK_BACKGROUND_SRC : src;
   const isVideo = !hasError && VIDEO_SRC_PATTERN.test(src);
 
-  if (isVideo && isNative === false) {
+  if (isVideo) {
     return (
       <video
         aria-hidden="true"
@@ -118,6 +117,7 @@ export function BackgroundImage({
         playsInline
         src={resolvedSrc}
         tabIndex={-1}
+        style={{ position: 'absolute' }}
       />
     );
   }

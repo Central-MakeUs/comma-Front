@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { AppScreen, BackgroundImage } from '../../../shared/components/layout';
 import { type LoginData, login } from '../api/auth.api';
 import { useNativeSocialLogin } from '../hooks/useNativeSocialLogin';
+import { isAppleLoginCancelled } from '../lib/appleAuth';
 import { getIosAppleLoginMode, shouldUseNativeLogin } from '../lib/loginPolicy';
 import {
   clearNativeGoogleOAuthState,
@@ -294,8 +295,8 @@ function LoginScreen() {
           oauthState: res.authorization.state
         }
       });
-    } catch {
-      showLoginToast(LOGIN_ERROR_MESSAGE);
+    } catch (error) {
+      if (!isAppleLoginCancelled(error)) showLoginToast(LOGIN_ERROR_MESSAGE);
     }
   }, [navigate, showLoginToast]);
 

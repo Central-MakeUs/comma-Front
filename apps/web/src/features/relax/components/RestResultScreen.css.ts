@@ -3,6 +3,7 @@ import { globalStyle, style } from '@vanilla-extract/css';
 import * as layoutStyles from '../../../shared/components/layout/layout.css';
 
 export const container = style({
+  position: 'relative',
   isolation: 'isolate',
   background: colors.backgroundPrimary
 });

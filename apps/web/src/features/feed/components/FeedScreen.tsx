@@ -2,6 +2,7 @@ import { FeedCard, Toast } from '@comma/design-system';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { trackEvent } from '../../../shared/analytics/events';
 import { SESSION_EXPIRED_ERROR_MESSAGE } from '../../../shared/api/client';
 import { TabScrollArea, TabShell } from '../../../shared/components/layout';
 import { QueryFeedback } from '../../../shared/components/QueryFeedback';
@@ -90,6 +91,10 @@ function FeedScreen() {
   }, []);
   const handleFeelChange = useCallback(
     (nextFeel: string) => {
+      trackEvent('feed_filter_applied', {
+        filter_state: nextFeel === '전체' ? 'cleared' : 'applied',
+        filter_type: 'mood'
+      });
       resetFeedScrollMetrics();
       setCurrentFeel(nextFeel);
     },
@@ -97,6 +102,10 @@ function FeedScreen() {
   );
   const handleBodyChange = useCallback(
     (nextBody: string) => {
+      trackEvent('feed_filter_applied', {
+        filter_state: nextBody === '전체' ? 'cleared' : 'applied',
+        filter_type: 'time_budget'
+      });
       resetFeedScrollMetrics();
       setCurrentBody(nextBody);
     },

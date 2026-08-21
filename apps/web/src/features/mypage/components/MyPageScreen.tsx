@@ -2,6 +2,7 @@ import { Icon, SmallButton } from '@comma/design-system';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { trackEvent } from '../../../shared/analytics/events';
 import { TabShell } from '../../../shared/components/layout';
 import { QueryFeedback } from '../../../shared/components/QueryFeedback';
 import { BIG_HEIGHT, GAP, SMALL_HEIGHT, SMALL_WIDTH } from '../../../shared/lib/carousel.constants';
@@ -89,7 +90,10 @@ function MyPageScreen() {
           <SmallButton
             label="닉네임 수정"
             className={styles.nicknameEditBtn}
-            onClick={() => setShowModal(true)}
+            onClick={() => {
+              trackEvent('nickname_edit_opened');
+              setShowModal(true);
+            }}
           />
         </div>
         {latestMyFeedQuery.isError ? (

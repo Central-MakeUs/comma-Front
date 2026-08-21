@@ -6,6 +6,7 @@ import {
   useQueryClient
 } from '@tanstack/react-query';
 import { useCallback, useRef, useState } from 'react';
+import { trackEvent } from '../../../shared/analytics/events';
 import { getStoredNickname } from '../../../shared/lib/tokenStorage';
 import { blockFeed, postLikes, reportFeed } from '../api/feed.api';
 import { removeFeed, setFeedLike, toggleFeedLike } from '../lib/feedCache';
@@ -93,6 +94,7 @@ export function useFeedActions({
             likeCount: like.likeCount
           })
         );
+        trackEvent('feed_like_changed', { action: like.liked ? 'liked' : 'unliked' });
       } catch (error) {
         console.error(error);
         rollbackLike();
@@ -109,6 +111,7 @@ export function useFeedActions({
 
       try {
         await reportMutation.mutateAsync(feedId);
+        trackEvent('feed_reported');
         setToastVariant('report');
       } catch (error) {
         console.error(error);
@@ -123,6 +126,7 @@ export function useFeedActions({
 
       try {
         await blockMutation.mutateAsync(feedId);
+        trackEvent('feed_user_blocked');
         setToastVariant('block');
         updateCache((data) => removeFeed(data, feedId));
       } catch (error) {

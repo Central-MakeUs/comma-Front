@@ -10,6 +10,7 @@ import {
   useState
 } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { trackEvent } from '../../analytics/events';
 import { navigateToNavigationItem } from '../../lib/navigation';
 import * as styles from './layout.css';
 
@@ -61,7 +62,10 @@ export function TabShell({
       <NavigationBar
         active={active}
         className={cx(styles.tabNavigation, navigationClassName)}
-        onItemSelect={(item) => navigateToNavigationItem(navigate, item, active)}
+        onItemSelect={(item) => {
+          if (item !== active) trackEvent('tab_selected', { tab: item });
+          navigateToNavigationItem(navigate, item, active);
+        }}
       />
     </div>
   );

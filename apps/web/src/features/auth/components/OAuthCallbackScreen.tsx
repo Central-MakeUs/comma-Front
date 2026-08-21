@@ -1,6 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { trackEvent } from '../../../shared/analytics/events';
 import { AppScreen, BackgroundImage } from '../../../shared/components/layout';
 import { QueryFeedback } from '../../../shared/components/QueryFeedback';
 import { type AuthProvider, login } from '../api/auth.api';
@@ -39,7 +40,12 @@ function OAuthCallbackScreen() {
     hasRun.current = true;
 
     const handleLogin = async () => {
-      const returnToLogin = (message: string) => {
+      const returnToLogin = (
+        message: string,
+        eventName: 'login_cancelled' | 'login_failed' = 'login_failed',
+        method = 'unknown'
+      ) => {
+        trackEvent(eventName, { method, surface: 'web' });
         navigate('/', {
           replace: true,
           state: { reason: 'OAUTH_FAILED', message }
@@ -50,18 +56,27 @@ function OAuthCallbackScreen() {
         returnToLogin('올바르지 않은 로그인 응답입니다. 다시 시도해 주세요.');
         return;
       }
+      const method = field.toLowerCase();
 
       const searchParams = new URLSearchParams(location.search);
       const isStateValid =
         field === 'APPLE' || consumeWebOAuthState(field, searchParams.get('state'));
 
       if (searchParams.get('error')) {
-        returnToLogin('로그인이 취소되었거나 인증 제공자에서 거부되었습니다.');
+        returnToLogin(
+          '로그인이 취소되었거나 인증 제공자에서 거부되었습니다.',
+          'login_cancelled',
+          method
+        );
         return;
       }
 
       if (!isStateValid) {
-        returnToLogin('로그인 요청을 확인할 수 없습니다. 다시 시도해 주세요.');
+        returnToLogin(
+          '로그인 요청을 확인할 수 없습니다. 다시 시도해 주세요.',
+          'login_failed',
+          method
+        );
         return;
       }
 
@@ -69,7 +84,9 @@ function OAuthCallbackScreen() {
       const code = field === 'APPLE' ? (appleCode ?? queryCode) : queryCode;
       if (!code) {
         returnToLogin(
-          field === 'APPLE' ? 'APPLE 코드가 없습니다.' : '로그인 오류: 올바른 정보를 입력하세요.'
+          field === 'APPLE' ? 'APPLE 코드가 없습니다.' : '로그인 오류: 올바른 정보를 입력하세요.',
+          'login_failed',
+          method
         );
         return;
       }
@@ -82,11 +99,23 @@ function OAuthCallbackScreen() {
         });
 
         if (res.success && res.data) {
+          trackEvent(res.data.onboardingCompleted ? 'login' : 'sign_up', {
+            method,
+            surface: 'web'
+          });
           navigate(getPostLoginPath(res.data), { replace: true });
-        } else returnToLogin(res.message ?? '로그인을 완료하지 못했습니다. 다시 시도해 주세요.');
+        } else {
+          returnToLogin(
+            res.message ?? '로그인을 완료하지 못했습니다. 다시 시도해 주세요.',
+            'login_failed',
+            method
+          );
+        }
       } catch (err) {
         returnToLogin(
-          err instanceof Error ? err.message : '로그인 오류: 올바른 정보를 입력하세요.'
+          err instanceof Error ? err.message : '로그인 오류: 올바른 정보를 입력하세요.',
+          'login_failed',
+          method
         );
       }
     };

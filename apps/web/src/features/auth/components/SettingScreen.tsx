@@ -10,6 +10,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { trackEvent } from '../../../shared/analytics/events';
 import { useAppToast } from '../../../shared/components/AppToast';
 import { AppScreen } from '../../../shared/components/layout';
 import { useNativeBackHandler } from '../../../shared/components/NativeBack';
@@ -206,16 +207,23 @@ function SettingScreen() {
     mutationFn: requestPremiumAlert,
     onSuccess: (res) => {
       if (!res.success) {
+        trackEvent('premium_alert_failed', {
+          contact_method: premiumAlertContactType.toLowerCase()
+        });
         showToast(res.message ?? '프리미엄 알림 신청에 실패했습니다.');
         return;
       }
 
+      trackEvent('premium_alert_submitted', {
+        contact_method: premiumAlertContactType.toLowerCase()
+      });
       setActiveModal(null);
       setPremiumAlertContact('');
       setPremiumAlertContactType('EMAIL');
       showToast('프리미엄 알림을 신청했습니다.', { tone: 'success' });
     },
     onError: (err) => {
+      trackEvent('premium_alert_failed', { contact_method: premiumAlertContactType.toLowerCase() });
       showToast(err instanceof Error ? err.message : '프리미엄 알림 신청에 실패했습니다.');
     }
   });
@@ -223,10 +231,12 @@ function SettingScreen() {
     mutationFn: withdrawUser,
     onSuccess: async (res) => {
       if (!res.success) {
+        trackEvent('account_deletion_failed');
         showToast(res.message ?? '회원 탈퇴에 실패했습니다.');
         return;
       }
 
+      trackEvent('account_deletion_completed');
       try {
         await clearTokens();
       } catch (error) {
@@ -236,11 +246,14 @@ function SettingScreen() {
       }
     },
     onError: (err) => {
+      trackEvent('account_deletion_failed');
       showToast(err instanceof Error ? err.message : '회원 탈퇴에 실패했습니다.');
     }
   });
   const logoutMutation = useMutation({
     mutationFn: logout,
+    onSuccess: () => trackEvent('logout_completed'),
+    onError: () => trackEvent('logout_failed'),
     onSettled: async () => {
       try {
         await clearTokens();
@@ -293,7 +306,8 @@ function SettingScreen() {
     setActiveModal('withdraw');
   };
 
-  const onUrlClick = (url: string) => {
+  const onUrlClick = (url: string, documentType: 'privacy_policy' | 'terms_of_service') => {
+    trackEvent('legal_document_opened', { document_type: documentType });
     if (isWebView) {
       window.ReactNativeWebView?.postMessage(
         JSON.stringify({
@@ -307,6 +321,7 @@ function SettingScreen() {
   };
 
   const handlePremiumAlertClick = () => {
+    trackEvent('premium_alert_opened');
     setActiveModal('premiumAlert');
   };
 
@@ -388,8 +403,8 @@ function SettingScreen() {
                   : s === '회원 탈퇴'
                     ? onWithdrawClick
                     : s === '서비스 이용약관'
-                      ? () => onUrlClick(TERMS_OF_SERVICE)
-                      : () => onUrlClick(PRIVACY_POLICY)
+                      ? () => onUrlClick(TERMS_OF_SERVICE, 'terms_of_service')
+                      : () => onUrlClick(PRIVACY_POLICY, 'privacy_policy')
               }
             />
           ))}
@@ -404,7 +419,10 @@ function SettingScreen() {
           btnText={logoutMutation.isPending ? '로그아웃 중' : logOutSetting.btnText}
           onCancelClick={() => setActiveModal(null)}
           onConfirmClick={() => {
-            if (!logoutMutation.isPending) logoutMutation.mutate();
+            if (!logoutMutation.isPending) {
+              trackEvent('logout_requested');
+              logoutMutation.mutate();
+            }
           }}
         />
       ) : activeModal === 'withdraw' ? (
@@ -424,7 +442,10 @@ function SettingScreen() {
           btnText={withdrawMutation.isPending ? '탈퇴 중' : confirmWithdraw.btnText}
           onCancelClick={() => setActiveModal(null)}
           onConfirmClick={() => {
-            if (!withdrawMutation.isPending) withdrawMutation.mutate();
+            if (!withdrawMutation.isPending) {
+              trackEvent('account_deletion_requested');
+              withdrawMutation.mutate();
+            }
           }}
         />
       ) : activeModal === 'premiumAlert' ? (

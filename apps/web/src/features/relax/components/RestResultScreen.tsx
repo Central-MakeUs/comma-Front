@@ -1,6 +1,7 @@
 import { CtaButton, colors, Icon } from '@comma/design-system';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { trackEvent } from '../../../shared/analytics/events';
 import { useAppToast } from '../../../shared/components/AppToast';
 import { AppScreen, BackgroundImage } from '../../../shared/components/layout';
 import { useNativeBackHandler } from '../../../shared/components/NativeBack';
@@ -29,6 +30,11 @@ function RestResultScreen() {
   const carouselGap = GAP * layoutScale;
   const isCompactHeight = layoutScale < 1;
 
+  const openReselectModal = () => {
+    if (!showModal) trackEvent('reselection_opened', { stage: 'recommendation' });
+    setShowModal(true);
+  };
+
   useNativeBackHandler(() => {
     if (startMutation.isPending) {
       showToast('휴식을 시작하고 있어요.');
@@ -39,7 +45,7 @@ function RestResultScreen() {
       return true;
     }
 
-    setShowModal(true);
+    openReselectModal();
     return true;
   });
 
@@ -49,6 +55,12 @@ function RestResultScreen() {
     showToast('휴식 추천 중 오류가 발생했습니다. 다시 선택해주세요.');
     navigate('/rest/checklist', { replace: true });
   }, [validLocationState, navigate, showToast]);
+
+  useEffect(() => {
+    if (!selectedRelax) return;
+
+    trackEvent('recommendation_viewed', { position: selectedIndex + 1 });
+  }, [selectedIndex, selectedRelax]);
 
   const handleStartClick = async () => {
     if (startMutation.isPending) return;
@@ -61,6 +73,7 @@ function RestResultScreen() {
 
     try {
       const nextSelectedRelax = await startMutation.mutateAsync(selectedRelax);
+      trackEvent('rest_started');
       navigate('/rest/activity', {
         state: {
           data,
@@ -70,6 +83,7 @@ function RestResultScreen() {
         }
       });
     } catch (error) {
+      trackEvent('rest_start_failed');
       console.error('Failed to start relax.', error);
     }
   };
@@ -103,7 +117,7 @@ function RestResultScreen() {
             'calc(20px + var(--safe-area-top)) calc(32px + var(--safe-area-right)) 20px calc(32px + var(--safe-area-left))'
         }}
       >
-        <Icon color={colors.iconPrimary} name="x" onClick={() => setShowModal(true)} />
+        <Icon color={colors.iconPrimary} name="x" onClick={openReselectModal} />
       </div>
       <div style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
         <div

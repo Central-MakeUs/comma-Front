@@ -1,9 +1,14 @@
 import { CtaButton, colors, Icon, Modal } from '@comma/design-system';
 import { useNavigate } from 'react-router-dom';
+import { trackEvent } from '../../../shared/analytics/events';
 import * as styles from './RestResultScreen.css';
 
 export function RestResultReselectModal({ onClose }: { onClose: () => void }) {
   const navigate = useNavigate();
+  const handleClose = () => {
+    trackEvent('reselection_cancelled', { stage: 'recommendation' });
+    onClose();
+  };
 
   return (
     <Modal
@@ -11,11 +16,11 @@ export function RestResultReselectModal({ onClose }: { onClose: () => void }) {
       aria-labelledby="rest-select-modal-title"
       backdropTone="soft"
       className={styles.modalContainer}
-      onClose={onClose}
+      onClose={handleClose}
     >
       <div style={{ width: '100%', display: 'flex', flexDirection: 'column', marginBottom: 32 }}>
         <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-end' }}>
-          <Icon color={colors.iconPrimary} name="x" onClick={onClose} />
+          <Icon color={colors.iconPrimary} name="x" onClick={handleClose} />
         </div>
         <span className={styles.modalTitle} id="rest-select-modal-title">
           휴식 재선택
@@ -25,12 +30,15 @@ export function RestResultReselectModal({ onClose }: { onClose: () => void }) {
         </span>
       </div>
       <div style={{ width: '100%' }}>
-        <CtaButton className={styles.cancleBtn} onClick={onClose}>
+        <CtaButton className={styles.cancleBtn} onClick={handleClose}>
           취소
         </CtaButton>
         <CtaButton
           className={styles.confirmBtn}
-          onClick={() => navigate('/rest/checklist', { replace: true })}
+          onClick={() => {
+            trackEvent('reselection_confirmed', { stage: 'recommendation' });
+            navigate('/rest/checklist', { replace: true });
+          }}
         >
           확인
         </CtaButton>

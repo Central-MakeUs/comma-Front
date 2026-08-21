@@ -1,6 +1,7 @@
 import { BottomSheet, CtaButton, TextInput } from '@comma/design-system';
 import { useMutation } from '@tanstack/react-query';
 import type { FormEvent } from 'react';
+import { trackEvent } from '../../../../shared/analytics/events';
 import { useAppToast } from '../../../../shared/components/AppToast';
 import { useNativeBackHandler } from '../../../../shared/components/NativeBack';
 import { QueryFeedback } from '../../../../shared/components/QueryFeedback';
@@ -22,6 +23,10 @@ function MyPageNicknameModal({ onCancelClick, onSave }: MyPageNicknameModalProps
   const { value, handleChange } = useEditableNickname({
     suggestedValue: getStoredNickname() ?? undefined
   });
+  const handleCancel = () => {
+    trackEvent('nickname_edit_cancelled');
+    onCancelClick();
+  };
 
   useNativeBackHandler(() => {
     if (updateNicknameMutation.isPending) {
@@ -29,7 +34,7 @@ function MyPageNicknameModal({ onCancelClick, onSave }: MyPageNicknameModalProps
       return true;
     }
 
-    onCancelClick();
+    handleCancel();
     return true;
   });
 
@@ -42,6 +47,7 @@ function MyPageNicknameModal({ onCancelClick, onSave }: MyPageNicknameModalProps
       const data = await updateNicknameMutation.mutateAsync({ nickname: value });
 
       if (data.nickname) {
+        trackEvent('nickname_edit_completed');
         onSave(data.nickname);
         return;
       }
@@ -57,7 +63,7 @@ function MyPageNicknameModal({ onCancelClick, onSave }: MyPageNicknameModalProps
       className={styles.container}
       closeOnBackdrop={!updateNicknameMutation.isPending}
       onClose={() => {
-        if (!updateNicknameMutation.isPending) onCancelClick();
+        if (!updateNicknameMutation.isPending) handleCancel();
       }}
     >
       <div className={styles.icon} />
@@ -94,7 +100,7 @@ function MyPageNicknameModal({ onCancelClick, onSave }: MyPageNicknameModalProps
             alignItems: 'center'
           }}
         >
-          <CtaButton label="취소" className={styles.cancelBtn} onClick={onCancelClick} />
+          <CtaButton label="취소" className={styles.cancelBtn} onClick={handleCancel} />
           <CtaButton
             label={updateNicknameMutation.isPending ? '저장 중' : '저장하기'}
             state={value.length > 0 && !updateNicknameMutation.isPending ? 'default' : 'disabled'}

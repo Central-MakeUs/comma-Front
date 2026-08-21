@@ -2,6 +2,7 @@ import { type FeedCreateRequest, NATIVE_FEED_UPLOAD_UNAUTHORIZED_ERROR } from '@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { trackEvent } from '../../../shared/analytics/events';
 import { expireSession } from '../../../shared/api/client';
 import { appBridge } from '../../../shared/bridge/bridge';
 import { useAppToast } from '../../../shared/components/AppToast';
@@ -103,6 +104,9 @@ function RestActivityScreen() {
       return true;
     }
     if (showReselectModal) {
+      trackEvent('reselection_cancelled', {
+        stage: isWritingStarted ? 'record' : 'activity'
+      });
       setShowReselectModal(false);
       return true;
     }
@@ -111,6 +115,7 @@ function RestActivityScreen() {
       return true;
     }
 
+    trackEvent('reselection_opened', { stage: 'activity' });
     setShowReselectModal(true);
     return true;
   });
@@ -138,11 +143,38 @@ function RestActivityScreen() {
   const imagePreview = selectedPhoto?.previewSrc;
 
   const handlePhotoSelect = (photo: SelectedActivityPhoto) => {
+    trackEvent('photo_selected', { source: photo.kind });
     setSelectedPhoto(photo);
     setShowPhotoPicker(false);
   };
 
-  const handleConfirmReselect = () => navigate('/rest/checklist', { replace: true });
+  const handleOpenReselect = () => {
+    if (!showReselectModal) {
+      trackEvent('reselection_opened', {
+        stage: isWritingStarted ? 'record' : 'activity'
+      });
+    }
+    setShowReselectModal(true);
+  };
+
+  const handleCancelReselect = () => {
+    trackEvent('reselection_cancelled', {
+      stage: isWritingStarted ? 'record' : 'activity'
+    });
+    setShowReselectModal(false);
+  };
+
+  const handleConfirmReselect = () => {
+    trackEvent('reselection_confirmed', {
+      stage: isWritingStarted ? 'record' : 'activity'
+    });
+    navigate('/rest/checklist', { replace: true });
+  };
+
+  const handleOpenPhotoPicker = () => {
+    trackEvent('photo_picker_opened');
+    setShowPhotoPicker(true);
+  };
 
   const handleComplete = async (values: {
     hashtags: string[];
@@ -175,12 +207,21 @@ function RestActivityScreen() {
     };
 
     try {
+      trackEvent('rest_record_submitted', {
+        is_public: values.isPublic,
+        photo_source: selectedPhoto.kind,
+        tag_count: values.hashtags.length
+      });
       await uploadMutation.mutateAsync({ photo: selectedPhoto, request });
 
       clearStoredActivityId();
       void queryClient.invalidateQueries({ queryKey: userQueryKeys.restStatus() });
+      trackEvent('rest_completed', { is_public: values.isPublic });
       navigate('/feed', { replace: true });
     } catch (error) {
+      trackEvent('rest_completion_failed', {
+        stage: isNativeUploadUnauthorizedError(error) ? 'authorization' : 'upload'
+      });
       if (isNativeUploadUnauthorizedError(error)) {
         await expireSession();
         return;
@@ -197,10 +238,13 @@ function RestActivityScreen() {
       <RestActivityProgress
         participantCount={participantCount}
         showReselectModal={showReselectModal}
-        onCancelReselect={() => setShowReselectModal(false)}
-        onComplete={() => setIsWritingStarted(true)}
+        onCancelReselect={handleCancelReselect}
+        onComplete={() => {
+          trackEvent('rest_record_started');
+          setIsWritingStarted(true);
+        }}
         onConfirmReselect={handleConfirmReselect}
-        onOpenReselectModal={() => setShowReselectModal(true)}
+        onOpenReselectModal={handleOpenReselect}
         title={locationState?.selectedRelax?.activeMessage}
         desc={locationState?.selectedRelax?.description}
         imageSrc={locationState?.selectedRelax?.imageUrl}
@@ -225,12 +269,12 @@ function RestActivityScreen() {
       isSubmitting={uploadMutation.isPending}
       submissionError={uploadMutation.error?.message}
       showReselectModal={showReselectModal}
-      onCancelReselect={() => setShowReselectModal(false)}
+      onCancelReselect={handleCancelReselect}
       onComplete={handleComplete}
       onConfirmReselect={handleConfirmReselect}
       onDraftChange={setDraft}
-      onOpenPhotoPicker={() => setShowPhotoPicker(true)}
-      onOpenReselectModal={() => setShowReselectModal(true)}
+      onOpenPhotoPicker={handleOpenPhotoPicker}
+      onOpenReselectModal={handleOpenReselect}
       title={
         locationState?.selectedRelax?.activeMessage ?? locationState?.selectedRelax?.name ?? ''
       }

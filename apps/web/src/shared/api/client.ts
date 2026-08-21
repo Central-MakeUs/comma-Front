@@ -9,9 +9,9 @@ import { appBridge } from '../bridge/bridge';
 import {
   clearTokens,
   getTokens,
-  isNativeApp,
   setOnboardingCompleted,
-  setTokens
+  setTokens,
+  shouldUseNativeAuthBridge
 } from '../lib/tokenStorage';
 import type { ApiResponse } from '../types/api';
 
@@ -115,7 +115,7 @@ export const resetSessionExpiredState = () => {
 };
 
 const performStoredTokenRefresh = async () => {
-  if (isNativeApp()) {
+  if (shouldUseNativeAuthBridge()) {
     try {
       const result = await appBridge.refreshAuthSession();
       if (typeof result.onboardingCompleted === 'boolean') {
@@ -173,7 +173,7 @@ export const refreshStoredTokens = () => {
 };
 
 apiClient.interceptors.request.use((config) => {
-  if (isNativeApp()) {
+  if (shouldUseNativeAuthBridge()) {
     config.adapter = nativeApiAdapter;
     return config;
   }
@@ -200,7 +200,7 @@ apiClient.interceptors.response.use(
     originalRequest._retry = true;
 
     try {
-      if (isNativeApp()) {
+      if (shouldUseNativeAuthBridge()) {
         await expireSession();
         throw new Error(SESSION_EXPIRED_ERROR_MESSAGE);
       }

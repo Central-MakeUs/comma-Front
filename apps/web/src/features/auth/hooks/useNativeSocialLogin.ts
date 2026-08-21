@@ -1,12 +1,18 @@
 import { useMutation } from '@tanstack/react-query';
 import { useCallback, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { type AuthProvider, loginWithNativeProvider } from '../api/auth.api';
+import {
+  type AuthProvider,
+  loginWithNativeProvider,
+  NativeLoginUnavailableError
+} from '../api/auth.api';
 import { getPostLoginPath } from '../lib/authNavigation';
 
 interface UseNativeSocialLoginOptions {
   enabled: boolean;
 }
+
+export type NativeLoginOutcome = 'success' | 'cancelled' | 'unavailable' | 'failed' | 'busy';
 
 export function useNativeSocialLogin({ enabled }: UseNativeSocialLoginOptions) {
   const navigate = useNavigate();
@@ -16,21 +22,24 @@ export function useNativeSocialLogin({ enabled }: UseNativeSocialLoginOptions) {
 
   const startLogin = useCallback(
     async (provider: AuthProvider) => {
-      if (!enabled || isLoginInProgressRef.current || isPending) return false;
+      if (!enabled) return 'unavailable' as const;
+      if (isLoginInProgressRef.current || isPending) return 'busy' as const;
 
       isLoginInProgressRef.current = true;
       setPendingProvider(provider);
       try {
         const response = await mutateAsync(provider);
-        if (response.cancelled) return true;
+        if (response.cancelled) return 'cancelled' as const;
         if (!response.success || !response.data) {
-          return false;
+          return 'failed' as const;
         }
 
         navigate(getPostLoginPath(response.data), { replace: true });
-        return true;
-      } catch {
-        return false;
+        return 'success' as const;
+      } catch (error) {
+        return error instanceof NativeLoginUnavailableError
+          ? ('unavailable' as const)
+          : ('failed' as const);
       } finally {
         isLoginInProgressRef.current = false;
         setPendingProvider(null);

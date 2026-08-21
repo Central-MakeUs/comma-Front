@@ -1,5 +1,13 @@
 /// <reference types="vite/client" />
 
+interface ImportMetaEnv {
+  readonly VITE_IOS_APPLE_LOGIN_MODE?: 'review' | 'native';
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}
+
 interface AppleIDAuthInitConfig {
   clientId: string;
   scope: string;

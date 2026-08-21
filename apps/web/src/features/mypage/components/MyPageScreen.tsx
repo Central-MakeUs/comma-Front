@@ -30,6 +30,7 @@ function MyPageScreen() {
   const { backgroundUrl, carouselRef, layout } = useActivityCarousel(activityCardCount);
   const latestMyFeedQuery = useQuery(latestMyFeedQueryOptions);
   const latestFeed = latestMyFeedQuery.data;
+  const isReportLoading = reportQuery.isPending || latestMyFeedQuery.isLoading;
   const lastCommaLabel = latestMyFeedQuery.isLoading
     ? '마지막 쉼표 불러오는 중'
     : latestMyFeedQuery.isError
@@ -103,7 +104,9 @@ function MyPageScreen() {
             state="error"
           />
         ) : null}
-        {showEmptyReport ? (
+        {isReportLoading ? (
+          <span className={styles.emptyReportOverlay}>리포트를 불러오고 있어요</span>
+        ) : showEmptyReport ? (
           <span className={styles.emptyReportOverlay}>
             쉼표가 쌓이면 나만의 쉼표 리포트가 생겨요.
           </span>

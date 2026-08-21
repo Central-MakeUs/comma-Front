@@ -492,122 +492,120 @@ export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivity
   };
 
   return (
-    <main className={sharedStyles.page}>
-      <div className={styles.screen} onScroll={handleGalleryScroll} ref={screenRef}>
-        <div aria-hidden="true" className={sharedStyles.topGradient} />
-        <div aria-hidden="true" className={sharedStyles.bottomGradient} />
+    <main className={styles.screen} onScroll={handleGalleryScroll} ref={screenRef}>
+      <div aria-hidden="true" className={sharedStyles.topGradient} />
+      <div aria-hidden="true" className={sharedStyles.bottomGradient} />
 
-        <header className={styles.header}>
-          <button
-            aria-label="사진 선택 닫기"
-            className={sharedStyles.iconButton}
-            onClick={onClose}
-            type="button"
-          >
-            <Icon color={colors.iconPrimary} name="backArrow" />
-          </button>
-        </header>
-
-        <section className={styles.content} aria-label="사진 선택" ref={contentRef}>
-          <ImageUpload
-            className={sharedStyles.upload}
-            onClick={() => fileInputRef.current?.click()}
-            state="select"
-          />
-        </section>
-
-        <div
-          className={styles.photoGrid}
-          ref={photoGridRef}
-          style={{ height: photoGridHeight } as CSSProperties}
+      <header className={styles.header}>
+        <button
+          aria-label="사진 선택 닫기"
+          className={sharedStyles.iconButton}
+          onClick={onClose}
+          type="button"
         >
-          {visiblePhotoTiles.map(({ tile, index }) => {
-            const row = Math.floor(index / PHOTO_GRID_COLUMN_COUNT);
-            const column = index % PHOTO_GRID_COLUMN_COUNT;
-            const tileStyle = {
-              width: photoTileWidth,
-              height: photoTileHeight,
-              transform: `translate3d(${column * photoColumnStride}px, ${row * photoRowStride}px, 0)`
-            } as CSSProperties;
+          <Icon color={colors.iconPrimary} name="backArrow" />
+        </button>
+      </header>
 
-            if (tile.kind === 'camera') {
-              return (
-                <button
-                  aria-label="카메라로 사진 선택"
-                  className={`${styles.cameraTile} ${styles.virtualPhotoTile}`}
-                  disabled={Boolean(preparingAssetId)}
-                  key={tile.key}
-                  onClick={() => {
-                    void handleCameraClick();
-                  }}
-                  style={tileStyle}
-                  type="button"
-                >
-                  <Icon color={colors.iconPrimary} height={40} name="camera" width={40} />
-                </button>
-              );
-            }
+      <section className={styles.content} aria-label="사진 선택" ref={contentRef}>
+        <ImageUpload
+          className={sharedStyles.upload}
+          onClick={() => fileInputRef.current?.click()}
+          state="select"
+        />
+      </section>
 
-            if (tile.kind === 'photo') {
-              return (
-                <button
-                  aria-label="사진 선택"
-                  className={`${styles.photoTile} ${styles.virtualPhotoTile}`}
-                  disabled={Boolean(preparingAssetId)}
-                  key={tile.key}
-                  onClick={() => {
-                    if (galleryPhotos.length > 0) {
-                      void handleNativePhotoSelect(tile.photo);
-                      return;
-                    }
+      <div
+        className={styles.photoGrid}
+        ref={photoGridRef}
+        style={{ height: photoGridHeight } as CSSProperties}
+      >
+        {visiblePhotoTiles.map(({ tile, index }) => {
+          const row = Math.floor(index / PHOTO_GRID_COLUMN_COUNT);
+          const column = index % PHOTO_GRID_COLUMN_COUNT;
+          const tileStyle = {
+            width: photoTileWidth,
+            height: photoTileHeight,
+            transform: `translate3d(${column * photoColumnStride}px, ${row * photoRowStride}px, 0)`
+          } as CSSProperties;
 
-                    onPhotoSelect({
-                      kind: 'preview',
-                      previewSrc: tile.photo.src
-                    });
-                  }}
-                  style={tileStyle}
-                  type="button"
-                >
-                  <img
-                    alt=""
-                    className={styles.photoTileImage}
-                    decoding="async"
-                    src={tile.photo.src}
-                  />
-                </button>
-              );
-            }
+          if (tile.kind === 'camera') {
+            return (
+              <button
+                aria-label="카메라로 사진 선택"
+                className={`${styles.cameraTile} ${styles.virtualPhotoTile}`}
+                disabled={Boolean(preparingAssetId)}
+                key={tile.key}
+                onClick={() => {
+                  void handleCameraClick();
+                }}
+                style={tileStyle}
+                type="button"
+              >
+                <Icon color={colors.iconPrimary} height={40} name="camera" width={40} />
+              </button>
+            );
+          }
 
-            if (tile.kind === 'empty') {
-              return (
-                <div
-                  className={`${styles.emptyPhotoTile} ${styles.virtualPhotoTile}`}
-                  key={tile.key}
-                  style={tileStyle}
+          if (tile.kind === 'photo') {
+            return (
+              <button
+                aria-label="사진 선택"
+                className={`${styles.photoTile} ${styles.virtualPhotoTile}`}
+                disabled={Boolean(preparingAssetId)}
+                key={tile.key}
+                onClick={() => {
+                  if (galleryPhotos.length > 0) {
+                    void handleNativePhotoSelect(tile.photo);
+                    return;
+                  }
+
+                  onPhotoSelect({
+                    kind: 'preview',
+                    previewSrc: tile.photo.src
+                  });
+                }}
+                style={tileStyle}
+                type="button"
+              >
+                <img
+                  alt=""
+                  className={styles.photoTileImage}
+                  decoding="async"
+                  src={tile.photo.src}
                 />
-              );
-            }
+              </button>
+            );
+          }
 
+          if (tile.kind === 'empty') {
             return (
               <div
-                aria-hidden="true"
-                className={`${styles.photoSkeletonTile} ${styles.virtualPhotoTile}`}
+                className={`${styles.emptyPhotoTile} ${styles.virtualPhotoTile}`}
                 key={tile.key}
                 style={tileStyle}
               />
             );
-          })}
-        </div>
+          }
 
-        <input
-          ref={fileInputRef}
-          accept="image/*"
-          className={styles.hiddenInput}
-          onChange={handleImageChange}
-          type="file"
-        />
+          return (
+            <div
+              aria-hidden="true"
+              className={`${styles.photoSkeletonTile} ${styles.virtualPhotoTile}`}
+              key={tile.key}
+              style={tileStyle}
+            />
+          );
+        })}
       </div>
+
+      <input
+        ref={fileInputRef}
+        accept="image/*"
+        className={styles.hiddenInput}
+        onChange={handleImageChange}
+        type="file"
+      />
     </main>
   );
 }

@@ -73,11 +73,6 @@ export function RestActivityForm({
 }: RestActivityFormProps) {
   const [focusedInput, setFocusedInput] = useState<'tag' | 'comment'>();
   const pageRef = useRef<HTMLElement | null>(null);
-  const touchScrollRef = useRef({
-    isDragging: false,
-    scrollTop: 0,
-    y: 0
-  });
   const { tagInput, tags, comment, isSecret } = draft;
 
   useLayoutEffect(() => {
@@ -146,14 +141,6 @@ export function RestActivityForm({
     comment.trim().length > 0 &&
     !isCommentOverLimit;
   const isDoneDisabled = !isComplete || isSubmitting;
-  const handleOpenPhotoPicker = () => {
-    if (touchScrollRef.current.isDragging) {
-      touchScrollRef.current.isDragging = false;
-      return;
-    }
-
-    onOpenPhotoPicker();
-  };
 
   return (
     <main className={sharedStyles.page} ref={pageRef}>
@@ -173,38 +160,7 @@ export function RestActivityForm({
         <div aria-hidden="true" className={sharedStyles.topGradient} />
         <div aria-hidden="true" className={sharedStyles.bottomGradient} />
 
-        <section
-          className={styles.content}
-          aria-labelledby="rest-activity-title"
-          onTouchEndCapture={() => {
-            window.setTimeout(() => {
-              touchScrollRef.current.isDragging = false;
-            }, 0);
-          }}
-          onTouchMoveCapture={(event) => {
-            const touch = event.touches[0];
-            const page = pageRef.current;
-            if (!touch || !page) return;
-
-            const nextScrollTop =
-              touchScrollRef.current.scrollTop + touchScrollRef.current.y - touch.clientY;
-            if (Math.abs(touch.clientY - touchScrollRef.current.y) > 6) {
-              touchScrollRef.current.isDragging = true;
-            }
-            page.scrollTop = nextScrollTop;
-          }}
-          onTouchStartCapture={(event) => {
-            const touch = event.touches[0];
-            const page = pageRef.current;
-            if (!touch || !page) return;
-
-            touchScrollRef.current = {
-              isDragging: false,
-              scrollTop: page.scrollTop,
-              y: touch.clientY
-            };
-          }}
-        >
+        <section className={styles.content} aria-labelledby="rest-activity-title">
           <header className={styles.header}>
             <button
               aria-label="휴식 재선택"
@@ -231,7 +187,7 @@ export function RestActivityForm({
               className={sharedStyles.upload}
               imageAlt="업로드한 휴식 사진"
               imageSrc={imagePreview}
-              onClick={handleOpenPhotoPicker}
+              onClick={onOpenPhotoPicker}
               state={imagePreview ? 'exist' : 'none'}
             />
           </div>

@@ -1,5 +1,6 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useState } from 'react';
+import { trackEvent } from '../../../shared/analytics/events';
 import { SESSION_EXPIRED_ERROR_MESSAGE } from '../../../shared/api/client';
 import { TabScrollArea, TabShell } from '../../../shared/components/layout';
 import { QueryFeedback } from '../../../shared/components/QueryFeedback';
@@ -17,10 +18,16 @@ function ArchiveScreen() {
   const [viewMode, setViewMode] = useState<ArchiveViewMode>('list');
   const archiveQuery = useInfiniteQuery(myFeedsInfiniteQueryOptions(ARCHIVE_PAGE_SIZE));
   const content = archiveQuery.data?.pages.flatMap((page) => page.items) ?? [];
+  const handleViewModeChange = (nextViewMode: ArchiveViewMode) => {
+    if (nextViewMode === viewMode) return;
+
+    trackEvent('archive_view_changed', { view_mode: nextViewMode });
+    setViewMode(nextViewMode);
+  };
 
   return (
     <TabShell active="archive" className={styles.screen}>
-      <ArchiveHeader viewMode={viewMode} onViewModeChange={setViewMode} />
+      <ArchiveHeader viewMode={viewMode} onViewModeChange={handleViewModeChange} />
       <TabScrollArea
         className={styles.scrollContainer}
         onScroll={(event) => {

@@ -4,6 +4,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { useFunnel } from '@use-funnel/react-router-dom';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { trackEvent } from '../../../shared/analytics/events';
 import { useAppToast } from '../../../shared/components/AppToast';
 import { TabShell } from '../../../shared/components/layout';
 import { useNativeBackHandler } from '../../../shared/components/NativeBack';
@@ -136,6 +137,7 @@ function RestChecklistScreen() {
                   step={questionInfo[0].order}
                   title={questionInfo[0].title}
                   onOptionSelect={(_, mood) => {
+                    trackEvent('checklist_step_completed', { step: 1 });
                     selectThenMove(`Mood:${mood}`, () => {
                       setSelectedKey(undefined);
                       void history.push('Time', { mood });
@@ -161,6 +163,7 @@ function RestChecklistScreen() {
                   }}
                   onOptionSelect={async (index, time) => {
                     if (recommendMutation.isPending) return;
+                    trackEvent('checklist_step_completed', { step: 2 });
                     try {
                       const selectedMoodCode = questionInfo[0].options.filter(
                         (o) => context.mood === o.label
@@ -172,9 +175,13 @@ function RestChecklistScreen() {
                       ) {
                         throw new Error();
                       }
+                      trackEvent('recommendation_requested');
                       const recommendations = await recommendMutation.mutateAsync({
                         mood: selectedMoodCode,
                         time: selectedTimeBudgetCode
+                      });
+                      trackEvent('recommendation_received', {
+                        result_count: recommendations.length
                       });
                       selectThenMove(`Time:${time}`, async () => {
                         setSelectedKey(undefined);
@@ -188,6 +195,7 @@ function RestChecklistScreen() {
                         });
                       });
                     } catch (error) {
+                      trackEvent('recommendation_failed');
                       console.log(error);
                     }
                   }}

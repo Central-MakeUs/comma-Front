@@ -2,6 +2,7 @@ import { Toast } from '@comma/design-system';
 import { useMutation } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { trackEvent } from '../../../shared/analytics/events';
 import { AppScreen, BackgroundImage } from '../../../shared/components/layout';
 import { type LoginData, login } from '../api/auth.api';
 import { useNativeSocialLogin } from '../hooks/useNativeSocialLogin';
@@ -228,13 +229,21 @@ function LoginScreen() {
         if (controller.signal.aborted) return;
 
         if (res.success && res.data) {
+          trackEvent('login', {
+            method: 'google',
+            surface: 'app'
+          });
           navigate(getPostLoginPath(res.data), { replace: true });
         } else {
+          trackEvent('login_failed', { method: 'google', surface: 'app' });
           showLoginToast(LOGIN_ERROR_MESSAGE);
         }
       })
       .catch(() => {
-        if (!controller.signal.aborted) clearNativeGoogleOAuthState();
+        if (!controller.signal.aborted) {
+          clearNativeGoogleOAuthState();
+          trackEvent('login_failed', { method: 'google', surface: 'app' });
+        }
       })
       .finally(() => {
         if (googleLoginAbortControllerRef.current === controller) {
@@ -296,12 +305,19 @@ function LoginScreen() {
         }
       });
     } catch (error) {
-      if (!isAppleLoginCancelled(error)) showLoginToast(LOGIN_ERROR_MESSAGE);
+      if (!isAppleLoginCancelled(error)) {
+        trackEvent('login_failed', { method: 'apple', surface: 'web' });
+        showLoginToast(LOGIN_ERROR_MESSAGE);
+      }
     }
   }, [navigate, showLoginToast]);
 
   const onKakaoClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
+    trackEvent('login_attempt', {
+      method: 'kakao',
+      surface: isMobileWebView ? 'app' : 'web'
+    });
     if (
       shouldUseNativeLogin({
         isMobileWebView,
@@ -322,6 +338,10 @@ function LoginScreen() {
 
   const onGoogleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
+    trackEvent('login_attempt', {
+      method: 'google',
+      surface: isMobileWebView ? 'app' : 'web'
+    });
     if (
       shouldUseNativeLogin({
         isMobileWebView,
@@ -364,13 +384,19 @@ function LoginScreen() {
         if (controller.signal.aborted) return;
 
         if (res.success && res.data) {
+          trackEvent('login', {
+            method: 'google',
+            surface: 'app'
+          });
           navigate(getPostLoginPath(res.data), { replace: true });
         } else {
+          trackEvent('login_failed', { method: 'google', surface: 'app' });
           showLoginToast(LOGIN_ERROR_MESSAGE);
         }
       } catch {
         if (controller.signal.aborted) return;
         clearNativeGoogleOAuthState();
+        trackEvent('login_failed', { method: 'google', surface: 'app' });
         showLoginToast(LOGIN_ERROR_MESSAGE);
       } finally {
         if (googleLoginAbortControllerRef.current === controller) {
@@ -389,6 +415,10 @@ function LoginScreen() {
 
   const onAppleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
+    trackEvent('login_attempt', {
+      method: 'apple',
+      surface: isMobileWebView ? 'app' : 'web'
+    });
     if (
       shouldUseNativeLogin({
         isMobileWebView,
@@ -414,6 +444,10 @@ function LoginScreen() {
         url
       })
     );
+  };
+
+  const trackLegalDocumentOpen = (documentType: 'privacy_policy' | 'terms_of_service') => {
+    trackEvent('legal_document_opened', { document_type: documentType });
   };
 
   return (
@@ -480,6 +514,7 @@ function LoginScreen() {
             target="_blank"
             rel="noopener"
             onClick={(e) => {
+              trackLegalDocumentOpen('terms_of_service');
               if (isMobileWebView) {
                 e.preventDefault();
 
@@ -496,6 +531,7 @@ function LoginScreen() {
             rel="noopener"
             target="_blank"
             onClick={(e) => {
+              trackLegalDocumentOpen('privacy_policy');
               if (isMobileWebView) {
                 e.preventDefault();
 

@@ -2,6 +2,7 @@ import { CtaButton, TextInput } from '@comma/design-system';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { trackEvent } from '../../../shared/analytics/events';
 import { AppScreen, BackgroundImage } from '../../../shared/components/layout';
 import { QueryFeedback } from '../../../shared/components/QueryFeedback';
 import { setOnboardingCompleted, setStoredNickname } from '../../../shared/lib/tokenStorage';
@@ -39,6 +40,7 @@ function NicknameScreen() {
       if (data.nickname) {
         setOnboardingCompleted(true);
         setStoredNickname(data.nickname);
+        trackEvent('onboarding_completed');
         navigate('/loading', { state: { userName: data.nickname } });
         return;
       }

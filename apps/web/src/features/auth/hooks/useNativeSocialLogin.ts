@@ -1,6 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { useCallback, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { trackEvent } from '../../../shared/analytics/events';
 import {
   type AuthProvider,
   loginWithNativeProvider,
@@ -29,14 +30,26 @@ export function useNativeSocialLogin({ enabled }: UseNativeSocialLoginOptions) {
       setPendingProvider(provider);
       try {
         const response = await mutateAsync(provider);
-        if (response.cancelled) return 'cancelled' as const;
+        const method = provider.toLowerCase();
+        if (response.cancelled) {
+          trackEvent('login_cancelled', { method, surface: 'app' });
+          return 'cancelled' as const;
+        }
         if (!response.success || !response.data) {
+          trackEvent('login_failed', { method, surface: 'app' });
           return 'failed' as const;
         }
 
+        trackEvent('login', {
+          method,
+          surface: 'app'
+        });
         navigate(getPostLoginPath(response.data), { replace: true });
         return 'success' as const;
       } catch (error) {
+        if (!(error instanceof NativeLoginUnavailableError)) {
+          trackEvent('login_failed', { method: provider.toLowerCase(), surface: 'app' });
+        }
         return error instanceof NativeLoginUnavailableError
           ? ('unavailable' as const)
           : ('failed' as const);

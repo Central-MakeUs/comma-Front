@@ -27,6 +27,10 @@ globalStyle('html, body', {
   touchAction: 'manipulation'
 });
 
+globalStyle('button, a, [role="button"]', {
+  WebkitTapHighlightColor: 'transparent'
+});
+
 globalFontFace('Pretendard', {
   src: 'url("/fonts/PretendardVariable.woff2") format("woff2")',
   fontDisplay: 'swap',

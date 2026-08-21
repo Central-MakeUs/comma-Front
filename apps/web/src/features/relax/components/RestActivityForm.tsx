@@ -6,7 +6,14 @@ import {
   SecretToggle,
   TextInput
 } from '@comma/design-system';
-import { type Dispatch, type KeyboardEvent, type SetStateAction, useRef, useState } from 'react';
+import {
+  type Dispatch,
+  type KeyboardEvent,
+  type SetStateAction,
+  useLayoutEffect,
+  useRef,
+  useState
+} from 'react';
 import { BackgroundImage } from '../../../shared/components/layout';
 import { QueryFeedback } from '../../../shared/components/QueryFeedback';
 import { COMMENT_MAX_LENGTH, TAG_MAX_LENGTH } from '../model/restActivity.constants';
@@ -72,6 +79,20 @@ export function RestActivityForm({
     y: 0
   });
   const { tagInput, tags, comment, isSecret } = draft;
+
+  useLayoutEffect(() => {
+    if (!imagePreview) return undefined;
+
+    const resetScrollPosition = () => {
+      if (pageRef.current) pageRef.current.scrollTop = 0;
+      window.scrollTo(0, 0);
+    };
+
+    resetScrollPosition();
+    const animationFrame = window.requestAnimationFrame(resetScrollPosition);
+
+    return () => window.cancelAnimationFrame(animationFrame);
+  }, [imagePreview]);
 
   const handleAddTag = () => {
     onDraftChange((currentDraft) => {

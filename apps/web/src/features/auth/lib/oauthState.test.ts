@@ -58,4 +58,11 @@ describe('web OAuth state', () => {
 
     expect(consumeWebOAuthState('APPLE', state)).toBe(false);
   });
+
+  it('validates an Apple state once', () => {
+    const state = createWebOAuthState('APPLE');
+
+    expect(consumeWebOAuthState('APPLE', state)).toBe(true);
+    expect(consumeWebOAuthState('APPLE', state)).toBe(false);
+  });
 });

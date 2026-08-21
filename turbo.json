@@ -9,7 +9,18 @@
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**", "build/**"],
-      "env": ["EXPO_PUBLIC_WEB_URL", "VITE_BASE_URL", "VITE_REST_API_KEY", "VITE_REDIRECT_URI"]
+      "env": [
+        "EXPO_PUBLIC_WEB_URL",
+        "VITE_BASE_URL",
+        "VITE_REST_API_KEY",
+        "VITE_REDIRECT_URI",
+        "VITE_KAKAO_REDIRECT_URI",
+        "VITE_GOOGLE_CLIENT_ID",
+        "VITE_GOOGLE_REDIRECT_URI",
+        "VITE_APPLE_CLIENT_ID",
+        "VITE_APPLE_REDIRECT_URI",
+        "VITE_IOS_APPLE_LOGIN_MODE"
+      ]
     },
     "typecheck": {
       "dependsOn": ["^typecheck"],

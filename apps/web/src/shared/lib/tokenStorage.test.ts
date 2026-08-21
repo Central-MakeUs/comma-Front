@@ -1,5 +1,22 @@
-import { beforeEach, describe, expect, it } from 'vitest';
-import { getStoredNickname, setStoredNickname } from './tokenStorage';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+  getStoredNickname,
+  getTokens,
+  initializeAuthStorage,
+  resetNativeAuthBridgeStatusForTests,
+  setStoredNickname,
+  setTokens,
+  shouldUseNativeAuthBridge
+} from './tokenStorage';
+
+const bridgeMocks = vi.hoisted(() => ({
+  migrateAuthTokens: vi.fn(),
+  clearAuthTokens: vi.fn(),
+  getAuthState: vi.fn(),
+  isNativeMethodAvailable: vi.fn()
+}));
+
+vi.mock('../bridge/bridge', () => ({ appBridge: bridgeMocks }));
 
 const createStorage = (): Storage => {
   const values = new Map<string, string>();
@@ -16,6 +33,9 @@ const createStorage = (): Storage => {
 };
 
 beforeEach(() => {
+  vi.clearAllMocks();
+  resetNativeAuthBridgeStatusForTests();
+  bridgeMocks.isNativeMethodAvailable.mockReturnValue(true);
   Object.defineProperty(globalThis, 'window', {
     configurable: true,
     value: { localStorage: createStorage() }
@@ -29,5 +49,67 @@ describe('stored nickname', () => {
 
     setStoredNickname(null);
     expect(getStoredNickname()).toBeNull();
+  });
+});
+
+describe('native auth storage compatibility', () => {
+  it('migrates web OAuth tokens into the native bridge when supported', async () => {
+    Object.assign(window, { ReactNativeWebView: {} });
+    bridgeMocks.migrateAuthTokens.mockResolvedValue({
+      hasTokens: true,
+      accessTokenExpiresAt: null
+    });
+
+    await setTokens({ accessToken: 'access', refreshToken: 'refresh' });
+
+    expect(bridgeMocks.migrateAuthTokens).toHaveBeenCalledWith({
+      accessToken: 'access',
+      refreshToken: 'refresh'
+    });
+    expect(shouldUseNativeAuthBridge()).toBe(true);
+    expect(getTokens()).toBeNull();
+  });
+
+  it('keeps tokens in localStorage when the legacy bridge is unavailable', async () => {
+    Object.assign(window, { ReactNativeWebView: {} });
+    bridgeMocks.isNativeMethodAvailable.mockReturnValue(false);
+
+    await setTokens({ accessToken: 'legacy-access', refreshToken: 'legacy-refresh' });
+
+    expect(bridgeMocks.migrateAuthTokens).not.toHaveBeenCalled();
+    expect(shouldUseNativeAuthBridge()).toBe(false);
+    expect(getTokens()).toEqual({
+      accessToken: 'legacy-access',
+      refreshToken: 'legacy-refresh'
+    });
+  });
+
+  it('rejects startup migration failures without treating the native bridge as unavailable', async () => {
+    Object.assign(window, { ReactNativeWebView: {} });
+    window.localStorage.setItem('comma.accessToken', 'legacy-access');
+    window.localStorage.setItem('comma.refreshToken', 'legacy-refresh');
+    bridgeMocks.migrateAuthTokens.mockResolvedValue(undefined);
+
+    await expect(initializeAuthStorage()).rejects.toThrow(
+      'Native auth bridge returned an invalid state.'
+    );
+
+    expect(shouldUseNativeAuthBridge()).toBe(false);
+    expect(getTokens()).toEqual({
+      accessToken: 'legacy-access',
+      refreshToken: 'legacy-refresh'
+    });
+  });
+
+  it('does not persist tokens locally when a supported native bridge fails', async () => {
+    Object.assign(window, { ReactNativeWebView: {} });
+    bridgeMocks.migrateAuthTokens.mockRejectedValue(new Error('SecureStore write failed.'));
+
+    await expect(setTokens({ accessToken: 'access', refreshToken: 'refresh' })).rejects.toThrow(
+      'SecureStore write failed.'
+    );
+
+    expect(shouldUseNativeAuthBridge()).toBe(false);
+    expect(getTokens()).toBeNull();
   });
 });

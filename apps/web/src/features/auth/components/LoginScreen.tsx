@@ -6,6 +6,8 @@ import { trackEvent } from '../../../shared/analytics/events';
 import { AppScreen, BackgroundImage } from '../../../shared/components/layout';
 import { type LoginData, login } from '../api/auth.api';
 import { useNativeSocialLogin } from '../hooks/useNativeSocialLogin';
+import { isAppleLoginCancelled } from '../lib/appleAuth';
+import { getIosAppleLoginMode, shouldUseNativeLogin } from '../lib/loginPolicy';
 import {
   clearNativeGoogleOAuthState,
   consumeNativeGoogleOAuthState,
@@ -27,6 +29,7 @@ interface IAppleRes {
   authorization: {
     code: string;
     id_token: string;
+    state: string;
   };
 }
 
@@ -34,7 +37,7 @@ const LOGIN_TOAST_DURATION_MS = 4000;
 const LOGIN_ERROR_MESSAGE = '로그인 에러입니다. 다시 시도해주세요.';
 const GOOGLE_LOGIN_TIMEOUT_MS = 60000;
 const GOOGLE_LOGIN_RECOVERY_TIMEOUT_MS = 10000;
-const USE_NATIVE_SDK_WEBVIEW_LOGIN = import.meta.env.VITE_USE_NATIVE_SDK_WEBVIEW_LOGIN === 'true';
+const IOS_APPLE_LOGIN_MODE = getIosAppleLoginMode(import.meta.env.VITE_IOS_APPLE_LOGIN_MODE);
 
 type WebProvider = 'KAKAO' | 'GOOGLE' | 'APPLE';
 
@@ -152,13 +155,13 @@ function LoginScreen() {
   const [loginToast, setLoginToast] = useState<LoginToastState | null>(null);
   const isMobileWebView = typeof window !== 'undefined' && window.ReactNativeWebView !== undefined;
   const isAndroidApp = isMobileWebView && /Android/i.test(window.navigator.userAgent);
-  const shouldUseNativeSdkLogin = isAndroidApp && USE_NATIVE_SDK_WEBVIEW_LOGIN;
+  const isIosApp = isMobileWebView && !isAndroidApp;
   const { isPending: isGoogleLoginPending, mutateAsync: googleLoginMutateAsync } = useMutation({
     mutationFn: login
   });
   const { isPending: isNativeSdkLoginPending, startLogin: startNativeSdkLogin } =
     useNativeSocialLogin({
-      enabled: shouldUseNativeSdkLogin
+      enabled: isMobileWebView
     });
 
   const showLoginToast = useCallback((message: string) => {
@@ -283,34 +286,51 @@ function LoginScreen() {
   }, []);
 
   const startAppleWebLogin = useCallback(async () => {
+    const state = createWebOAuthState('APPLE');
     const redirectUri = getWebRedirectUri('APPLE');
     window.AppleID?.auth.init({
       clientId: APPLE_CLIENT_ID,
       scope: 'email name',
       redirectURI: `${redirectUri}`,
+      state,
       usePopup: true
     });
 
     try {
       const res = (await window.AppleID?.auth.signIn()) as IAppleRes;
-      navigate('/oauth/apple/callback', { state: { code: res.authorization.code } });
-    } catch {
-      trackEvent('login_failed', { method: 'apple', surface: 'web' });
-      showLoginToast(LOGIN_ERROR_MESSAGE);
+      navigate('/oauth/apple/callback', {
+        state: {
+          code: res.authorization.code,
+          oauthState: res.authorization.state
+        }
+      });
+    } catch (error) {
+      if (!isAppleLoginCancelled(error)) {
+        trackEvent('login_failed', { method: 'apple', surface: 'web' });
+        showLoginToast(LOGIN_ERROR_MESSAGE);
+      }
     }
   }, [navigate, showLoginToast]);
 
-  const onKakaoClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const onKakaoClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     trackEvent('login_attempt', {
       method: 'kakao',
       surface: isMobileWebView ? 'app' : 'web'
     });
-    if (shouldUseNativeSdkLogin) {
-      void startNativeSdkLogin('KAKAO').then((handled) => {
-        if (!handled) showLoginToast(LOGIN_ERROR_MESSAGE);
-      });
-      return;
+    if (
+      shouldUseNativeLogin({
+        isMobileWebView,
+        isIosApp,
+        iosAppleLoginMode: IOS_APPLE_LOGIN_MODE,
+        provider: 'KAKAO'
+      })
+    ) {
+      const outcome = await startNativeSdkLogin('KAKAO');
+      if (outcome !== 'unavailable') {
+        if (outcome === 'failed') showLoginToast(LOGIN_ERROR_MESSAGE);
+        return;
+      }
     }
 
     startKakaoWebLogin();
@@ -322,10 +342,19 @@ function LoginScreen() {
       method: 'google',
       surface: isMobileWebView ? 'app' : 'web'
     });
-    if (shouldUseNativeSdkLogin) {
-      if (await startNativeSdkLogin('GOOGLE')) return;
-      showLoginToast(LOGIN_ERROR_MESSAGE);
-      return;
+    if (
+      shouldUseNativeLogin({
+        isMobileWebView,
+        isIosApp,
+        iosAppleLoginMode: IOS_APPLE_LOGIN_MODE,
+        provider: 'GOOGLE'
+      })
+    ) {
+      const outcome = await startNativeSdkLogin('GOOGLE');
+      if (outcome !== 'unavailable') {
+        if (outcome === 'failed') showLoginToast(LOGIN_ERROR_MESSAGE);
+        return;
+      }
     }
 
     if (isMobileWebView) {
@@ -390,10 +419,19 @@ function LoginScreen() {
       method: 'apple',
       surface: isMobileWebView ? 'app' : 'web'
     });
-    if (shouldUseNativeSdkLogin) {
-      if (await startNativeSdkLogin('APPLE')) return;
-      showLoginToast(LOGIN_ERROR_MESSAGE);
-      return;
+    if (
+      shouldUseNativeLogin({
+        isMobileWebView,
+        isIosApp,
+        iosAppleLoginMode: IOS_APPLE_LOGIN_MODE,
+        provider: 'APPLE'
+      })
+    ) {
+      const outcome = await startNativeSdkLogin('APPLE');
+      if (outcome !== 'unavailable') {
+        if (outcome === 'failed') showLoginToast(LOGIN_ERROR_MESSAGE);
+        return;
+      }
     }
 
     await startAppleWebLogin();

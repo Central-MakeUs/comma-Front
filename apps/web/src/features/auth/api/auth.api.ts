@@ -6,7 +6,6 @@ import {
 } from '../../../shared/api/client';
 import { appBridge } from '../../../shared/bridge/bridge';
 import {
-  isNativeApp,
   setOnboardingCompleted,
   setStoredNickname,
   setTokens
@@ -21,25 +20,19 @@ import type {
 
 export type { AuthProvider, LoginData, LoginRequest, LoginResponse } from '../model/auth.types';
 
+export class NativeLoginUnavailableError extends Error {
+  constructor() {
+    super('Native login bridge is unavailable.');
+    this.name = 'NativeLoginUnavailableError';
+  }
+}
+
 const persistLoginData = (data: LoginData) => {
   setOnboardingCompleted(data.onboardingCompleted);
   setStoredNickname(data.nickname);
 };
 
 export const login = async ({ field, code, redirectUri }: LoginRequest) => {
-  if (isNativeApp()) {
-    if (!appBridge.completeLogin) {
-      return { success: false, message: 'Native login bridge is unavailable.' };
-    }
-
-    const result = await appBridge.completeLogin({ field, code, redirectUri });
-    if (result.success) {
-      if (result.data) persistLoginData(result.data);
-      resetSessionExpiredState();
-    }
-    return result;
-  }
-
   const { data } = await publicApiClient.post<TokenLoginResponse>(`/api/auth/login/${field}`, {
     code,
     redirectUri
@@ -69,7 +62,20 @@ export const login = async ({ field, code, redirectUri }: LoginRequest) => {
 };
 
 export const loginWithNativeProvider = async (provider: AuthProvider) => {
-  const result = await appBridge.loginWithProvider(provider);
+  let result: Awaited<ReturnType<typeof appBridge.loginWithProvider>> | undefined;
+  try {
+    result = await appBridge.loginWithProvider(provider);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : '';
+    if (/not registered|not defined|unavailable|only available/i.test(message)) {
+      throw new NativeLoginUnavailableError();
+    }
+    throw error;
+  }
+
+  if (!result || typeof result.success !== 'boolean') {
+    throw new NativeLoginUnavailableError();
+  }
   if (result.success) {
     if (result.data) persistLoginData(result.data);
     resetSessionExpiredState();

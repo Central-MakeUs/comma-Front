@@ -32,6 +32,7 @@ function OAuthCallbackScreen() {
   const location = useLocation();
   const pathname = location.pathname;
   const appleCode = location.state?.code;
+  const appleOAuthState = location.state?.oauthState;
   const hasRun = useRef(false);
   const { mutateAsync: loginMutateAsync } = useMutation({
     mutationFn: login
@@ -61,8 +62,11 @@ function OAuthCallbackScreen() {
       const method = field.toLowerCase();
 
       const searchParams = new URLSearchParams(location.search);
-      const isStateValid =
-        field === 'APPLE' || consumeWebOAuthState(field, searchParams.get('state'));
+      const returnedState =
+        field === 'APPLE'
+          ? (appleOAuthState ?? searchParams.get('state'))
+          : searchParams.get('state');
+      const isStateValid = consumeWebOAuthState(field, returnedState);
       const oauthError = searchParams.get('error');
       const queryCode = searchParams.get('code');
       const code = field === 'APPLE' ? (appleCode ?? queryCode) : queryCode;
@@ -127,7 +131,7 @@ function OAuthCallbackScreen() {
       }
     };
     handleLogin();
-  }, [navigate, pathname, appleCode, location.search, loginMutateAsync]);
+  }, [navigate, pathname, appleCode, appleOAuthState, location.search, loginMutateAsync]);
   return (
     <AppScreen className={styles.container}>
       <BackgroundImage

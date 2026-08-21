@@ -23,6 +23,8 @@ type GalleryPhotoItem = {
   src: string;
 };
 
+type NativeGalleryPageResult = Awaited<ReturnType<typeof getNativeGalleryPhotos>>;
+
 export type SelectedActivityPhoto =
   | {
       kind: 'file';
@@ -104,6 +106,14 @@ async function getNativeGalleryPhotos(after?: string) {
 async function takeNativePhoto() {
   await waitForNativeGalleryBridge();
   return appBridge.takeGalleryPhoto();
+}
+
+function normalizeNativeGalleryPage(page: NativeGalleryPageResult | null | undefined) {
+  return {
+    photos: Array.isArray(page?.photos) ? page.photos : [],
+    endCursor: typeof page?.endCursor === 'string' ? page.endCursor : null,
+    hasNextPage: typeof page?.hasNextPage === 'boolean' ? page.hasNextPage : false
+  };
 }
 
 export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivityPhotoPickerProps) {
@@ -212,7 +222,7 @@ export function RestActivityPhotoPicker({ onClose, onPhotoSelect }: RestActivity
       }
 
       try {
-        const nativePage = await getNativeGalleryPhotos(after);
+        const nativePage = normalizeNativeGalleryPage(await getNativeGalleryPhotos(after));
         if (!isActiveRef.current) return;
 
         galleryEndCursorRef.current = nativePage.endCursor ?? undefined;

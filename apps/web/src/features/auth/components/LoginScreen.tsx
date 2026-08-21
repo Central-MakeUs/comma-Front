@@ -152,12 +152,14 @@ function LoginScreen() {
   const isMobileWebView = typeof window !== 'undefined' && window.ReactNativeWebView !== undefined;
   const isAndroidApp = isMobileWebView && /Android/i.test(window.navigator.userAgent);
   const shouldUseNativeSdkLogin = isMobileWebView && USE_NATIVE_SDK_WEBVIEW_LOGIN;
+  const isIosApp = isMobileWebView && !isAndroidApp;
+  const shouldUseNativeAppleLogin = isIosApp;
   const { isPending: isGoogleLoginPending, mutateAsync: googleLoginMutateAsync } = useMutation({
     mutationFn: login
   });
   const { isPending: isNativeSdkLoginPending, startLogin: startNativeSdkLogin } =
     useNativeSocialLogin({
-      enabled: shouldUseNativeSdkLogin
+      enabled: shouldUseNativeSdkLogin || shouldUseNativeAppleLogin
     });
 
   const showLoginToast = useCallback((message: string) => {
@@ -362,7 +364,7 @@ function LoginScreen() {
 
   const onAppleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    if (shouldUseNativeSdkLogin) {
+    if (shouldUseNativeAppleLogin) {
       if (await startNativeSdkLogin('APPLE')) return;
       showLoginToast(LOGIN_ERROR_MESSAGE);
       return;

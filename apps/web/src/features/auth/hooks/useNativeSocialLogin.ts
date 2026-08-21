@@ -33,7 +33,7 @@ export function useNativeSocialLogin({ enabled }: UseNativeSocialLoginOptions) {
           return false;
         }
 
-        trackEvent(response.data.onboardingCompleted ? 'login' : 'sign_up', {
+        trackEvent('login', {
           method,
           surface: 'app'
         });

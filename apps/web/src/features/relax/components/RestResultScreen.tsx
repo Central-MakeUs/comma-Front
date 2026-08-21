@@ -41,6 +41,7 @@ function RestResultScreen() {
       return true;
     }
     if (showModal) {
+      trackEvent('reselection_cancelled', { stage: 'recommendation' });
       setShowModal(false);
       return true;
     }

@@ -1,7 +1,9 @@
 import { useMutation } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { initializeClarity } from '../../../shared/analytics/clarity';
 import { trackEvent } from '../../../shared/analytics/events';
+import { initializeGoogleAnalytics } from '../../../shared/analytics/googleAnalytics';
 import { AppScreen, BackgroundImage } from '../../../shared/components/layout';
 import { QueryFeedback } from '../../../shared/components/QueryFeedback';
 import { type AuthProvider, login } from '../api/auth.api';
@@ -61,8 +63,15 @@ function OAuthCallbackScreen() {
       const searchParams = new URLSearchParams(location.search);
       const isStateValid =
         field === 'APPLE' || consumeWebOAuthState(field, searchParams.get('state'));
+      const oauthError = searchParams.get('error');
+      const queryCode = searchParams.get('code');
+      const code = field === 'APPLE' ? (appleCode ?? queryCode) : queryCode;
 
-      if (searchParams.get('error')) {
+      window.history.replaceState(window.history.state, '', pathname);
+      initializeClarity();
+      initializeGoogleAnalytics();
+
+      if (oauthError) {
         returnToLogin(
           '로그인이 취소되었거나 인증 제공자에서 거부되었습니다.',
           'login_cancelled',
@@ -80,8 +89,6 @@ function OAuthCallbackScreen() {
         return;
       }
 
-      const queryCode = searchParams.get('code');
-      const code = field === 'APPLE' ? (appleCode ?? queryCode) : queryCode;
       if (!code) {
         returnToLogin(
           field === 'APPLE' ? 'APPLE 코드가 없습니다.' : '로그인 오류: 올바른 정보를 입력하세요.',
@@ -99,7 +106,7 @@ function OAuthCallbackScreen() {
         });
 
         if (res.success && res.data) {
-          trackEvent(res.data.onboardingCompleted ? 'login' : 'sign_up', {
+          trackEvent('login', {
             method,
             surface: 'web'
           });

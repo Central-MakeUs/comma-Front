@@ -226,7 +226,7 @@ function LoginScreen() {
         if (controller.signal.aborted) return;
 
         if (res.success && res.data) {
-          trackEvent(res.data.onboardingCompleted ? 'login' : 'sign_up', {
+          trackEvent('login', {
             method: 'google',
             surface: 'app'
           });
@@ -355,7 +355,7 @@ function LoginScreen() {
         if (controller.signal.aborted) return;
 
         if (res.success && res.data) {
-          trackEvent(res.data.onboardingCompleted ? 'login' : 'sign_up', {
+          trackEvent('login', {
             method: 'google',
             surface: 'app'
           });

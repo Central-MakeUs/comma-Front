@@ -1,3 +1,5 @@
+import { shouldInitializeAnalytics } from './config';
+
 const CLARITY_PROJECT_ID = 'y5yal8g5el';
 
 type ClarityCommand = (...args: unknown[]) => void;
@@ -9,7 +11,7 @@ declare global {
 }
 
 export function initializeClarity() {
-  if (!import.meta.env.PROD || window.clarity) return;
+  if (!shouldInitializeAnalytics() || window.clarity) return;
 
   const clarity: ClarityCommand & { q?: unknown[][] } = (...args) => {
     clarity.q ??= [];

@@ -252,7 +252,7 @@ function SettingScreen() {
   });
   const logoutMutation = useMutation({
     mutationFn: logout,
-    onSuccess: () => trackEvent('logout_completed'),
+    onSuccess: (res) => trackEvent(res.success ? 'logout_completed' : 'logout_failed'),
     onError: () => trackEvent('logout_failed'),
     onSettled: async () => {
       try {

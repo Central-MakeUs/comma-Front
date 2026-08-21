@@ -38,7 +38,6 @@ export type AnalyticsEventName =
   | 'rest_record_submitted'
   | 'rest_start_failed'
   | 'rest_started'
-  | 'sign_up'
   | 'tab_selected';
 
 export type AnalyticsEventParams = Record<string, boolean | number | string>;

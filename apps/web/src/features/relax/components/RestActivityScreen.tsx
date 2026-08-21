@@ -104,6 +104,9 @@ function RestActivityScreen() {
       return true;
     }
     if (showReselectModal) {
+      trackEvent('reselection_cancelled', {
+        stage: isWritingStarted ? 'record' : 'activity'
+      });
       setShowReselectModal(false);
       return true;
     }
@@ -112,6 +115,7 @@ function RestActivityScreen() {
       return true;
     }
 
+    trackEvent('reselection_opened', { stage: 'activity' });
     setShowReselectModal(true);
     return true;
   });

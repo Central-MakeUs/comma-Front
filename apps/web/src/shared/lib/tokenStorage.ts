@@ -71,6 +71,8 @@ const migrateTokensToNative = async (tokens: StoredTokens | null) => {
   return state;
 };
 
+const isNativeAuthMigrationSupported = () => appBridge.isNativeMethodAvailable('migrateAuthTokens');
+
 export const getTokens = (): StoredTokens | null => {
   if (!canUseLocalStorage()) return null;
 
@@ -84,13 +86,15 @@ export const getTokens = (): StoredTokens | null => {
 
 export const setTokens = async ({ accessToken, refreshToken }: StoredTokens) => {
   if (isNativeApp()) {
-    try {
-      await migrateTokensToNative({ accessToken, refreshToken });
-      removeLocalTokens();
-      return;
-    } catch {
+    if (!isNativeAuthMigrationSupported()) {
       nativeAuthBridgeStatus = 'unavailable';
+      persistTokensLocally({ accessToken, refreshToken });
+      return;
     }
+
+    await migrateTokensToNative({ accessToken, refreshToken });
+    removeLocalTokens();
+    return;
   }
   persistTokensLocally({ accessToken, refreshToken });
 };
@@ -115,13 +119,14 @@ export const clearTokens = async () => {
 export const initializeAuthStorage = async () => {
   if (!isNativeApp()) return;
 
-  const legacyTokens = getTokens();
-  try {
-    await migrateTokensToNative(legacyTokens);
-    removeLocalTokens();
-  } catch {
+  if (!isNativeAuthMigrationSupported()) {
     nativeAuthBridgeStatus = 'unavailable';
+    return;
   }
+
+  const legacyTokens = getTokens();
+  await migrateTokensToNative(legacyTokens);
+  removeLocalTokens();
 };
 
 export const getAuthState = async () => {

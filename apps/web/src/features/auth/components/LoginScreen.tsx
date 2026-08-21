@@ -27,6 +27,7 @@ interface IAppleRes {
   authorization: {
     code: string;
     id_token: string;
+    state: string;
   };
 }
 
@@ -275,17 +276,24 @@ function LoginScreen() {
   }, []);
 
   const startAppleWebLogin = useCallback(async () => {
+    const state = createWebOAuthState('APPLE');
     const redirectUri = getWebRedirectUri('APPLE');
     window.AppleID?.auth.init({
       clientId: APPLE_CLIENT_ID,
       scope: 'email name',
       redirectURI: `${redirectUri}`,
+      state,
       usePopup: true
     });
 
     try {
       const res = (await window.AppleID?.auth.signIn()) as IAppleRes;
-      navigate('/oauth/apple/callback', { state: { code: res.authorization.code } });
+      navigate('/oauth/apple/callback', {
+        state: {
+          code: res.authorization.code,
+          oauthState: res.authorization.state
+        }
+      });
     } catch {
       showLoginToast(LOGIN_ERROR_MESSAGE);
     }

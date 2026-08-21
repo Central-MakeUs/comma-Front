@@ -12,7 +12,8 @@ import {
 const bridgeMocks = vi.hoisted(() => ({
   migrateAuthTokens: vi.fn(),
   clearAuthTokens: vi.fn(),
-  getAuthState: vi.fn()
+  getAuthState: vi.fn(),
+  isNativeMethodAvailable: vi.fn()
 }));
 
 vi.mock('../bridge/bridge', () => ({ appBridge: bridgeMocks }));
@@ -34,6 +35,7 @@ const createStorage = (): Storage => {
 beforeEach(() => {
   vi.clearAllMocks();
   resetNativeAuthBridgeStatusForTests();
+  bridgeMocks.isNativeMethodAvailable.mockReturnValue(true);
   Object.defineProperty(globalThis, 'window', {
     configurable: true,
     value: { localStorage: createStorage() }
@@ -70,9 +72,27 @@ describe('native auth storage compatibility', () => {
 
   it('keeps tokens in localStorage when the legacy bridge is unavailable', async () => {
     Object.assign(window, { ReactNativeWebView: {} });
-    bridgeMocks.migrateAuthTokens.mockRejectedValue(new Error('Method is not registered.'));
+    bridgeMocks.isNativeMethodAvailable.mockReturnValue(false);
 
     await setTokens({ accessToken: 'legacy-access', refreshToken: 'legacy-refresh' });
+
+    expect(bridgeMocks.migrateAuthTokens).not.toHaveBeenCalled();
+    expect(shouldUseNativeAuthBridge()).toBe(false);
+    expect(getTokens()).toEqual({
+      accessToken: 'legacy-access',
+      refreshToken: 'legacy-refresh'
+    });
+  });
+
+  it('rejects startup migration failures without treating the native bridge as unavailable', async () => {
+    Object.assign(window, { ReactNativeWebView: {} });
+    window.localStorage.setItem('comma.accessToken', 'legacy-access');
+    window.localStorage.setItem('comma.refreshToken', 'legacy-refresh');
+    bridgeMocks.migrateAuthTokens.mockResolvedValue(undefined);
+
+    await expect(initializeAuthStorage()).rejects.toThrow(
+      'Native auth bridge returned an invalid state.'
+    );
 
     expect(shouldUseNativeAuthBridge()).toBe(false);
     expect(getTokens()).toEqual({
@@ -81,18 +101,15 @@ describe('native auth storage compatibility', () => {
     });
   });
 
-  it('preserves legacy tokens when startup migration returns an invalid state', async () => {
+  it('does not persist tokens locally when a supported native bridge fails', async () => {
     Object.assign(window, { ReactNativeWebView: {} });
-    window.localStorage.setItem('comma.accessToken', 'legacy-access');
-    window.localStorage.setItem('comma.refreshToken', 'legacy-refresh');
-    bridgeMocks.migrateAuthTokens.mockResolvedValue(undefined);
+    bridgeMocks.migrateAuthTokens.mockRejectedValue(new Error('SecureStore write failed.'));
 
-    await initializeAuthStorage();
+    await expect(setTokens({ accessToken: 'access', refreshToken: 'refresh' })).rejects.toThrow(
+      'SecureStore write failed.'
+    );
 
     expect(shouldUseNativeAuthBridge()).toBe(false);
-    expect(getTokens()).toEqual({
-      accessToken: 'legacy-access',
-      refreshToken: 'legacy-refresh'
-    });
+    expect(getTokens()).toBeNull();
   });
 });

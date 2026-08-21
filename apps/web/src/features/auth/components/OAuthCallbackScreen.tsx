@@ -29,6 +29,7 @@ function OAuthCallbackScreen() {
   const location = useLocation();
   const pathname = location.pathname;
   const appleCode = location.state?.code;
+  const appleOAuthState = location.state?.oauthState;
   const hasRun = useRef(false);
   const { mutateAsync: loginMutateAsync } = useMutation({
     mutationFn: login
@@ -52,8 +53,11 @@ function OAuthCallbackScreen() {
       }
 
       const searchParams = new URLSearchParams(location.search);
-      const isStateValid =
-        field === 'APPLE' || consumeWebOAuthState(field, searchParams.get('state'));
+      const returnedState =
+        field === 'APPLE'
+          ? (appleOAuthState ?? searchParams.get('state'))
+          : searchParams.get('state');
+      const isStateValid = consumeWebOAuthState(field, returnedState);
 
       if (searchParams.get('error')) {
         returnToLogin('로그인이 취소되었거나 인증 제공자에서 거부되었습니다.');
@@ -91,7 +95,7 @@ function OAuthCallbackScreen() {
       }
     };
     handleLogin();
-  }, [navigate, pathname, appleCode, location.search, loginMutateAsync]);
+  }, [navigate, pathname, appleCode, appleOAuthState, location.search, loginMutateAsync]);
   return (
     <AppScreen className={styles.container}>
       <BackgroundImage

@@ -14,14 +14,17 @@ export const screen = style({
   position: 'relative',
   width: '100%',
   minHeight: '100%',
-  overflowX: 'hidden',
+  overflow: 'hidden',
   color: colors.textPrimary,
   background: colors.backgroundPrimary
 });
 
 export const backgroundImage = style({
   zIndex: 0,
-  objectFit: 'cover'
+  objectFit: 'cover',
+  filter: 'blur(20px)',
+  transform: 'scale(1.1)',
+  transformOrigin: 'center'
 });
 
 export const dimOverlay = style([
@@ -30,8 +33,6 @@ export const dimOverlay = style([
     zIndex: 0,
     display: 'none',
     background: 'rgba(26, 24, 20, 0.5)',
-    backdropFilter: 'blur(20px)',
-    WebkitBackdropFilter: 'blur(20px)',
     pointerEvents: 'none'
   }
 ]);

@@ -14,6 +14,7 @@ import {
   useRef,
   useState
 } from 'react';
+import { useAppToast } from '../../../shared/components/AppToast';
 import { BackgroundImage } from '../../../shared/components/layout';
 import { QueryFeedback } from '../../../shared/components/QueryFeedback';
 import { COMMENT_MAX_LENGTH, TAG_MAX_LENGTH } from '../model/restActivity.constants';
@@ -71,8 +72,10 @@ export function RestActivityForm({
   onConfirmReselect,
   onComplete
 }: RestActivityFormProps) {
+  const { showToast } = useAppToast();
   const [focusedInput, setFocusedInput] = useState<'tag' | 'comment'>();
   const pageRef = useRef<HTMLElement | null>(null);
+  const hasShownTagLimitToastRef = useRef(false);
   const { tagInput, tags, comment, isSecret } = draft;
 
   useLayoutEffect(() => {
@@ -89,7 +92,21 @@ export function RestActivityForm({
     return () => window.cancelAnimationFrame(animationFrame);
   }, [imagePreview]);
 
+  const showTagLimitToast = () => {
+    if (hasShownTagLimitToastRef.current) return;
+
+    hasShownTagLimitToastRef.current = true;
+    showToast('태그는 최대 2개까지 추가할 수 있어요.');
+  };
+
   const handleAddTag = () => {
+    const nextTag = normalizeTag(tagInput);
+
+    if (nextTag && tags.length >= 2 && !tags.includes(nextTag)) {
+      showTagLimitToast();
+      return;
+    }
+
     onDraftChange((currentDraft) => {
       const nextTags = appendTag(currentDraft.tags, currentDraft.tagInput);
 
@@ -103,6 +120,14 @@ export function RestActivityForm({
         tags: nextTags
       };
     });
+  };
+
+  const handleRemoveTag = (tagToRemove: string) => {
+    hasShownTagLimitToastRef.current = false;
+    onDraftChange((currentDraft) => ({
+      ...currentDraft,
+      tags: currentDraft.tags.filter((tag) => tag !== tagToRemove)
+    }));
   };
 
   const handleTagKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
@@ -140,6 +165,9 @@ export function RestActivityForm({
     completedTags.length > 0 &&
     comment.trim().length > 0 &&
     !isCommentOverLimit;
+  const normalizedTagInput = normalizeTag(tagInput);
+  const hasPendingTagOverLimit =
+    tags.length >= 2 && Boolean(normalizedTagInput) && !tags.includes(normalizedTagInput);
   const isDoneDisabled = !isComplete || isSubmitting;
 
   return (
@@ -198,9 +226,10 @@ export function RestActivityForm({
                 className={styles.input}
                 maxLength={TAG_MAX_LENGTH}
                 onBlur={handleTagBlur}
-                onChange={(tagInput) =>
-                  onDraftChange((currentDraft) => ({ ...currentDraft, tagInput }))
-                }
+                onChange={(tagInput) => {
+                  hasShownTagLimitToastRef.current = false;
+                  onDraftChange((currentDraft) => ({ ...currentDraft, tagInput }));
+                }}
                 onFocus={() => setFocusedInput('tag')}
                 onKeyDown={handleTagKeyDown}
                 onPlusClick={handleAddTag}
@@ -215,7 +244,28 @@ export function RestActivityForm({
                 <div className={styles.tagList}>
                   {tags.map((tag) => (
                     <span className={styles.tag} key={tag}>
-                      # {tag}
+                      <span># {tag}</span>
+                      <button
+                        aria-label={`${tag} 태그 삭제`}
+                        className={styles.tagRemoveButton}
+                        onClick={() => handleRemoveTag(tag)}
+                        type="button"
+                      >
+                        <svg
+                          aria-hidden="true"
+                          className={styles.tagRemoveIcon}
+                          fill="none"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            d="M5 5l10 10M15 5 5 15"
+                            stroke="currentColor"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2.5"
+                          />
+                        </svg>
+                      </button>
                     </span>
                   ))}
                 </div>
@@ -258,13 +308,18 @@ export function RestActivityForm({
           <CtaButton
             className={sharedStyles.doneButton}
             disabled={isDoneDisabled}
-            onClick={() =>
+            onClick={() => {
+              if (hasPendingTagOverLimit) {
+                showTagLimitToast();
+                return;
+              }
+
               onComplete({
                 hashtags: completedTags,
                 review: comment.trim(),
                 isPublic: !isSecret
-              })
-            }
+              });
+            }}
           >
             {isSubmitting ? '올리는 중' : '휴식 완료'}
           </CtaButton>

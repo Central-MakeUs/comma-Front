@@ -61,8 +61,33 @@ export const tagList = style({
 
 export const tag = style({
   ...typography.bodyNormalB,
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: 4,
   color: colors.textPrimary,
   whiteSpace: 'nowrap'
+});
+
+export const tagRemoveButton = style({
+  width: 20,
+  height: 20,
+  display: 'inline-grid',
+  placeItems: 'center',
+  flexShrink: 0,
+  border: 0,
+  borderRadius: '50%',
+  padding: 1,
+  background: 'transparent',
+  color: colors.iconSecondary,
+  cursor: 'pointer',
+  lineHeight: 0,
+  transform: 'translateY(-1px)'
+});
+
+export const tagRemoveIcon = style({
+  width: 18,
+  height: 18,
+  display: 'block'
 });
 
 export const visibilityRow = style({

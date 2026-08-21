@@ -24,6 +24,7 @@ type GalleryPhotoItem = {
 };
 
 type NativeGalleryPageResult = Awaited<ReturnType<typeof getNativeGalleryPhotos>>;
+type NativeGalleryResult = NativeGalleryPageResult | NativeGalleryPageResult['photos'];
 
 export type SelectedActivityPhoto =
   | {
@@ -108,7 +109,15 @@ async function takeNativePhoto() {
   return appBridge.takeGalleryPhoto();
 }
 
-function normalizeNativeGalleryPage(page: NativeGalleryPageResult | null | undefined) {
+function normalizeNativeGalleryPage(page: NativeGalleryResult | null | undefined) {
+  if (Array.isArray(page)) {
+    return {
+      photos: page,
+      endCursor: null,
+      hasNextPage: false
+    };
+  }
+
   return {
     photos: Array.isArray(page?.photos) ? page.photos : [],
     endCursor: typeof page?.endCursor === 'string' ? page.endCursor : null,

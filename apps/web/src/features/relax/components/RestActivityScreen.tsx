@@ -2,7 +2,11 @@ import { type FeedCreateRequest, NATIVE_FEED_UPLOAD_UNAUTHORIZED_ERROR } from '@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { trackEvent } from '../../../shared/analytics/events';
+import {
+  getAnalyticsFailureReason,
+  toRelaxCode,
+  trackEvent
+} from '../../../shared/analytics/events';
 import { expireSession } from '../../../shared/api/client';
 import { appBridge } from '../../../shared/bridge/bridge';
 import { useAppToast } from '../../../shared/components/AppToast';
@@ -58,11 +62,13 @@ function RestActivityScreen() {
   const { showToast } = useAppToast();
   const location = useLocation();
   const locationState = location.state as RestLoadingLocationState | null;
-  const activityId = locationState?.selectedRelax?.activityId ?? getStoredActivityId();
+  const selectedRelax = locationState?.selectedRelax;
+  const relaxCode = selectedRelax ? toRelaxCode(selectedRelax.id) : undefined;
+  const activityId = selectedRelax?.activityId ?? getStoredActivityId();
   const hasValidLocationState = Boolean(
     locationState?.mood &&
       locationState.timeBudget &&
-      locationState.selectedRelax &&
+      selectedRelax &&
       typeof activityId === 'number'
   );
   const invalidStateHandledRef = useRef(false);
@@ -124,6 +130,10 @@ function RestActivityScreen() {
     if (hasValidLocationState || invalidStateHandledRef.current) return;
 
     invalidStateHandledRef.current = true;
+    trackEvent('rest_state_invalid', {
+      failure_reason: 'invalid_state',
+      stage: 'activity'
+    });
     showToast('휴식 정보가 없어 다시 선택해주세요.');
     navigate('/rest/checklist', { replace: true });
   }, [hasValidLocationState, navigate, showToast]);
@@ -143,7 +153,7 @@ function RestActivityScreen() {
   const imagePreview = selectedPhoto?.previewSrc;
 
   const handlePhotoSelect = (photo: SelectedActivityPhoto) => {
-    trackEvent('photo_selected', { source: photo.kind });
+    trackEvent('photo_selected', { photo_source: photo.kind });
     setSelectedPhoto(photo);
     setShowPhotoPicker(false);
   };
@@ -181,7 +191,17 @@ function RestActivityScreen() {
     review: string;
     isPublic: boolean;
   }) => {
-    if (!locationState?.mood || !locationState.timeBudget || typeof activityId !== 'number') {
+    if (
+      !locationState?.mood ||
+      !locationState.timeBudget ||
+      !selectedRelax ||
+      !relaxCode ||
+      typeof activityId !== 'number'
+    ) {
+      trackEvent('rest_state_invalid', {
+        failure_reason: 'invalid_state',
+        stage: 'record'
+      });
       showToast('휴식 정보가 없어 다시 선택해주세요.');
       navigate('/rest/checklist', { replace: true });
       return;
@@ -205,21 +225,23 @@ function RestActivityScreen() {
       isPublic: values.isPublic,
       activityId
     };
-
     try {
       trackEvent('rest_record_submitted', {
         is_public: values.isPublic,
         photo_source: selectedPhoto.kind,
+        relax_code: relaxCode,
         tag_count: values.hashtags.length
       });
       await uploadMutation.mutateAsync({ photo: selectedPhoto, request });
 
       clearStoredActivityId();
       void queryClient.invalidateQueries({ queryKey: userQueryKeys.restStatus() });
-      trackEvent('rest_completed', { is_public: values.isPublic });
+      trackEvent('rest_completed', { is_public: values.isPublic, relax_code: relaxCode });
       navigate('/feed', { replace: true });
     } catch (error) {
       trackEvent('rest_completion_failed', {
+        failure_reason: getAnalyticsFailureReason(error),
+        relax_code: relaxCode,
         stage: isNativeUploadUnauthorizedError(error) ? 'authorization' : 'upload'
       });
       if (isNativeUploadUnauthorizedError(error)) {
@@ -231,7 +253,7 @@ function RestActivityScreen() {
     }
   };
 
-  if (!hasValidLocationState) return null;
+  if (!hasValidLocationState || !relaxCode) return null;
 
   if (!isWritingStarted) {
     return (
@@ -240,7 +262,9 @@ function RestActivityScreen() {
         showReselectModal={showReselectModal}
         onCancelReselect={handleCancelReselect}
         onComplete={() => {
-          trackEvent('rest_record_started');
+          trackEvent('rest_record_started', {
+            relax_code: relaxCode
+          });
           setIsWritingStarted(true);
         }}
         onConfirmReselect={handleConfirmReselect}

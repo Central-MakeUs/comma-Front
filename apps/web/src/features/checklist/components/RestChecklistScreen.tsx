@@ -2,9 +2,9 @@ import { FEED_MOODS, FEED_TIME_BUDGETS, type FeedMood, type FeedTimeBudget } fro
 import { ProgressBar, Question } from '@comma/design-system';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useFunnel } from '@use-funnel/react-router-dom';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { trackEvent } from '../../../shared/analytics/events';
+import { getAnalyticsFailureReason, trackEvent } from '../../../shared/analytics/events';
 import { useAppToast } from '../../../shared/components/AppToast';
 import { TabShell } from '../../../shared/components/layout';
 import { useNativeBackHandler } from '../../../shared/components/NativeBack';
@@ -73,6 +73,7 @@ function RestChecklistScreen() {
   const checklistQuery = useQuery(checklistQueryOptions);
   const recommendMutation = useMutation({ mutationFn: recommend });
   const questionInfo = checklistQuery.data;
+  const hasTrackedChecklistStartRef = useRef(false);
 
   const funnel = useFunnel<RestChecklistFunnel>({
     id: 'rest-checklist',
@@ -94,6 +95,13 @@ function RestChecklistScreen() {
     return true;
   });
 
+  useEffect(() => {
+    if (!questionInfo || hasTrackedChecklistStartRef.current) return;
+
+    hasTrackedChecklistStartRef.current = true;
+    trackEvent('checklist_started');
+  }, [questionInfo]);
+
   return (
     <TabShell active="rest" className={styles.screen} navigationClassName={styles.navigation}>
       <img
@@ -109,7 +117,7 @@ function RestChecklistScreen() {
       <div aria-hidden="true" className={styles.topGradient} />
       <div aria-hidden="true" className={styles.bottomGradient} />
 
-      <div className={styles.content}>
+      <div className={styles.content} data-clarity-unmask="true">
         <header className={styles.header}>
           <img alt="comma" className={styles.logo} src="/images/logo_glass.svg" />
         </header>
@@ -136,8 +144,11 @@ function RestChecklistScreen() {
                     .findIndex((option) => selectedKey === `Mood:${option}`)}
                   step={questionInfo[0].order}
                   title={questionInfo[0].title}
-                  onOptionSelect={(_, mood) => {
-                    trackEvent('checklist_step_completed', { step: 1 });
+                  onOptionSelect={(index, mood) => {
+                    const moodCode = questionInfo[0].options[index]?.code;
+                    if (isFeedMood(moodCode)) {
+                      trackEvent('checklist_step_completed', { mood_code: moodCode, step: 1 });
+                    }
                     selectThenMove(`Mood:${mood}`, () => {
                       setSelectedKey(undefined);
                       void history.push('Time', { mood });
@@ -163,25 +174,35 @@ function RestChecklistScreen() {
                   }}
                   onOptionSelect={async (index, time) => {
                     if (recommendMutation.isPending) return;
-                    trackEvent('checklist_step_completed', { step: 2 });
+                    let selectedMoodCode: FeedMood | undefined;
+                    let selectedTimeBudgetCode: FeedTimeBudget | undefined;
                     try {
-                      const selectedMoodCode = questionInfo[0].options.filter(
+                      const moodCode = questionInfo[0].options.filter(
                         (o) => context.mood === o.label
                       )[0].code;
-                      const selectedTimeBudgetCode = questionInfo[1].options[index].code;
-                      if (
-                        !isFeedMood(selectedMoodCode) ||
-                        !isFeedTimeBudget(selectedTimeBudgetCode)
-                      ) {
+                      const timeCode = questionInfo[1].options[index].code;
+                      if (!isFeedMood(moodCode) || !isFeedTimeBudget(timeCode)) {
                         throw new Error();
                       }
-                      trackEvent('recommendation_requested');
+                      selectedMoodCode = moodCode;
+                      selectedTimeBudgetCode = timeCode;
+                      trackEvent('checklist_step_completed', {
+                        mood_code: selectedMoodCode,
+                        step: 2,
+                        time_code: selectedTimeBudgetCode
+                      });
+                      trackEvent('recommendation_requested', {
+                        mood_code: selectedMoodCode,
+                        time_code: selectedTimeBudgetCode
+                      });
                       const recommendations = await recommendMutation.mutateAsync({
                         mood: selectedMoodCode,
                         time: selectedTimeBudgetCode
                       });
                       trackEvent('recommendation_received', {
-                        result_count: recommendations.length
+                        mood_code: selectedMoodCode,
+                        result_count: recommendations.length,
+                        time_code: selectedTimeBudgetCode
                       });
                       selectThenMove(`Time:${time}`, async () => {
                         setSelectedKey(undefined);
@@ -195,7 +216,14 @@ function RestChecklistScreen() {
                         });
                       });
                     } catch (error) {
-                      trackEvent('recommendation_failed');
+                      trackEvent('recommendation_failed', {
+                        failure_reason:
+                          selectedMoodCode && selectedTimeBudgetCode
+                            ? getAnalyticsFailureReason(error)
+                            : 'invalid_state',
+                        mood_code: selectedMoodCode,
+                        time_code: selectedTimeBudgetCode
+                      });
                       console.log(error);
                     }
                   }}

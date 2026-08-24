@@ -35,7 +35,7 @@ export function RestActivityProgress({
   const backgroundSrc = imageSrc || '/images/feed-image.svg';
 
   return (
-    <main className={sharedStyles.page}>
+    <main className={sharedStyles.page} data-clarity-unmask="true">
       <div className={sharedStyles.screen}>
         <BackgroundImage className={sharedStyles.backgroundImage} src={backgroundSrc} />
         <div

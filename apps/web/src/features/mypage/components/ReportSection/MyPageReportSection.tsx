@@ -62,7 +62,7 @@ export function MyPageReportSection({
   }`;
 
   return (
-    <div className={sectionClassName}>
+    <div className={sectionClassName} data-clarity-unmask="true">
       {isLoading ? (
         <QueryFeedback message="리포트를 불러오고 있어요..." state="loading" />
       ) : isError ? (

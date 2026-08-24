@@ -1,5 +1,6 @@
 import { POST_MESSAGE_EVENT } from '@comma/bridge';
 import { themeClass } from '@comma/design-system';
+import * as Sentry from '@sentry/react';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
@@ -12,6 +13,31 @@ import { NativeBackProvider } from '../shared/components/NativeBack';
 import { QueryProvider } from './providers/QueryProvider';
 import { router } from './router';
 import './styles/global.css';
+
+Sentry.init({
+  beforeSend(event) {
+    event.user = undefined;
+    if (event.request) {
+      event.request.cookies = undefined;
+      event.request.data = undefined;
+      event.request.headers = undefined;
+      event.request.query_string = undefined;
+      if (event.request.url) event.request.url = event.request.url.split(/[?#]/, 1)[0];
+    }
+    event.breadcrumbs = event.breadcrumbs?.map((breadcrumb) => ({
+      ...breadcrumb,
+      data:
+        typeof breadcrumb.data?.url === 'string'
+          ? { ...breadcrumb.data, url: breadcrumb.data.url.split(/[?#]/, 1)[0] }
+          : breadcrumb.data
+    }));
+    return event;
+  },
+  dsn: 'https://8de7ae690fb433eb96402edca6bc8ecd@o4511961421774848.ingest.us.sentry.io/4511961426100224',
+  enabled: import.meta.env.PROD,
+  environment: import.meta.env.MODE,
+  sendDefaultPii: false
+});
 
 initializeClarity();
 initializeGoogleAnalytics();
@@ -28,7 +54,11 @@ if (!rootElement) {
 
 rootElement.classList.add(themeClass);
 
-ReactDOM.createRoot(rootElement).render(
+ReactDOM.createRoot(rootElement, {
+  onCaughtError: Sentry.reactErrorHandler(),
+  onUncaughtError: Sentry.reactErrorHandler(),
+  onRecoverableError: Sentry.reactErrorHandler()
+}).render(
   <React.StrictMode>
     <QueryProvider>
       <AppToastProvider>

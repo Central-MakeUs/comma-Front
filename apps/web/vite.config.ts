@@ -3,7 +3,7 @@ import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
-const SENTRY_ORG = process.env.SENTRY_ORG ?? 'choiho-jz';
+const SENTRY_ORG = process.env.SENTRY_ORG ?? 'comma-3l';
 const canUploadSentrySourceMaps = Boolean(process.env.SENTRY_AUTH_TOKEN);
 
 export default defineConfig({

@@ -11,8 +11,10 @@
       "outputs": ["dist/**", "build/**"],
       "env": [
         "EXPO_PUBLIC_WEB_URL",
+        "SENTRY_ENVIRONMENT",
         "SENTRY_AUTH_TOKEN",
         "SENTRY_ORG",
+        "VERCEL_ENV",
         "VITE_BASE_URL",
         "VITE_REST_API_KEY",
         "VITE_REDIRECT_URI",

@@ -1,3 +1,6 @@
+import { NATIVE_FEED_UPLOAD_UNAUTHORIZED_ERROR } from '@comma/bridge';
+import { SESSION_EXPIRED_ERROR_MESSAGE } from '../api/errors';
+
 export type AnalyticsFailureReason =
   | 'aborted'
   | 'client_error'
@@ -105,33 +108,56 @@ export type AnalyticsEventName = keyof AnalyticsEventMap;
 type AnalyticsParamValue = boolean | number | string;
 type AnalyticsParams = Record<string, AnalyticsParamValue>;
 
-const ANALYTICS_PARAM_ALLOWLIST = new Set([
-  'action',
-  'contact_method',
-  'document_type',
-  'failure_reason',
-  'filter_state',
-  'filter_type',
-  'is_public',
-  'load_stage',
-  'method',
-  'mood_code',
-  'photo_source',
-  'platform',
-  'position',
-  'relax_code',
-  'report_section',
-  'result_count',
-  'stage',
-  'step',
-  'surface',
-  'tab',
-  'tag_count',
-  'time_code',
-  'view_mode'
+const FAILURE_REASONS = new Set<AnalyticsFailureReason>([
+  'aborted',
+  'client_error',
+  'forbidden',
+  'invalid_state',
+  'network_error',
+  'not_found',
+  'rate_limited',
+  'server_error',
+  'session_expired',
+  'unauthorized',
+  'unknown'
 ]);
 
-const CLARITY_TAG_ALLOWLIST = new Set([
+const oneOf = (...values: AnalyticsParamValue[]) => {
+  const allowedValues = new Set(values);
+  return (value: unknown) => allowedValues.has(value as AnalyticsParamValue);
+};
+
+const isNonNegativeInteger = (value: unknown) =>
+  typeof value === 'number' && Number.isInteger(value) && value >= 0;
+const isPositiveInteger = (value: unknown) =>
+  typeof value === 'number' && Number.isInteger(value) && value > 0;
+
+const ANALYTICS_PARAM_VALIDATORS: Record<string, (value: unknown) => boolean> = {
+  action: oneOf('liked', 'unliked'),
+  contact_method: oneOf('email', 'phone'),
+  document_type: oneOf('privacy_policy', 'terms_of_service'),
+  failure_reason: (value) =>
+    typeof value === 'string' && FAILURE_REASONS.has(value as AnalyticsFailureReason),
+  filter_state: oneOf('applied', 'cleared'),
+  filter_type: oneOf('mood', 'time_budget'),
+  is_public: (value) => typeof value === 'boolean',
+  load_stage: oneOf('initial', 'pagination'),
+  method: oneOf('apple', 'google', 'kakao', 'unknown'),
+  mood_code: oneOf('A', 'B', 'C'),
+  photo_source: oneOf('file', 'native', 'preview'),
+  position: isPositiveInteger,
+  relax_code: (value) => typeof value === 'string' && /^relax_\d+$/.test(value),
+  report_section: oneOf('latest_feed', 'summary'),
+  result_count: isNonNegativeInteger,
+  stage: oneOf('activity', 'authorization', 'loading', 'recommendation', 'record', 'upload'),
+  step: oneOf(1, 2),
+  tab: oneOf('archive', 'feed', 'mypage', 'rest'),
+  tag_count: isNonNegativeInteger,
+  time_code: oneOf('X', 'Y', 'Z'),
+  view_mode: oneOf('grid', 'list')
+};
+
+const CLARITY_EVENT_PARAM_ALLOWLIST = new Set([
   'action',
   'failure_reason',
   'filter_state',
@@ -140,11 +166,9 @@ const CLARITY_TAG_ALLOWLIST = new Set([
   'method',
   'mood_code',
   'photo_source',
-  'platform',
   'relax_code',
   'report_section',
   'stage',
-  'surface',
   'tab',
   'time_code',
   'view_mode'
@@ -164,23 +188,22 @@ function getAnalyticsContext(): AnalyticsParams {
 
 function sanitizeParams(params: Record<string, unknown>): AnalyticsParams {
   return Object.fromEntries(
-    Object.entries(params).filter(
-      ([key, value]) =>
-        ANALYTICS_PARAM_ALLOWLIST.has(key) &&
-        (typeof value === 'boolean' || typeof value === 'number' || typeof value === 'string')
-    )
+    Object.entries(params).filter(([key, value]) => ANALYTICS_PARAM_VALIDATORS[key]?.(value))
   ) as AnalyticsParams;
 }
 
 function trackClarityEvent(name: AnalyticsEventName, params: AnalyticsParams) {
   if (!window.clarity || CLARITY_EVENT_EXCLUSIONS.has(name)) return;
 
+  window.clarity('set', 'platform', String(params.platform));
+  window.clarity('set', 'surface', String(params.surface));
+  window.clarity('event', name);
+
   for (const [key, value] of Object.entries(params)) {
-    if (CLARITY_TAG_ALLOWLIST.has(key)) {
-      window.clarity('set', key, String(value));
+    if (CLARITY_EVENT_PARAM_ALLOWLIST.has(key)) {
+      window.clarity('event', `${name}__${key}__${String(value)}`);
     }
   }
-  window.clarity('event', name);
 }
 
 type TrackEventArgs<Name extends AnalyticsEventName> = keyof AnalyticsEventMap[Name] extends never
@@ -188,8 +211,8 @@ type TrackEventArgs<Name extends AnalyticsEventName> = keyof AnalyticsEventMap[N
   : [params: AnalyticsEventMap[Name]];
 
 /**
- * Sends a typed, allowlisted event to GA4 and Clarity. Clarity receives only
- * low-cardinality custom tags and intentionally skips high-volume impressions.
+ * Sends a typed, runtime-validated event to GA4 and Clarity. Clarity receives
+ * stable platform/surface session tags plus value-specific custom events.
  * User-entered text, user/activity/feed identifiers, photos, and URLs are not allowed.
  */
 export function trackEvent<Name extends AnalyticsEventName>(
@@ -198,7 +221,7 @@ export function trackEvent<Name extends AnalyticsEventName>(
 ) {
   if (typeof window === 'undefined') return;
 
-  const safeParams = sanitizeParams({ ...getAnalyticsContext(), ...(params ?? {}) });
+  const safeParams = { ...sanitizeParams(params ?? {}), ...getAnalyticsContext() };
   window.gtag?.('event', name, safeParams);
   trackClarityEvent(name, safeParams);
 }
@@ -221,7 +244,13 @@ export function getAnalyticsFailureReason(error: unknown): AnalyticsFailureReaso
   if (typeof status === 'number' && status >= 500) return 'server_error';
   if (typeof status === 'number' && status >= 400) return 'client_error';
   if (candidate.code === 'ERR_NETWORK') return 'network_error';
-  if (candidate.message === 'SESSION_EXPIRED') return 'session_expired';
+  if (
+    typeof candidate.message === 'string' &&
+    candidate.message.includes(NATIVE_FEED_UPLOAD_UNAUTHORIZED_ERROR)
+  ) {
+    return 'unauthorized';
+  }
+  if (candidate.message === SESSION_EXPIRED_ERROR_MESSAGE) return 'session_expired';
 
   return 'unknown';
 }

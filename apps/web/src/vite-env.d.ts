@@ -2,6 +2,7 @@
 
 interface ImportMetaEnv {
   readonly VITE_IOS_APPLE_LOGIN_MODE?: 'review' | 'native';
+  readonly VITE_SENTRY_ENVIRONMENT: 'development' | 'preview' | 'production';
 }
 
 interface ImportMeta {

@@ -1,4 +1,6 @@
+import { NATIVE_FEED_UPLOAD_UNAUTHORIZED_ERROR } from '@comma/bridge';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { SESSION_EXPIRED_ERROR_MESSAGE } from '../api/errors';
 import { getAnalyticsFailureReason, trackEvent } from './events';
 
 afterEach(() => {
@@ -21,8 +23,8 @@ describe('trackEvent', () => {
     });
     expect(clarity).toHaveBeenCalledWith('set', 'platform', 'web');
     expect(clarity).toHaveBeenCalledWith('set', 'surface', 'web');
-    expect(clarity).toHaveBeenCalledWith('set', 'relax_code', 'relax_7');
     expect(clarity).toHaveBeenCalledWith('event', 'rest_completed');
+    expect(clarity).toHaveBeenCalledWith('event', 'rest_completed__relax_code__relax_7');
     expect(clarity).not.toHaveBeenCalledWith('set', 'is_public', 'true');
   });
 
@@ -71,6 +73,26 @@ describe('trackEvent', () => {
       surface: 'web'
     });
   });
+
+  it('rejects unsafe values and prevents callers from overriding common context', () => {
+    const gtag = vi.fn();
+    vi.stubGlobal('window', { gtag, navigator: { userAgent: 'Mozilla/5.0' } });
+
+    trackEvent('recommendation_requested', {
+      method: 'private nickname',
+      mood_code: 'private mood',
+      platform: 'private platform',
+      relax_code: 'private text',
+      surface: 'private surface',
+      time_code: 'X'
+    } as never);
+
+    expect(gtag).toHaveBeenCalledWith('event', 'recommendation_requested', {
+      platform: 'web',
+      surface: 'web',
+      time_code: 'X'
+    });
+  });
 });
 
 describe('getAnalyticsFailureReason', () => {
@@ -87,5 +109,17 @@ describe('getAnalyticsFailureReason', () => {
 
   it('maps network errors without exposing their message', () => {
     expect(getAnalyticsFailureReason({ code: 'ERR_NETWORK' })).toBe('network_error');
+  });
+
+  it('maps the shared session expiration error', () => {
+    expect(getAnalyticsFailureReason(new Error(SESSION_EXPIRED_ERROR_MESSAGE))).toBe(
+      'session_expired'
+    );
+  });
+
+  it('maps native upload authorization errors', () => {
+    expect(
+      getAnalyticsFailureReason(new Error(`bridge: ${NATIVE_FEED_UPLOAD_UNAUTHORIZED_ERROR}`))
+    ).toBe('unauthorized');
   });
 });

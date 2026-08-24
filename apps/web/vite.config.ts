@@ -5,8 +5,12 @@ import { defineConfig } from 'vite';
 
 const SENTRY_ORG = process.env.SENTRY_ORG ?? 'comma-3l';
 const canUploadSentrySourceMaps = Boolean(process.env.SENTRY_AUTH_TOKEN);
+const sentryEnvironment = process.env.VERCEL_ENV ?? process.env.SENTRY_ENVIRONMENT ?? 'development';
 
 export default defineConfig({
+  define: {
+    'import.meta.env.VITE_SENTRY_ENVIRONMENT': JSON.stringify(sentryEnvironment)
+  },
   plugins: [
     vanillaExtractPlugin(),
     react(),

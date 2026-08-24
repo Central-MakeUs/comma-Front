@@ -11,6 +11,7 @@
         "buildType": "apk"
       },
       "env": {
+        "EXPO_PUBLIC_SENTRY_ENVIRONMENT": "development",
         "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "389558827056-o797ta3s8i4ikukrlm883gsbolscsuhq.apps.googleusercontent.com"
       }
     },
@@ -20,6 +21,7 @@
         "buildType": "apk"
       },
       "env": {
+        "EXPO_PUBLIC_SENTRY_ENVIRONMENT": "preview",
         "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "389558827056-o797ta3s8i4ikukrlm883gsbolscsuhq.apps.googleusercontent.com"
       }
     },
@@ -33,6 +35,7 @@
         "buildType": "app-bundle"
       },
       "env": {
+        "EXPO_PUBLIC_SENTRY_ENVIRONMENT": "production",
         "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "389558827056-o797ta3s8i4ikukrlm883gsbolscsuhq.apps.googleusercontent.com"
       }
     }

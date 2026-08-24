@@ -239,12 +239,13 @@ function RestActivityScreen() {
       trackEvent('rest_completed', { is_public: values.isPublic, relax_code: relaxCode });
       navigate('/feed', { replace: true });
     } catch (error) {
+      const isUnauthorized = isNativeUploadUnauthorizedError(error);
       trackEvent('rest_completion_failed', {
         failure_reason: getAnalyticsFailureReason(error),
         relax_code: relaxCode,
-        stage: isNativeUploadUnauthorizedError(error) ? 'authorization' : 'upload'
+        stage: isUnauthorized ? 'authorization' : 'upload'
       });
-      if (isNativeUploadUnauthorizedError(error)) {
+      if (isUnauthorized) {
         await expireSession();
         return;
       }

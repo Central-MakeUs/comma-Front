@@ -49,6 +49,9 @@ const confirmWithdraw = {
 
 type ActiveModal = 'logout' | 'withdraw' | 'withdrawConfirm' | 'premiumAlert' | null;
 
+const getPremiumAlertContactMethod = (type: PremiumAlertContactType) =>
+  type === 'EMAIL' ? ('email' as const) : ('phone' as const);
+
 function ConfirmBottomSheet({
   dialogId,
   title,
@@ -208,14 +211,14 @@ function SettingScreen() {
     onSuccess: (res) => {
       if (!res.success) {
         trackEvent('premium_alert_failed', {
-          contact_method: premiumAlertContactType.toLowerCase()
+          contact_method: getPremiumAlertContactMethod(premiumAlertContactType)
         });
         showToast(res.message ?? '프리미엄 알림 신청에 실패했습니다.');
         return;
       }
 
       trackEvent('premium_alert_submitted', {
-        contact_method: premiumAlertContactType.toLowerCase()
+        contact_method: getPremiumAlertContactMethod(premiumAlertContactType)
       });
       setActiveModal(null);
       setPremiumAlertContact('');
@@ -223,7 +226,9 @@ function SettingScreen() {
       showToast('프리미엄 알림을 신청했습니다.', { tone: 'success' });
     },
     onError: (err) => {
-      trackEvent('premium_alert_failed', { contact_method: premiumAlertContactType.toLowerCase() });
+      trackEvent('premium_alert_failed', {
+        contact_method: getPremiumAlertContactMethod(premiumAlertContactType)
+      });
       showToast(err instanceof Error ? err.message : '프리미엄 알림 신청에 실패했습니다.');
     }
   });

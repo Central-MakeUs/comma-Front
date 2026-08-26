@@ -53,6 +53,13 @@
             "extraMavenRepos": ["https://devrepo.kakao.com/nexus/content/groups/public/"]
           }
         }
+      ],
+      [
+        "@sentry/react-native",
+        {
+          "organization": "comma-3l",
+          "project": "comma-mobile"
+        }
       ]
     ],
     "ios": {

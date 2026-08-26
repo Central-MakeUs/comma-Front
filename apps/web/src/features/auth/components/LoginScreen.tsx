@@ -229,20 +229,17 @@ function LoginScreen() {
         if (controller.signal.aborted) return;
 
         if (res.success && res.data) {
-          trackEvent('login', {
-            method: 'google',
-            surface: 'app'
-          });
+          trackEvent('login', { method: 'google' });
           navigate(getPostLoginPath(res.data), { replace: true });
         } else {
-          trackEvent('login_failed', { method: 'google', surface: 'app' });
+          trackEvent('login_failed', { method: 'google' });
           showLoginToast(LOGIN_ERROR_MESSAGE);
         }
       })
       .catch(() => {
         if (!controller.signal.aborted) {
           clearNativeGoogleOAuthState();
-          trackEvent('login_failed', { method: 'google', surface: 'app' });
+          trackEvent('login_failed', { method: 'google' });
         }
       })
       .finally(() => {
@@ -306,7 +303,7 @@ function LoginScreen() {
       });
     } catch (error) {
       if (!isAppleLoginCancelled(error)) {
-        trackEvent('login_failed', { method: 'apple', surface: 'web' });
+        trackEvent('login_failed', { method: 'apple' });
         showLoginToast(LOGIN_ERROR_MESSAGE);
       }
     }
@@ -314,10 +311,7 @@ function LoginScreen() {
 
   const onKakaoClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    trackEvent('login_attempt', {
-      method: 'kakao',
-      surface: isMobileWebView ? 'app' : 'web'
-    });
+    trackEvent('login_attempt', { method: 'kakao' });
     if (
       shouldUseNativeLogin({
         isMobileWebView,
@@ -338,10 +332,7 @@ function LoginScreen() {
 
   const onGoogleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    trackEvent('login_attempt', {
-      method: 'google',
-      surface: isMobileWebView ? 'app' : 'web'
-    });
+    trackEvent('login_attempt', { method: 'google' });
     if (
       shouldUseNativeLogin({
         isMobileWebView,
@@ -384,19 +375,16 @@ function LoginScreen() {
         if (controller.signal.aborted) return;
 
         if (res.success && res.data) {
-          trackEvent('login', {
-            method: 'google',
-            surface: 'app'
-          });
+          trackEvent('login', { method: 'google' });
           navigate(getPostLoginPath(res.data), { replace: true });
         } else {
-          trackEvent('login_failed', { method: 'google', surface: 'app' });
+          trackEvent('login_failed', { method: 'google' });
           showLoginToast(LOGIN_ERROR_MESSAGE);
         }
       } catch {
         if (controller.signal.aborted) return;
         clearNativeGoogleOAuthState();
-        trackEvent('login_failed', { method: 'google', surface: 'app' });
+        trackEvent('login_failed', { method: 'google' });
         showLoginToast(LOGIN_ERROR_MESSAGE);
       } finally {
         if (googleLoginAbortControllerRef.current === controller) {
@@ -415,10 +403,7 @@ function LoginScreen() {
 
   const onAppleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    trackEvent('login_attempt', {
-      method: 'apple',
-      surface: isMobileWebView ? 'app' : 'web'
-    });
+    trackEvent('login_attempt', { method: 'apple' });
     if (
       shouldUseNativeLogin({
         isMobileWebView,
@@ -451,7 +436,7 @@ function LoginScreen() {
   };
 
   return (
-    <AppScreen className={styles.container}>
+    <AppScreen className={styles.container} data-clarity-unmask="true">
       <BackgroundImage
         className={styles.backgroundImage}
         src="/images/onboardingBackground_blur.png"

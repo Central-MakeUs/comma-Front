@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { useCallback, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { trackEvent } from '../../../shared/analytics/events';
+import { toLoginMethod, trackEvent } from '../../../shared/analytics/events';
 import {
   type AuthProvider,
   loginWithNativeProvider,
@@ -30,25 +30,22 @@ export function useNativeSocialLogin({ enabled }: UseNativeSocialLoginOptions) {
       setPendingProvider(provider);
       try {
         const response = await mutateAsync(provider);
-        const method = provider.toLowerCase();
+        const method = toLoginMethod(provider);
         if (response.cancelled) {
-          trackEvent('login_cancelled', { method, surface: 'app' });
+          trackEvent('login_cancelled', { method });
           return 'cancelled' as const;
         }
         if (!response.success || !response.data) {
-          trackEvent('login_failed', { method, surface: 'app' });
+          trackEvent('login_failed', { method });
           return 'failed' as const;
         }
 
-        trackEvent('login', {
-          method,
-          surface: 'app'
-        });
+        trackEvent('login', { method });
         navigate(getPostLoginPath(response.data), { replace: true });
         return 'success' as const;
       } catch (error) {
         if (!(error instanceof NativeLoginUnavailableError)) {
-          trackEvent('login_failed', { method: provider.toLowerCase(), surface: 'app' });
+          trackEvent('login_failed', { method: toLoginMethod(provider) });
         }
         return error instanceof NativeLoginUnavailableError
           ? ('unavailable' as const)

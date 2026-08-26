@@ -1,8 +1,8 @@
 import { Icon, SmallButton } from '@comma/design-system';
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { trackEvent } from '../../../shared/analytics/events';
+import { getAnalyticsFailureReason, trackEvent } from '../../../shared/analytics/events';
 import { TabShell } from '../../../shared/components/layout';
 import { QueryFeedback } from '../../../shared/components/QueryFeedback';
 import { BIG_HEIGHT, GAP, SMALL_HEIGHT, SMALL_WIDTH } from '../../../shared/lib/carousel.constants';
@@ -40,6 +40,24 @@ function MyPageScreen() {
         : null;
   const hasNoFeed = latestMyFeedQuery.isSuccess && latestFeed === null;
   const showEmptyReport = hasNoFeed && reportQuery.isSuccess;
+
+  useEffect(() => {
+    if (!reportQuery.error) return;
+
+    trackEvent('report_load_failed', {
+      failure_reason: getAnalyticsFailureReason(reportQuery.error),
+      report_section: 'summary'
+    });
+  }, [reportQuery.error]);
+
+  useEffect(() => {
+    if (!latestMyFeedQuery.error) return;
+
+    trackEvent('report_load_failed', {
+      failure_reason: getAnalyticsFailureReason(latestMyFeedQuery.error),
+      report_section: 'latest_feed'
+    });
+  }, [latestMyFeedQuery.error]);
 
   return (
     <TabShell active="mypage" className={styles.container} navigationClassName={styles.navStyle}>

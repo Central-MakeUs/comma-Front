@@ -2,7 +2,7 @@ import { FeedCard, Toast } from '@comma/design-system';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { trackEvent } from '../../../shared/analytics/events';
+import { getAnalyticsFailureReason, trackEvent } from '../../../shared/analytics/events';
 import { SESSION_EXPIRED_ERROR_MESSAGE } from '../../../shared/api/client';
 import { TabScrollArea, TabShell } from '../../../shared/components/layout';
 import { QueryFeedback } from '../../../shared/components/QueryFeedback';
@@ -43,6 +43,7 @@ function FeedScreen() {
   const [currentBody, setCurrentBody] = useState('시간');
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const feedScrollRef = useRef<HTMLDivElement>(null);
+  const impressedPositionsRef = useRef(new Set<number>());
 
   const nickname = getStoredNickname();
   const mood = moods[currentFeel];
@@ -95,6 +96,7 @@ function FeedScreen() {
         filter_state: nextFeel === '전체' ? 'cleared' : 'applied',
         filter_type: 'mood'
       });
+      impressedPositionsRef.current.clear();
       resetFeedScrollMetrics();
       setCurrentFeel(nextFeel);
     },
@@ -106,6 +108,7 @@ function FeedScreen() {
         filter_state: nextBody === '전체' ? 'cleared' : 'applied',
         filter_type: 'time_budget'
       });
+      impressedPositionsRef.current.clear();
       resetFeedScrollMetrics();
       setCurrentBody(nextBody);
     },
@@ -114,10 +117,34 @@ function FeedScreen() {
 
   useEffect(() => {
     if (!feedQuery.error) return;
+
+    trackEvent('feed_load_failed', {
+      failure_reason:
+        feedQuery.error.message === SESSION_EXPIRED_ERROR_MESSAGE
+          ? 'session_expired'
+          : getAnalyticsFailureReason(feedQuery.error),
+      load_stage: feedQuery.isFetchNextPageError ? 'pagination' : 'initial'
+    });
     if (feedQuery.error.message === SESSION_EXPIRED_ERROR_MESSAGE) return;
 
     console.error(feedQuery.error);
-  }, [feedQuery.error]);
+  }, [feedQuery.error, feedQuery.isFetchNextPageError]);
+
+  useEffect(() => {
+    const scrollElement = feedScrollRef.current;
+    if (!scrollElement) return;
+
+    const viewportStart = scrollElement.scrollTop;
+    const viewportEnd = viewportStart + scrollElement.clientHeight;
+    for (const virtualFeed of virtualFeeds) {
+      const isVisible = virtualFeed.end > viewportStart && virtualFeed.start < viewportEnd;
+      const position = virtualFeed.index + 1;
+      if (!isVisible || impressedPositionsRef.current.has(position)) continue;
+
+      impressedPositionsRef.current.add(position);
+      trackEvent('feed_card_impression', { position });
+    }
+  }, [virtualFeeds]);
 
   return (
     <TabShell active="feed" className={styles.container}>

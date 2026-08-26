@@ -1,7 +1,11 @@
 import { CtaButton, colors, Icon } from '@comma/design-system';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { trackEvent } from '../../../shared/analytics/events';
+import {
+  getAnalyticsFailureReason,
+  toRelaxCode,
+  trackEvent
+} from '../../../shared/analytics/events';
 import { useAppToast } from '../../../shared/components/AppToast';
 import { AppScreen, BackgroundImage } from '../../../shared/components/layout';
 import { useNativeBackHandler } from '../../../shared/components/NativeBack';
@@ -53,6 +57,10 @@ function RestResultScreen() {
   useEffect(() => {
     if (validLocationState) return;
 
+    trackEvent('rest_state_invalid', {
+      failure_reason: 'invalid_state',
+      stage: 'recommendation'
+    });
     showToast('휴식 추천 중 오류가 발생했습니다. 다시 선택해주세요.');
     navigate('/rest/checklist', { replace: true });
   }, [validLocationState, navigate, showToast]);
@@ -60,7 +68,10 @@ function RestResultScreen() {
   useEffect(() => {
     if (!selectedRelax) return;
 
-    trackEvent('recommendation_viewed', { position: selectedIndex + 1 });
+    trackEvent('recommendation_viewed', {
+      position: selectedIndex + 1,
+      relax_code: toRelaxCode(selectedRelax.id)
+    });
   }, [selectedIndex, selectedRelax]);
 
   const handleStartClick = async () => {
@@ -74,7 +85,7 @@ function RestResultScreen() {
 
     try {
       const nextSelectedRelax = await startMutation.mutateAsync(selectedRelax);
-      trackEvent('rest_started');
+      trackEvent('rest_started', { relax_code: toRelaxCode(selectedRelax.id) });
       navigate('/rest/activity', {
         state: {
           data,
@@ -84,7 +95,10 @@ function RestResultScreen() {
         }
       });
     } catch (error) {
-      trackEvent('rest_start_failed');
+      trackEvent('rest_start_failed', {
+        failure_reason: getAnalyticsFailureReason(error),
+        relax_code: toRelaxCode(selectedRelax.id)
+      });
       console.error('Failed to start relax.', error);
     }
   };
@@ -94,7 +108,7 @@ function RestResultScreen() {
   const backgroundSrc = selectedRelax.imageUrl || '/images/feed-image.svg';
 
   return (
-    <AppScreen className={styles.container}>
+    <AppScreen className={styles.container} data-clarity-unmask="true">
       <BackgroundImage className={styles.backgroundImage} src={backgroundSrc} />
       <div aria-hidden="true" className={styles.backgroundOverlay} />
       {showModal ? <RestResultReselectModal onClose={() => setShowModal(false)} /> : null}

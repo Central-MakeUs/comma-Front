@@ -24,6 +24,7 @@ function MyPageCard({
 
   return (
     <div
+      data-clarity-unmask="true"
       style={{
         position: 'absolute',
         top: '50%',

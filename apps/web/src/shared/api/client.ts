@@ -14,6 +14,9 @@ import {
   shouldUseNativeAuthBridge
 } from '../lib/tokenStorage';
 import type { ApiResponse } from '../types/api';
+import { SESSION_EXPIRED_ERROR_MESSAGE } from './errors';
+
+export { SESSION_EXPIRED_ERROR_MESSAGE } from './errors';
 
 interface RefreshTokenData {
   accessToken: string;
@@ -26,7 +29,6 @@ type RetriableRequestConfig = InternalAxiosRequestConfig & {
 };
 
 export const SESSION_EXPIRED_EVENT = 'comma:session-expired';
-export const SESSION_EXPIRED_ERROR_MESSAGE = 'COMMA_SESSION_EXPIRED';
 
 export const apiClient = axios.create({
   baseURL: import.meta.env.VITE_BASE_URL

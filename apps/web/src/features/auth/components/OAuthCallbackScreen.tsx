@@ -2,7 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { initializeClarity } from '../../../shared/analytics/clarity';
-import { trackEvent } from '../../../shared/analytics/events';
+import { type LoginMethod, toLoginMethod, trackEvent } from '../../../shared/analytics/events';
 import { initializeGoogleAnalytics } from '../../../shared/analytics/googleAnalytics';
 import { AppScreen, BackgroundImage } from '../../../shared/components/layout';
 import { QueryFeedback } from '../../../shared/components/QueryFeedback';
@@ -46,9 +46,9 @@ function OAuthCallbackScreen() {
       const returnToLogin = (
         message: string,
         eventName: 'login_cancelled' | 'login_failed' = 'login_failed',
-        method = 'unknown'
+        method: LoginMethod = 'unknown'
       ) => {
-        trackEvent(eventName, { method, surface: 'web' });
+        trackEvent(eventName, { method });
         navigate('/', {
           replace: true,
           state: { reason: 'OAUTH_FAILED', message }
@@ -59,7 +59,7 @@ function OAuthCallbackScreen() {
         returnToLogin('올바르지 않은 로그인 응답입니다. 다시 시도해 주세요.');
         return;
       }
-      const method = field.toLowerCase();
+      const method = toLoginMethod(field);
 
       const searchParams = new URLSearchParams(location.search);
       const returnedState =
@@ -110,10 +110,7 @@ function OAuthCallbackScreen() {
         });
 
         if (res.success && res.data) {
-          trackEvent('login', {
-            method,
-            surface: 'web'
-          });
+          trackEvent('login', { method });
           navigate(getPostLoginPath(res.data), { replace: true });
         } else {
           returnToLogin(

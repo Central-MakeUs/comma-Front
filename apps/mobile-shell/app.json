@@ -2,7 +2,7 @@
   "expo": {
     "name": "Comma",
     "slug": "comma",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "comma",
@@ -65,7 +65,7 @@
     "ios": {
       "bundleIdentifier": "com.comma.app",
       "icon": "./assets/icon.png",
-      "buildNumber": "30",
+      "buildNumber": "35",
       "supportsTablet": false,
       "usesAppleSignIn": true,
       "infoPlist": {
@@ -168,7 +168,7 @@
         "android.permission.RECORD_AUDIO",
         "android.permission.SYSTEM_ALERT_WINDOW"
       ],
-      "versionCode": 18
+      "versionCode": 20
     },
     "extra": {
       "apiBaseUrl": "https://167-126-10-48.sslip.io",

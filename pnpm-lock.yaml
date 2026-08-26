@@ -111,6 +111,9 @@ importers:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
+      '@sentry/cli':
+        specifier: 2.55.0
+        version: 2.55.0
       '@types/node':
         specifier: ^26.0.1
         version: 26.0.1
